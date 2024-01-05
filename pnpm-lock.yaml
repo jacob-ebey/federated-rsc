@@ -8,7 +8,7 @@ importers:
 
   .: {}
 
-  example:
+  examples/basic:
     dependencies:
       '@hono/node-server':
         specifier: ^1.4.0
@@ -28,7 +28,7 @@ importers:
         version: 8.2.2
       framework:
         specifier: workspace:*
-        version: link:../framework
+        version: link:../../framework
       tsm:
         specifier: ^2.3.0
         version: 2.3.0

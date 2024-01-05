@@ -169,7 +169,7 @@ export async function build() {
         rsdResource: rsdSsrResource,
         libraryType: "commonjs-static",
         containerName,
-        howToLoad: "commonjs ./client_modules.js",
+        howToLoad: `commonjs ./${containerName}.js`,
         shared: {
           react: pkgJson.dependencies.react,
           "react-dom": pkgJson.dependencies["react-dom"],
