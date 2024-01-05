@@ -12,15 +12,14 @@ declare global {
 export function hydrate() {
   if (typeof __RSC__ !== "undefined") {
     hydrateInternal();
+    return;
   }
   addEventListener("rscready", hydrateInternal, { once: true });
 }
 
 async function hydrateInternal() {
   const root = RSD.createFromReadableStream(__RSC__.stream);
-
-  const tree = await root;
   React.startTransition(() => {
-    hydrateRoot(document, tree[0]);
+    hydrateRoot(document, root);
   });
 }

@@ -1,6 +1,11 @@
 
 export const routes = [
   {
+    id: "$",
+    path: "*",
+    lazy: () => import("./app/routes/$/route.tsx"),
+  },
+  {
     id: "_public",
     lazy: () => import("./app/routes/_public/route.tsx"),
     children: [
@@ -27,9 +32,5 @@ export const routes = [
         lazy: () => import("./app/routes/_public.slug.$slug/route.tsx"),
       },
     ]
-  },
-  {
-    id: "_public_",
-    lazy: () => import("./app/routes/_public_/route.tsx"),
   },
 ];

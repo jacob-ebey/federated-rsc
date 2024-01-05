@@ -1,5 +1,6 @@
 import * as stream from "node:stream";
 
+import * as React from "react";
 // @ts-expect-error - no types
 import RDS from "react-dom/server.node";
 // @ts-expect-error - no types
@@ -7,7 +8,11 @@ import RSD from "react-server-dom-webpack/client.node";
 
 import { InlinePayload } from "framework/ssr";
 
-export async function handler(request: Request, serverOrigin: string) {
+export async function handler(
+  request: Request,
+  serverOrigin: string,
+  bootstrapScripts: string[]
+) {
   const url = new URL(request.url);
   const serverUrl = new URL(url.pathname + url.search, serverOrigin);
   const response = await fetch(serverUrl, {
@@ -26,7 +31,7 @@ export async function handler(request: Request, serverOrigin: string) {
       {
         status: isComponentResponse ? 500 : response.status,
         headers: {
-          "Content-Type": "text/plain",
+          "Content-Type": "text/plain; charset=utf-8",
         },
       }
     );
@@ -72,11 +77,15 @@ export async function handler(request: Request, serverOrigin: string) {
     const { pipe, abort } = RDS.renderToPipeableStream(
       <>
         {root}
-        <InlinePayload readable={payloadB.getReader()} />
+        <React.Suspense>
+          <InlinePayload readable={payloadB.getReader()} />
+        </React.Suspense>
       </>,
       {
+        bootstrapScripts,
         onShellReady() {
           shellSent = true;
+          console.log("Shell Ready");
           resolve(
             new Response(
               stream.Readable.toWeb(
@@ -85,7 +94,7 @@ export async function handler(request: Request, serverOrigin: string) {
               {
                 status: response.status,
                 headers: {
-                  "Content-Type": "text/html",
+                  "Content-Type": "text/html; charset=utf-8",
                   "Transfer-Encoding": "chunked",
                 },
               }
@@ -103,5 +112,6 @@ export async function handler(request: Request, serverOrigin: string) {
         },
       }
     );
+    request.signal.addEventListener("abort", abort, { once: true });
   });
 }

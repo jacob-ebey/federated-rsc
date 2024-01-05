@@ -1,3 +1,5 @@
+import * as React from "react";
+
 export async function InlinePayload({
   decoder,
   readable,
@@ -71,7 +73,9 @@ export async function InlinePayload({
     <>
       {initialScript}
       {script}
-      <InlinePayload decoder={decoder} readable={readable} />
+      <React.Suspense>
+        <InlinePayload decoder={decoder} readable={readable} />
+      </React.Suspense>
     </>
   );
 }

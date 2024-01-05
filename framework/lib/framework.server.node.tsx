@@ -9,10 +9,7 @@ import {
   type Params,
 } from "@remix-run/router";
 
-export function createRequestHandler(
-  routes: AgnosticDataRouteObject[],
-  scripts: string[]
-) {
+export function createRequestHandler(routes: AgnosticDataRouteObject[]) {
   return async (request: Request) => {
     const handler = createStaticHandler(routes, {
       future: { v7_relativeSplatPath: true },
@@ -48,16 +45,14 @@ export function createRequestHandler(
       }
 
       if (!root) {
-        return new Response(null, { status: 404 });
+        return new Response("Not Found", {
+          status: 404,
+          headers: { "Content-Type": "text/plain; charset=utf-8" },
+        });
       }
 
-      const { pipe } = RSD.renderToPipeableStream(
-        React.createElement(
-          React.Fragment,
-          null,
-          root,
-          ...scripts.map((src) => React.createElement("script", { src }))
-        ),
+      const { pipe, abort } = RSD.renderToPipeableStream(
+        root,
         new Proxy(
           {},
           {
@@ -74,8 +69,16 @@ export function createRequestHandler(
               };
             },
           }
-        )
+        ),
+        {
+          onError(error: Error) {
+            console.error(error);
+          },
+        }
       );
+
+      request.signal.addEventListener("abort", abort, { once: true });
+
       return new Response(
         stream.Readable.toWeb(
           pipe(new stream.PassThrough())
@@ -83,14 +86,17 @@ export function createRequestHandler(
         {
           status: context.statusCode,
           headers: {
-            "Content-Type": "text/x-component",
+            "Content-Type": "text/x-component; charset=utf-8",
             "Transfer-Encoding": "chunked",
           },
         }
       );
     } catch (reason) {
       console.error(reason);
-      return new Response(null, { status: 500 });
+      return new Response("Internal Server Error", {
+        status: 500,
+        headers: { "Content-Type": "text/plain; charset=utf-8" },
+      });
     }
   };
 }

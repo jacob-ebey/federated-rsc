@@ -6,7 +6,9 @@ import { handler } from "./dist/ssr/main.js";
 const app = new Hono();
 
 app.use("*", (c) => {
-  return handler(c.req.raw, "http://localhost:3001");
+  return handler(c.req.raw, "http://localhost:3001", [
+    "http://localhost:3001/dist/browser/main.js",
+  ]);
 });
 
 serve(

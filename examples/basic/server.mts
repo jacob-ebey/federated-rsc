@@ -16,8 +16,7 @@ app.use(
 );
 
 app.all("*", async (c) => {
-  const entry = new URL("/dist/browser/main.js", c.req.url).href;
-  const handler = createRequestHandler(routes, [entry]);
+  const handler = createRequestHandler(routes);
 
   return handler(c.req.raw);
 });
