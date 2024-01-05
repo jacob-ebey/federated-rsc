@@ -18,6 +18,7 @@ async function build() {
   const devtool = false;
   const mode = "production";
   const browserEntry = undefined;
+  const ssrEntry = undefined;
   const generatedRoutes = undefined;
   const containerName = "client_modules";
 
@@ -111,7 +112,7 @@ async function build() {
     plugins: [new ServerRSCPlugin(clientModules)],
   });
 
-  const resolvedSsrEntry = path.resolve(cwd, browserEntry || "./entry/ssr.tsx");
+  const resolvedSsrEntry = path.resolve(cwd, ssrEntry || "./entry/ssr.tsx");
   let ssrEntryImport = path.relative(cwd, resolvedSsrEntry);
   if (!ssrEntryImport.startsWith(".")) {
     ssrEntryImport = "./" + ssrEntryImport;
@@ -146,9 +147,9 @@ async function build() {
     },
     plugins: [
       new VirtualModulesPlugin({
-        [bootstrapSsrPath]: `export const handler = import(${JSON.stringify(
+        [bootstrapSsrPath]: `export const handler = (...args) => import(${JSON.stringify(
           ssrEntryImport
-        )}).then(m => m.handler)`,
+        )}).then(m => m.handler(...args));`,
       }),
       new ClientRSCPlugin({
         clientModules,
