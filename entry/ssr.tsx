@@ -3,6 +3,7 @@ import * as stream from "node:stream";
 import * as React from "react";
 import RDS from "react-dom/server.node";
 import RSD from "react-server-dom-webpack/client.node";
+import { InlinePayload } from "#framework/ssr";
 
 // TODO: Make this a build time thing
 const SERVER_ORIGIN = "http://localhost:3001";
@@ -21,8 +22,10 @@ export async function handler(request: Request) {
     });
   }
 
+  const [payloadA, payloadB] = response.body.tee();
+
   const root = RSD.createFromNodeStream(
-    stream.Readable.fromWeb(response.body as any),
+    stream.Readable.fromWeb(payloadA as any),
     {
       moduleMap: new Proxy(
         {},
@@ -40,7 +43,6 @@ export async function handler(request: Request) {
                 },
               }
             );
-            // throw new Error("WTF Manifest " + String(key));
           },
         }
       ),
@@ -57,27 +59,36 @@ export async function handler(request: Request) {
 
   return new Promise((resolve, reject) => {
     let shellSent = false;
-    const { pipe, abort } = RDS.renderToPipeableStream(root, {
-      onShellReady() {
-        shellSent = true;
-        resolve(
-          new Response(stream.Readable.toWeb(pipe(new stream.PassThrough())), {
-            headers: {
-              "Content-Type": "text/html",
-              "Transfer-Encoding": "chunked",
-            },
-          })
-        );
-      },
-      onShellError(error) {
-        if (!shellSent) {
-          reject(error);
-        }
-      },
-      onError(error) {
-        if (shellSent) return;
-        console.error(error);
-      },
-    });
+    const { pipe, abort } = RDS.renderToPipeableStream(
+      <>
+        {root}
+        <InlinePayload readable={payloadB.getReader()} />
+      </>,
+      {
+        onShellReady() {
+          shellSent = true;
+          resolve(
+            new Response(
+              stream.Readable.toWeb(pipe(new stream.PassThrough())),
+              {
+                headers: {
+                  "Content-Type": "text/html",
+                  "Transfer-Encoding": "chunked",
+                },
+              }
+            )
+          );
+        },
+        onShellError(error) {
+          if (!shellSent) {
+            reject(error);
+          }
+        },
+        onError(error) {
+          if (shellSent) return;
+          console.error(error);
+        },
+      }
+    );
   });
 }

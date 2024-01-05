@@ -39,9 +39,10 @@ async function build() {
       );
 
   const alias = {
-    "#framework/browser": "./lib/framework.browser.tsx",
-    "#framework/client": "./lib/framework.client.tsx",
-    "#framework": "./lib/framework.server.tsx",
+    // TODO: resolve these relative to import.meta.url
+    "#framework/browser": path.resolve("./lib/framework.browser.tsx"),
+    "#framework/ssr": path.resolve("./lib/framework.ssr.tsx"),
+    "#framework": path.resolve("./lib/framework.server.tsx"),
   };
 
   const extensions = [".ts", ".tsx", ".js", ".jsx"];

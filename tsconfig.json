@@ -12,7 +12,8 @@
     "noEmit": true,
     "rootDir": ".",
     "paths": {
-      "#framework/client": ["./lib/framework.client.tsx"],
+      "#framework/browser": ["./lib/framework.browser.tsx"],
+      "#framework/ssr": ["./lib/framework.ssr.tsx"],
       "#framework": ["./lib/framework.server.tsx"]
     }
   }
