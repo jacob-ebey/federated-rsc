@@ -28,6 +28,6 @@ serve(
     port: 3001,
   },
   (info) => {
-    console.log(`Server listening on http://localhost:${info.port}`);
+    console.log(`RSC listening on http://localhost:${info.port}`);
   }
 );
