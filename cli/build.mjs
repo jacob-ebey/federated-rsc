@@ -16,7 +16,7 @@ async function build() {
   const cwd = process.cwd();
   const routesDir = path.resolve(cwd, "app/routes");
   const devtool = false;
-  const mode = "development";
+  const mode = "production";
   const browserEntry = undefined;
   const generatedRoutes = undefined;
   const containerName = "client_modules";

@@ -122,8 +122,9 @@ export class ClientRSCPlugin {
                 "var remote = chunkId.slice(0, splitIndex);",
                 "var remoteModuleId = remote.slice(18);",
                 "var [exposed] = chunkId.slice(splitIndex + 1).split('#');",
-
-                `return ogEnsureChunk(remote).then(${runtimeTemplate.basicFunction(
+                "var promises = [];",
+                `${RuntimeGlobals.ensureChunkHandlers}.remotes(chunkId, promises);`,
+                `return Promise.all(promises).then(${runtimeTemplate.basicFunction(
                   ["r"],
                   [
                     `return ${RuntimeGlobals.require}("webpack/container/reference/" + remoteModuleId);`,
@@ -155,7 +156,7 @@ export class ClientRSCPlugin {
     compiler.hooks.compilation.tap(
       "MyPlugin",
       (compilation, { normalModuleFactory }) => {
-        compilation.hooks.beforeModuleIds.tap("MyPlugin", (modules) => {
+        compilation.hooks.optimizeModuleIds.tap("MyPlugin", (modules) => {
           for (const mod of modules) {
             if (
               mod.userRequest &&
