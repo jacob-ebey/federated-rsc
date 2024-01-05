@@ -1,5 +1,4 @@
 {
-  "include": ["./entry/**/*", "./lib/**/*"],
   "compilerOptions": {
     "module": "ESNext",
     "moduleResolution": "Bundler",

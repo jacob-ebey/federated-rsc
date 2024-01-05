@@ -9,11 +9,12 @@ import VirtualModulesPlugin from "webpack-virtual-modules";
 
 import { generate } from "./generate.mjs";
 import { ClientRSCPlugin, ServerRSCPlugin } from "./plugins.mjs";
+import { ExternalTemplateRemotesPlugin } from "./thrid-party-plugins/external-template-remotes.mjs";
 
 export async function build() {
   const cwd = process.cwd();
   const routesDir = path.resolve(cwd, "app/routes");
-  const devtool = false;
+  const devtool = "source-map";
   const mode = "production";
   const browserEntry = undefined;
   const ssrEntry = undefined;
@@ -24,19 +25,26 @@ export async function build() {
     await fsp.readFile(path.resolve(cwd, "package.json"), "utf8")
   );
 
-  const rsdBrowserResource = import.meta.resolve
-    ? fileURLToPath(
-        import.meta.resolve("react-server-dom-webpack/client.browser")
-      )
-    : createRequire(fileURLToPath(import.meta.url)).resolve(
-        "react-server-dom-webpack/client.browser"
-      );
-  const rsdSsrResource = import.meta.resolve
-    ? fileURLToPath(import.meta.resolve("react-server-dom-webpack/client.node"))
-    : createRequire(fileURLToPath(import.meta.url)).resolve(
-        "react-server-dom-webpack/client.node"
-      );
+  const rsdBrowserResource =
+    // @ts-expect-error - this is undefined sometimes for some reason
+    import.meta.resolve
+      ? fileURLToPath(
+          import.meta.resolve("react-server-dom-webpack/client.browser")
+        )
+      : createRequire(fileURLToPath(import.meta.url)).resolve(
+          "react-server-dom-webpack/client.browser"
+        );
+  const rsdSsrResource =
+    // @ts-expect-error - this is undefined sometimes for some reason
+    import.meta.resolve
+      ? fileURLToPath(
+          import.meta.resolve("react-server-dom-webpack/client.node")
+        )
+      : createRequire(fileURLToPath(import.meta.url)).resolve(
+          "react-server-dom-webpack/client.node"
+        );
 
+  /** @type {Record<string, string>} */
   const alias = {
     // TODO: resolve these relative to import.meta.url
     // "#framework/client": path.resolve("./lib/framework.client.tsx"),
@@ -44,6 +52,12 @@ export async function build() {
     // "#framework/ssr": path.resolve("./lib/framework.ssr.tsx"),
     // "#framework": path.resolve("./lib/framework.server.tsx"),
   };
+  const notExternal = [
+    "framework/client",
+    "framework/ssr",
+    "framework/entry/browser",
+    "framework/entry/ssr",
+  ];
 
   const extensions = [".ts", ".tsx", ".js", ".jsx"];
 
@@ -125,10 +139,7 @@ export async function build() {
     target: "node18",
     externals: [
       nodeExternals({
-        allowlist: [
-          ...Object.keys(alias),
-          "react-server-dom-webpack/client.node",
-        ],
+        allowlist: [...notExternal, "react-server-dom-webpack/client.node"],
       }),
     ],
     resolve: { alias, extensions },
@@ -193,6 +204,7 @@ export async function build() {
       ],
     },
     plugins: [
+      new ExternalTemplateRemotesPlugin(),
       new VirtualModulesPlugin({
         [bootstrapBrowserPath]: `import(${JSON.stringify(browserEntryImport)})`,
       }),
@@ -201,8 +213,7 @@ export async function build() {
         cwd,
         rsdResource: rsdBrowserResource,
         containerName,
-        howToLoad:
-          "script client_modules@http://localhost:3001/dist/browser/client_modules.js",
+        howToLoad: `script ${containerName}@[${webpack.RuntimeGlobals.publicPath}]${containerName}.js`,
         libraryType: "var",
         shared: {
           react: pkgJson.dependencies.react,
@@ -233,9 +244,4 @@ function runWebpack(config) {
       resolve(stats);
     });
   });
-}
-
-function exposedNameFromResource(cwd, resource) {
-  const relative = path.relative(cwd, resource).replace(/\\/g, "/");
-  return "./" + relative.replace(/\.\.\//g, "__/");
 }

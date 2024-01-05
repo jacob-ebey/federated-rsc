@@ -9,7 +9,10 @@ import {
   type Params,
 } from "@remix-run/router";
 
-export function createRequestHandler(routes: AgnosticDataRouteObject[]) {
+export function createRequestHandler(
+  routes: AgnosticDataRouteObject[],
+  scripts: string[]
+) {
   return async (request: Request) => {
     const handler = createStaticHandler(routes, {
       future: { v7_relativeSplatPath: true },
@@ -49,9 +52,7 @@ export function createRequestHandler(routes: AgnosticDataRouteObject[]) {
           React.Fragment,
           null,
           root,
-          React.createElement("script", {
-            src: "http://localhost:3001/dist/browser/main.js",
-          })
+          ...scripts.map((src) => React.createElement("script", { src }))
         ),
         new Proxy(
           {},

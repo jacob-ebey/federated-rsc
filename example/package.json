@@ -4,8 +4,8 @@
   "scripts": {
     "build": "remix build",
     "start": "concurrently \"npm:start:*\"",
-    "start:server": "node --no-warnings --loader tsm --conditions=react-server ./server.ts",
-    "start:ssr": "node --no-warnings --loader tsm  ./ssr-server.ts"
+    "start:server": "node --no-warnings --loader tsm --conditions=react-server ./server.mts",
+    "start:ssr": "node --no-warnings --loader tsm  ./ssr-server.mts"
   },
   "dependencies": {
     "@hono/node-server": "^1.4.0",
@@ -14,6 +14,8 @@
     "react-dom": "0.0.0-experimental-c5b937576-20231219"
   },
   "devDependencies": {
-    "framework": "workspace:*"
+    "concurrently": "^8.2.2",
+    "framework": "workspace:*",
+    "tsm": "^2.3.0"
   }
 }

@@ -7,8 +7,6 @@ import { createRequestHandler } from "framework";
 
 import { routes } from "./dist/server/main.js";
 
-const handler = createRequestHandler(routes);
-
 const app = new Hono();
 
 app.use(
@@ -18,6 +16,9 @@ app.use(
 );
 
 app.all("*", async (c) => {
+  const entry = new URL("/dist/browser/main.js", c.req.url).href;
+  const handler = createRequestHandler(routes, [entry]);
+
   return handler(c.req.raw);
 });
 
