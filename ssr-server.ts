@@ -5,7 +5,9 @@ import { handler } from "./dist/ssr/main.js";
 
 const app = new Hono();
 
-app.use("*", async (c) => (await handler)(c.req.raw));
+app.use("*", async (c) => {
+  return (await handler)(c.req.raw, "http://localhost:3001");
+});
 
 serve({
   ...app,

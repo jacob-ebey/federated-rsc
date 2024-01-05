@@ -27,13 +27,13 @@ export async function InlinePayload({
             };
             __RSC__.done = () => {
               __RSC__.controller.close();
-              window.dispatchEvent(
+              dispatchEvent(
                 new CustomEvent("rscdone", {
                   detail: null,
                 })
               );
             };
-            window.dispatchEvent(
+            dispatchEvent(
               new CustomEvent("rscready", {
                 detail: null,
               })

@@ -2,11 +2,17 @@ import * as React from "react";
 import { createRoot } from "react-dom/client";
 import RSD from "react-server-dom-webpack/client.browser";
 
+declare global {
+  var __RSC__: {
+    stream: ReadableStream<Uint8Array>;
+  };
+}
+
 export function hydrate() {
-  if (window.__RSC__) {
+  if (typeof __RSC__ !== "undefined") {
     hydrateInternal();
   }
-  window.addEventListener("rscready", hydrateInternal);
+  addEventListener("rscready", hydrateInternal, { once: true });
 }
 
 async function hydrateInternal() {

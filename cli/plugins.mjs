@@ -67,26 +67,29 @@ export class ClientRSCPlugin {
    */
   apply(compiler) {
     const browserRSCContainer =
-      new compiler.webpack.container.ModuleFederationPlugin({
-        name: this.containerName,
-        exposes: Array.from(this.clientModules).reduce(
-          (p, c) =>
-            Object.assign(p, {
-              [exposedNameFromResource(this.cwd, c)]: c,
-            }),
-          {}
-        ),
-        remotes: {
-          [this.containerName]: this.howToLoad,
-        },
-        shared: this.shared,
-        library: this.libraryType
-          ? {
-              name: this.libraryType === "var" ? this.containerName : undefined,
-              type: this.libraryType,
-            }
-          : undefined,
-      });
+      /** @type {typeof compiler.webpack.container.ModuleFederationPlugin & { _options: { remotes: Record<string, unknown> } }} */ (
+        new compiler.webpack.container.ModuleFederationPlugin({
+          name: this.containerName,
+          exposes: Array.from(this.clientModules).reduce(
+            (p, c) =>
+              Object.assign(p, {
+                [exposedNameFromResource(this.cwd, c)]: c,
+              }),
+            {}
+          ),
+          remotes: {
+            [this.containerName]: this.howToLoad,
+          },
+          shared: this.shared,
+          library: this.libraryType
+            ? {
+                name:
+                  this.libraryType === "var" ? this.containerName : undefined,
+                type: this.libraryType,
+              }
+            : undefined,
+        })
+      );
     browserRSCContainer.apply(compiler);
 
     class ContainerReferenceDependency extends compiler.webpack.dependencies
@@ -157,7 +160,9 @@ export class ClientRSCPlugin {
       "MyPlugin",
       (compilation, { normalModuleFactory }) => {
         compilation.hooks.optimizeModuleIds.tap("MyPlugin", (modules) => {
-          for (const mod of modules) {
+          for (const mod of /** @type {import("webpack").NormalModule[]} */ (
+            modules
+          )) {
             if (
               mod.userRequest &&
               mod.userRequest.startsWith("webpack/container/reference/")
@@ -178,7 +183,7 @@ export class ClientRSCPlugin {
 
         const handler = (parser) => {
           parser.hooks.program.tap("MyPlugin", (ast) => {
-            const mod = /** @type {import("webpack").Module} */ (
+            const mod = /** @type {import("webpack").NormalModule} */ (
               parser.state.module
             );
 

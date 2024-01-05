@@ -40,6 +40,7 @@ async function build() {
 
   const alias = {
     // TODO: resolve these relative to import.meta.url
+    "#framework/client": path.resolve("./lib/framework.client.tsx"),
     "#framework/browser": path.resolve("./lib/framework.browser.tsx"),
     "#framework/ssr": path.resolve("./lib/framework.ssr.tsx"),
     "#framework": path.resolve("./lib/framework.server.tsx"),
@@ -77,7 +78,7 @@ async function build() {
     target: "node18",
     externals: [
       nodeExternals({
-        allowlist: ["#generated"],
+        allowlist: Object.keys(alias),
       }),
     ],
     resolve: { alias: { ...alias, "#routes": routesPath }, extensions },
@@ -122,7 +123,10 @@ async function build() {
     target: "node18",
     externals: [
       nodeExternals({
-        allowlist: ["#generated", "react-server-dom-webpack/client.node"],
+        allowlist: [
+          ...Object.keys(alias),
+          "react-server-dom-webpack/client.node",
+        ],
       }),
     ],
     resolve: { alias, extensions },

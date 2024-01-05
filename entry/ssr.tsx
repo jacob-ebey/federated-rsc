@@ -1,16 +1,13 @@
 import * as stream from "node:stream";
 
-import * as React from "react";
 import RDS from "react-dom/server.node";
 import RSD from "react-server-dom-webpack/client.node";
+
 import { InlinePayload } from "#framework/ssr";
 
-// TODO: Make this a build time thing
-const SERVER_ORIGIN = "http://localhost:3001";
-
-export async function handler(request: Request) {
+export async function handler(request: Request, serverOrigin: string) {
   const url = new URL(request.url);
-  const serverUrl = new URL(url.pathname + url.search, SERVER_ORIGIN);
+  const serverUrl = new URL(url.pathname + url.search, serverOrigin);
   const response = await fetch(serverUrl);
 
   if (

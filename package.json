@@ -4,8 +4,8 @@
   "scripts": {
     "build": "node cli/build.mjs",
     "start": "concurrently \"npm:start:*\"",
-    "start:server": "node --conditions=react-server ./server.mjs",
-    "start:ssr": "node ./ssr.mjs"
+    "start:server": "node --no-warnings --loader tsm --conditions=react-server ./server.ts",
+    "start:ssr": "node --no-warnings --loader tsm  ./ssr-server.ts"
   },
   "dependencies": {
     "@hono/node-server": "^1.4.0",
@@ -24,6 +24,7 @@
     "concurrently": "^8.2.2",
     "esbuild-loader": "^4.0.2",
     "fast-glob": "^3.3.2",
+    "tsm": "^2.3.0",
     "webpack": "^5.89.0",
     "webpack-node-externals": "^3.0.0",
     "webpack-virtual-modules": "^0.6.1"

@@ -2,16 +2,14 @@ import * as stream from "node:stream";
 
 import * as React from "react";
 import RSD from "react-server-dom-webpack/server.node";
-import { serve } from "@hono/node-server";
-import { serveStatic } from "@hono/node-server/serve-static";
-import { Hono } from "hono";
-import { cors } from "hono/cors";
-import { createStaticHandler } from "@remix-run/router";
+import {
+  createStaticHandler,
+  type AgnosticDataRouteObject,
+  type Params,
+} from "@remix-run/router";
 
-import { routes } from "./dist/server/main.js";
-
-function createRequestHandler(routes) {
-  return async (request) => {
+export function createRequestHandler(routes: AgnosticDataRouteObject[]) {
+  return async (request: Request) => {
     const handler = createStaticHandler(routes, {
       future: { v7_relativeSplatPath: true },
     });
@@ -28,10 +26,14 @@ function createRequestHandler(routes) {
         const {
           params,
           route: { Component },
-        } =
-          /** @type {typeof context.matches[number] & { route: { Component: React.FunctionComponent } }} */ (
-            context.matches[i]
-          );
+        } = context.matches[i] as (typeof context.matches)[number] & {
+          route: {
+            Component: React.FunctionComponent<{
+              params: Params<string>;
+              children: React.ReactNode;
+            }>;
+          };
+        };
         if (Component) {
           root = React.createElement(
             Component,
@@ -84,22 +86,3 @@ function createRequestHandler(routes) {
     }
   };
 }
-
-const handler = createRequestHandler(routes);
-
-const app = new Hono();
-
-app.use(
-  "/dist/browser/*",
-  cors({ origin: "*", allowMethods: ["HEAD", "GET"] }),
-  serveStatic()
-);
-
-app.all("*", async (c) => {
-  return handler(c.req.raw);
-});
-
-serve({
-  ...app,
-  port: 3001,
-});
