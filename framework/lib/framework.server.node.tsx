@@ -9,6 +9,8 @@ import {
   type Params,
 } from "@remix-run/router";
 
+export * from "./framework.server.shared";
+
 export function createRequestHandler(routes: AgnosticDataRouteObject[]) {
   return async (request: Request) => {
     const handler = createStaticHandler(routes, {
@@ -22,19 +24,23 @@ export function createRequestHandler(routes: AgnosticDataRouteObject[]) {
         return context;
       }
 
+      const matches = context.matches as Array<
+        (typeof context.matches)[number] & {
+          route: {
+            Component?: React.FunctionComponent<{
+              params: Params<string>;
+              children: React.ReactNode;
+            }> & { standalone?: boolean };
+          };
+        }
+      >;
+
       let root = null;
-      for (let i = context.matches.length - 1; i >= 0; i--) {
+      for (let i = matches.length - 1; i >= 0; i--) {
         const {
           params,
           route: { Component },
-        } = context.matches[i] as (typeof context.matches)[number] & {
-          route: {
-            Component: React.FunctionComponent<{
-              params: Params<string>;
-              children: React.ReactNode;
-            }>;
-          };
-        };
+        } = matches[i];
         if (Component) {
           root = React.createElement(
             Component,

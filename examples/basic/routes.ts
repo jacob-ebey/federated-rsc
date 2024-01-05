@@ -33,4 +33,9 @@ export const routes = [
       },
     ]
   },
+  {
+    id: "weather.$",
+    path: "weather/*",
+    lazy: () => import("./app/routes/weather.$/route.tsx"),
+  },
 ];
