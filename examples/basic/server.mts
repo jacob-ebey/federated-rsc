@@ -22,7 +22,12 @@ app.all("*", async (c) => {
   return handler(c.req.raw);
 });
 
-serve({
-  ...app,
-  port: 3001,
-});
+serve(
+  {
+    ...app,
+    port: 3001,
+  },
+  (info) => {
+    console.log(`Server listening on http://localhost:${info.port}`);
+  }
+);
