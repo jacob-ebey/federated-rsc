@@ -42,22 +42,27 @@ function createRequestHandler(routes) {
       }
 
       const { pipe } = RSD.renderToPipeableStream(
-        root,
+        React.createElement(
+          React.Fragment,
+          null,
+          root,
+          React.createElement("script", {
+            src: "http://localhost:3001/dist/browser/main.js",
+          })
+        ),
         new Proxy(
           {},
           {
             get(_, prop, __) {
-              const [remote, ...exposedRest] = String(prop).split(":");
-              const [exposed, ...exportedRest] = exposedRest
-                .join(":")
-                .split("#");
+              const [___, ...exposedRest] = String(prop).split(":");
+              const [____, ...exportedRest] = exposedRest.join(":").split("#");
               const exported = exportedRest.join("#");
-              const id = remote + ":" + exposed;
 
               return {
-                id: id,
+                id: prop,
                 name: exported,
-                chunks: [id],
+                chunks: [prop],
+                async: true,
               };
             },
           }

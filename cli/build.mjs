@@ -16,7 +16,7 @@ async function build() {
   const cwd = process.cwd();
   const routesDir = path.resolve(cwd, "app/routes");
   const devtool = false;
-  const mode = "production";
+  const mode = "development";
   const browserEntry = undefined;
   const generatedRoutes = undefined;
   const containerName = "client_modules";
@@ -25,12 +25,17 @@ async function build() {
     await fsp.readFile(path.resolve(cwd, "package.json"), "utf8")
   );
 
-  const rsdResource = import.meta.resolve
+  const rsdBrowserResource = import.meta.resolve
     ? fileURLToPath(
         import.meta.resolve("react-server-dom-webpack/client.browser")
       )
     : createRequire(fileURLToPath(import.meta.url)).resolve(
         "react-server-dom-webpack/client.browser"
+      );
+  const rsdSsrResource = import.meta.resolve
+    ? fileURLToPath(import.meta.resolve("react-server-dom-webpack/client.node"))
+    : createRequire(fileURLToPath(import.meta.url)).resolve(
+        "react-server-dom-webpack/client.node"
       );
 
   const alias = {
@@ -49,7 +54,8 @@ async function build() {
     },
   };
 
-  const bootstrapBrowserPath = path.resolve(cwd, "___bootstrap.js");
+  const bootstrapBrowserPath = path.resolve(cwd, "___bootstrap_browser.js");
+  const bootstrapSsrPath = path.resolve(cwd, "___bootstrap_ssr.js");
 
   const routesPath = path.resolve(cwd, generatedRoutes || "./routes.ts");
   let serverEntry = path.relative(cwd, path.resolve(cwd, routesPath));
@@ -58,7 +64,6 @@ async function build() {
   }
 
   const generated = await generate(routesPath, routesDir);
-  console.log(generated);
 
   await fsp.mkdir(path.dirname(path.resolve(routesPath)), { recursive: true });
   await fsp.writeFile(routesPath, generated, "utf8");
@@ -104,7 +109,56 @@ async function build() {
     plugins: [new ServerRSCPlugin(clientModules)],
   });
 
-  console.log(clientModules);
+  const resolvedSsrEntry = path.resolve(cwd, browserEntry || "./entry/ssr.tsx");
+  let ssrEntryImport = path.relative(cwd, resolvedSsrEntry);
+  if (!ssrEntryImport.startsWith(".")) {
+    ssrEntryImport = "./" + ssrEntryImport;
+  }
+  const ssrStats = await runWebpack({
+    devtool,
+    mode,
+    entry: bootstrapSsrPath,
+    target: "node18",
+    externals: [
+      nodeExternals({
+        allowlist: ["#generated", "react-server-dom-webpack/client.node"],
+      }),
+    ],
+    resolve: { alias, extensions },
+    output: {
+      library: {
+        type: "commonjs-static",
+      },
+      path: path.resolve("./dist/ssr"),
+    },
+    module: {
+      rules: [
+        {
+          test: /\.m?[tj]sx?$/,
+          use: [esbuildLoader],
+        },
+      ],
+    },
+    plugins: [
+      new VirtualModulesPlugin({
+        [bootstrapSsrPath]: `export const handler = import(${JSON.stringify(
+          ssrEntryImport
+        )}).then(m => m.handler)`,
+      }),
+      new ClientRSCPlugin({
+        clientModules,
+        cwd,
+        rsdResource: rsdSsrResource,
+        libraryType: "commonjs-static",
+        containerName,
+        howToLoad: "commonjs ./client_modules.js",
+        shared: {
+          react: pkgJson.dependencies.react,
+          "react-dom": pkgJson.dependencies["react-dom"],
+        },
+      }),
+    ],
+  });
 
   const resolvedBrowserEntry = path.resolve(
     cwd,
@@ -138,10 +192,11 @@ async function build() {
       new ClientRSCPlugin({
         clientModules,
         cwd,
-        rsdResource,
+        rsdResource: rsdBrowserResource,
         containerName,
         howToLoad:
-          "client_modules@http://localhost:3001/dist/browser/client_modules.js",
+          "script client_modules@http://localhost:3001/dist/browser/client_modules.js",
+        libraryType: "var",
         shared: {
           react: pkgJson.dependencies.react,
           "react-dom": pkgJson.dependencies["react-dom"],

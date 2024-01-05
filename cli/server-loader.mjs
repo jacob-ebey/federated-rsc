@@ -9,14 +9,12 @@ export default async function (source) {
   const cb = this.async();
   const resourcePath = this.resourcePath;
   const { containerName, cwd } = this.getOptions();
-  console.log("HERE", resourcePath);
   const meta = await parseRSCMetadata(source, resourcePath, cwd, containerName);
 
   if (meta.useClient) {
     return cb(null, createClientModule(meta.moduleExports));
   }
 
-  console.log(meta);
   cb(null, source);
 }
 

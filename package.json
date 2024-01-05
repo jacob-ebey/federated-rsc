@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "scripts": {
     "build": "node cli/build.mjs",
-    "start": "node --conditions=react-server ./server.mjs"
+    "start": "concurrently \"npm:start:*\"",
+    "start:server": "node --conditions=react-server ./server.mjs",
+    "start:ssr": "node ./ssr.mjs"
   },
   "dependencies": {
     "@hono/node-server": "^1.4.0",
@@ -19,6 +21,7 @@
     "@types/react": "^18.2.46",
     "@types/react-dom": "^18.2.18",
     "@types/webpack-node-externals": "^3.0.4",
+    "concurrently": "^8.2.2",
     "esbuild-loader": "^4.0.2",
     "fast-glob": "^3.3.2",
     "webpack": "^5.89.0",

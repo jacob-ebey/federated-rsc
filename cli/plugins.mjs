@@ -48,6 +48,7 @@ export class ClientRSCPlugin {
     clientModules,
     cwd,
     rsdResource,
+    libraryType,
     containerName,
     howToLoad,
     shared,
@@ -55,6 +56,7 @@ export class ClientRSCPlugin {
     this.clientModules = clientModules;
     this.cwd = cwd;
     this.rsdResource = rsdResource;
+    this.libraryType = libraryType;
     this.containerName = containerName;
     this.howToLoad = howToLoad;
     this.shared = shared;
@@ -75,10 +77,15 @@ export class ClientRSCPlugin {
           {}
         ),
         remotes: {
-          [this.containerName]:
-            "client_modules@/dist/browser/client_modules.js",
+          [this.containerName]: this.howToLoad,
         },
         shared: this.shared,
+        library: this.libraryType
+          ? {
+              name: this.libraryType === "var" ? this.containerName : undefined,
+              type: this.libraryType,
+            }
+          : undefined,
       });
     browserRSCContainer.apply(compiler);
 
@@ -103,8 +110,6 @@ export class ClientRSCPlugin {
       }
       generate() {
         const runtimeTemplate = this.compilation.runtimeTemplate;
-        // TODO: instead of adding a new "rsc" key to ensureChunkHandlers, override ensureChunk
-        // and intercept prefixed "rsc/remote/client/" chunk identifiers.
         return Template.asString([
           `var ogEnsureChunk = ${RuntimeGlobals.ensureChunk};`,
           "// this function allows you to load federated modules through react server component decoding",
@@ -116,14 +121,9 @@ export class ClientRSCPlugin {
                 "var splitIndex = chunkId.indexOf(':', 18);",
                 "var remote = chunkId.slice(0, splitIndex);",
                 "var remoteModuleId = remote.slice(18);",
-                "var exposed = chunkId.slice(splitIndex + 1);",
-                "console.log({chunkId, remote, exposed, remoteModuleId});",
+                "var [exposed] = chunkId.slice(splitIndex + 1).split('#');",
 
-                "var promises = [];",
-                `${
-                  RuntimeGlobals.ensureChunkHandlers
-                }.remotes(remote, promises);
-                return Promise.all(promises).then(${runtimeTemplate.basicFunction(
+                `return ogEnsureChunk(remote).then(${runtimeTemplate.basicFunction(
                   ["r"],
                   [
                     `return ${RuntimeGlobals.require}("webpack/container/reference/" + remoteModuleId);`,
@@ -135,7 +135,6 @@ export class ClientRSCPlugin {
                   ["factory"],
                   [
                     "var mod = factory();",
-                    "console.log(mod);",
                     // TODO: if HMR is an issue, make this a Proxy to the underlying module
                     `${RuntimeGlobals.moduleCache}[chunkId] = {
                       id: chunkId,
@@ -143,7 +142,7 @@ export class ClientRSCPlugin {
                       exports: mod,
                     };`,
                   ]
-                )});`,
+                )})`,
               ]),
               "}",
               "return ogEnsureChunk(chunkId);",
@@ -185,6 +184,7 @@ export class ClientRSCPlugin {
             if (mod.resource !== this.rsdResource) return;
 
             console.log("Attaching RSC remotes to build");
+
             if (browserRSCContainer._options.remotes) {
               for (const key of Object.keys(
                 browserRSCContainer._options.remotes
@@ -217,16 +217,17 @@ export class ClientRSCPlugin {
           .for("javascript/dynamic")
           .tap("HarmonyModulesPlugin", handler);
 
+        const requirementsHandler = (chunk, set) => {
+          set.add(RuntimeGlobals.moduleFactoriesAddOnly);
+          set.add(RuntimeGlobals.hasOwnProperty);
+          compilation.addRuntimeModule(
+            chunk,
+            new ContainerReferenceRuntimeModule()
+          );
+        };
         compilation.hooks.runtimeRequirementInTree
-          .for(RuntimeGlobals.loadScript)
-          .tap("MyPlugin", (chunk, set) => {
-            set.add(RuntimeGlobals.moduleFactoriesAddOnly);
-            set.add(RuntimeGlobals.hasOwnProperty);
-            compilation.addRuntimeModule(
-              chunk,
-              new ContainerReferenceRuntimeModule()
-            );
-          });
+          .for(RuntimeGlobals.ensureChunk)
+          .tap("MyPlugin", requirementsHandler);
       }
     );
   }

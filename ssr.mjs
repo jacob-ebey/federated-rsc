@@ -1,11 +1,11 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 
-const SERVER_ORIGIN = "http://localhost:3001";
+import { handler } from "./dist/ssr/main.js";
 
 const app = new Hono();
 
-app.use()
+app.use("*", async (c) => (await handler)(c.req.raw));
 
 serve({
   ...app,
