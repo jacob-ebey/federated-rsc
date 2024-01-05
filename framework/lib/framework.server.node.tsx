@@ -47,6 +47,10 @@ export function createRequestHandler(
         }
       }
 
+      if (!root) {
+        return new Response(null, { status: 404 });
+      }
+
       const { pipe } = RSD.renderToPipeableStream(
         React.createElement(
           React.Fragment,

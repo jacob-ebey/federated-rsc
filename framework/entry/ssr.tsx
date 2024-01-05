@@ -16,13 +16,20 @@ export async function handler(request: Request, serverOrigin: string) {
     },
   });
 
-  if (
-    !response.headers.get("Content-Type")?.match(/\btext\/x-component\b/) ||
-    !response.body
-  ) {
-    return new Response(null, {
-      status: 500,
-    });
+  const isComponentResponse = response.headers
+    .get("Content-Type")
+    ?.match(/\btext\/x-component\b/);
+
+  if (!isComponentResponse || !response.body) {
+    return new Response(
+      isComponentResponse ? "No body found in response" : response.statusText,
+      {
+        status: isComponentResponse ? 500 : response.status,
+        headers: {
+          "Content-Type": "text/plain",
+        },
+      }
+    );
   }
 
   const [payloadA, payloadB] = response.body.tee();
@@ -76,6 +83,7 @@ export async function handler(request: Request, serverOrigin: string) {
                 pipe(new stream.PassThrough())
               ) as ReadableStream<Uint8Array>,
               {
+                status: response.status,
                 headers: {
                   "Content-Type": "text/html",
                   "Transfer-Encoding": "chunked",
