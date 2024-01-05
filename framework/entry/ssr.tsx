@@ -10,7 +10,11 @@ import { InlinePayload } from "framework/ssr";
 export async function handler(request: Request, serverOrigin: string) {
   const url = new URL(request.url);
   const serverUrl = new URL(url.pathname + url.search, serverOrigin);
-  const response = await fetch(serverUrl);
+  const response = await fetch(serverUrl, {
+    headers: {
+      Accept: "text/x-component",
+    },
+  });
 
   if (
     !response.headers.get("Content-Type")?.match(/\btext\/x-component\b/) ||
