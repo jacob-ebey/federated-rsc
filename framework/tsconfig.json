@@ -1,4 +1,5 @@
 {
+  "include": ["./entry/**/*", "./lib/**/*"],
   "compilerOptions": {
     "module": "ESNext",
     "moduleResolution": "Bundler",
@@ -10,13 +11,6 @@
     "strict": true,
     "allowJs": true,
     "checkJs": true,
-    "noEmit": true,
-    "rootDir": ".",
-    "paths": {
-      "#framework/browser": ["./lib/framework.browser.tsx"],
-      "#framework/client": ["./lib/framework.client.tsx"],
-      "#framework/ssr": ["./lib/framework.ssr.tsx"],
-      "#framework": ["./lib/framework.server.node.tsx"]
-    }
+    "noEmit": true
   }
 }

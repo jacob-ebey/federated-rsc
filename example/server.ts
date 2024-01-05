@@ -3,7 +3,7 @@ import { serveStatic } from "@hono/node-server/serve-static";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 
-import { createRequestHandler } from "./lib/framework.server.node.tsx";
+import { createRequestHandler } from "framework";
 
 import { routes } from "./dist/server/main.js";
 

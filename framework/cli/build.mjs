@@ -10,9 +10,7 @@ import VirtualModulesPlugin from "webpack-virtual-modules";
 import { generate } from "./generate.mjs";
 import { ClientRSCPlugin, ServerRSCPlugin } from "./plugins.mjs";
 
-await build();
-
-async function build() {
+export async function build() {
   const cwd = process.cwd();
   const routesDir = path.resolve(cwd, "app/routes");
   const devtool = false;
@@ -41,10 +39,10 @@ async function build() {
 
   const alias = {
     // TODO: resolve these relative to import.meta.url
-    "#framework/client": path.resolve("./lib/framework.client.tsx"),
-    "#framework/browser": path.resolve("./lib/framework.browser.tsx"),
-    "#framework/ssr": path.resolve("./lib/framework.ssr.tsx"),
-    "#framework": path.resolve("./lib/framework.server.tsx"),
+    // "#framework/client": path.resolve("./lib/framework.client.tsx"),
+    // "#framework/browser": path.resolve("./lib/framework.browser.tsx"),
+    // "#framework/ssr": path.resolve("./lib/framework.ssr.tsx"),
+    // "#framework": path.resolve("./lib/framework.server.tsx"),
   };
 
   const extensions = [".ts", ".tsx", ".js", ".jsx"];
@@ -112,10 +110,13 @@ async function build() {
     plugins: [new ServerRSCPlugin(clientModules)],
   });
 
-  const resolvedSsrEntry = path.resolve(cwd, ssrEntry || "./entry/ssr.tsx");
-  let ssrEntryImport = path.relative(cwd, resolvedSsrEntry);
-  if (!ssrEntryImport.startsWith(".")) {
-    ssrEntryImport = "./" + ssrEntryImport;
+  let ssrEntryImport = "framework/entry/ssr";
+  if (ssrEntry) {
+    const resolvedSsrEntry = path.resolve(cwd, ssrEntry);
+    ssrEntryImport = path.relative(cwd, resolvedSsrEntry);
+    if (!ssrEntryImport.startsWith(".")) {
+      ssrEntryImport = "./" + ssrEntryImport;
+    }
   }
   const ssrStats = await runWebpack({
     devtool,
@@ -166,13 +167,13 @@ async function build() {
     ],
   });
 
-  const resolvedBrowserEntry = path.resolve(
-    cwd,
-    browserEntry || "./entry/browser.tsx"
-  );
-  let browserEntryImport = path.relative(cwd, resolvedBrowserEntry);
-  if (!browserEntryImport.startsWith(".")) {
-    browserEntryImport = "./" + browserEntryImport;
+  let browserEntryImport = "framework/entry/browser";
+  if (browserEntry) {
+    const resolvedBrowserEntry = path.resolve(cwd, browserEntry);
+    browserEntryImport = path.relative(cwd, resolvedBrowserEntry);
+    if (!browserEntryImport.startsWith(".")) {
+      browserEntryImport = "./" + browserEntryImport;
+    }
   }
   const browserStats = await runWebpack({
     devtool,

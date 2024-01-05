@@ -1,9 +1,11 @@
 import * as stream from "node:stream";
 
+// @ts-expect-error - no types
 import RDS from "react-dom/server.node";
+// @ts-expect-error - no types
 import RSD from "react-server-dom-webpack/client.node";
 
-import { InlinePayload } from "#framework/ssr";
+import { InlinePayload } from "framework/ssr";
 
 export async function handler(request: Request, serverOrigin: string) {
   const url = new URL(request.url);
@@ -66,7 +68,9 @@ export async function handler(request: Request, serverOrigin: string) {
           shellSent = true;
           resolve(
             new Response(
-              stream.Readable.toWeb(pipe(new stream.PassThrough())),
+              stream.Readable.toWeb(
+                pipe(new stream.PassThrough())
+              ) as ReadableStream<Uint8Array>,
               {
                 headers: {
                   "Content-Type": "text/html",
@@ -76,12 +80,12 @@ export async function handler(request: Request, serverOrigin: string) {
             )
           );
         },
-        onShellError(error) {
+        onShellError(error: Error) {
           if (!shellSent) {
             reject(error);
           }
         },
-        onError(error) {
+        onError(error: Error) {
           if (shellSent) return;
           console.error(error);
         },

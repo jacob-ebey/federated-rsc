@@ -1,6 +1,7 @@
 import * as stream from "node:stream";
 
 import * as React from "react";
+// @ts-expect-error - no types
 import RSD from "react-server-dom-webpack/server.node";
 import {
   createStaticHandler,
@@ -71,7 +72,9 @@ export function createRequestHandler(routes: AgnosticDataRouteObject[]) {
         )
       );
       return new Response(
-        stream.Readable.toWeb(pipe(new stream.PassThrough())),
+        stream.Readable.toWeb(
+          pipe(new stream.PassThrough())
+        ) as ReadableStream<Uint8Array>,
         {
           status: context.statusCode,
           headers: {

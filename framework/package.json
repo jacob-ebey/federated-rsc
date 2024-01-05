@@ -1,0 +1,54 @@
+{
+  "name": "framework",
+  "version": "1.0.0",
+  "files": [
+    "bin",
+    "cli",
+    "dist"
+  ],
+  "bin": {
+    "remix": "./bin/remix.cjs"
+  },
+  "main": "dist/framework.server.node.js",
+  "types": "dist/framework.server.node.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/framework.server.node.d.ts",
+      "default": "./dist/framework.server.node.js"
+    },
+    "./browser": {
+      "types": "./dist/framework.browser.d.ts",
+      "default": "./dist/framework.browser.js"
+    },
+    "./client": {
+      "types": "./dist/framework.client.d.ts",
+      "default": "./dist/framework.client.js"
+    },
+    "./ssr": {
+      "types": "./dist/framework.ssr.d.ts",
+      "default": "./dist/framework.ssr.js"
+    },
+    "./entry/browser": "./entry/browser.tsx",
+    "./entry/ssr": "./entry/ssr.tsx"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.lib.json"
+  },
+  "dependencies": {
+    "@oxidation-compiler/napi": "^0.2.0",
+    "@remix-run/router": "^1.14.1",
+    "@types/react-dom": "^18.2.18",
+    "@types/react": "^18.2.46",
+    "@types/webpack-node-externals": "^3.0.4",
+    "concurrently": "^8.2.2",
+    "esbuild-loader": "^4.0.2",
+    "fast-glob": "^3.3.2",
+    "react": "0.0.0-experimental-c5b937576-20231219",
+    "react-dom": "0.0.0-experimental-c5b937576-20231219",
+    "react-server-dom-webpack": "0.0.0-experimental-c5b937576-20231219",
+    "tsm": "^2.3.0",
+    "webpack": "^5.89.0",
+    "webpack-node-externals": "^3.0.0",
+    "webpack-virtual-modules": "^0.6.1"
+  }
+}

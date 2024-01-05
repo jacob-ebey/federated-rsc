@@ -1,5 +1,6 @@
 import * as React from "react";
-import { createRoot } from "react-dom/client";
+import { hydrateRoot } from "react-dom/client";
+// @ts-expect-error - no types
 import RSD from "react-server-dom-webpack/client.browser";
 
 declare global {
@@ -20,6 +21,6 @@ async function hydrateInternal() {
 
   const tree = await root;
   React.startTransition(() => {
-    createRoot(document).render(tree[0]);
+    hydrateRoot(document, tree[0]);
   });
 }

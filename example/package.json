@@ -1,0 +1,19 @@
+{
+  "name": "example",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "remix build",
+    "start": "concurrently \"npm:start:*\"",
+    "start:server": "node --no-warnings --loader tsm --conditions=react-server ./server.ts",
+    "start:ssr": "node --no-warnings --loader tsm  ./ssr-server.ts"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.4.0",
+    "hono": "^3.12.0",
+    "react": "0.0.0-experimental-c5b937576-20231219",
+    "react-dom": "0.0.0-experimental-c5b937576-20231219"
+  },
+  "devDependencies": {
+    "framework": "workspace:*"
+  }
+}
