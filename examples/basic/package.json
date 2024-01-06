@@ -7,12 +7,6 @@
     "start:server": "node --no-warnings --loader tsm --conditions=react-server ./server.mts",
     "start:ssr": "node --no-warnings --loader tsm  ./ssr-server.mts"
   },
-  "pnpm": {
-    "overrides": {
-      "react": "0.0.0-experimental-c5b937576-20231219",
-      "react-dom": "0.0.0-experimental-c5b937576-20231219"
-    }
-  },
   "dependencies": {
     "@hono/node-server": "^1.4.0",
     "hono": "^3.12.0",

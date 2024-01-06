@@ -38,12 +38,6 @@
   "scripts": {
     "build": "tsc -p tsconfig.lib.json"
   },
-  "pnpm": {
-    "overrides": {
-      "react": "0.0.0-experimental-c5b937576-20231219",
-      "react-dom": "0.0.0-experimental-c5b937576-20231219"
-    }
-  },
   "dependencies": {
     "@module-federation/node": "^2.0.5",
     "@oxidation-compiler/napi": "^0.2.0",

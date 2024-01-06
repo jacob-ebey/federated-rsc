@@ -3,5 +3,11 @@
   "scripts": {
     "build": "pnpm -r build",
     "start": "pnpm --filter @example/* start"
+  },
+  "pnpm": {
+    "overrides": {
+      "react": "0.0.0-experimental-c5b937576-20231219",
+      "react-dom": "0.0.0-experimental-c5b937576-20231219"
+    }
   }
 }

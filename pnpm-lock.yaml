@@ -4,6 +4,10 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  react: 0.0.0-experimental-c5b937576-20231219
+  react-dom: 0.0.0-experimental-c5b937576-20231219
+
 importers:
 
   .: {}
@@ -416,8 +420,8 @@ packages:
     resolution: {integrity: sha512-+7sF0wAkISlTCaFEKnxYGiQjVUCS0VD5tOds2yQ5thX3p57P/LMd0u0Ze094GrVraF4zkE/4o0Zd8kOCY2GhZQ==}
     peerDependencies:
       next: ^12||^13
-      react: ^16||^17||^18
-      react-dom: ^16||^17||^18
+      react: 0.0.0-experimental-c5b937576-20231219
+      react-dom: 0.0.0-experimental-c5b937576-20231219
       webpack: ^5.40.0
     peerDependenciesMeta:
       next:
@@ -444,8 +448,8 @@ packages:
     resolution: {integrity: sha512-0D1dSWmZBUjkIloUzspcUjT3pbhHBSJ49Dn2RKWeqxN4Layx+7p5y9VkIckBRcgSawXktjGYHb5FA7vfaKh9nA==}
     peerDependencies:
       next: '*'
-      react: ^16 || ^17 || ^18
-      react-dom: ^16 || ^17 || ^18
+      react: 0.0.0-experimental-c5b937576-20231219
+      react-dom: 0.0.0-experimental-c5b937576-20231219
       webpack: ^5.40.0
     peerDependenciesMeta:
       next:
