@@ -18,7 +18,7 @@ export default (config, { build, webpack }) => {
                 "_example_basic@http://localhost:3001/dist/browser/_example_basic.js",
             },
           },
-          { ModuleFederationPlugin: webpack.container.ModuleFederationPlugin }
+          {}
         )
       );
       break;
@@ -32,7 +32,7 @@ export default (config, { build, webpack }) => {
                 "_example_basic@http://localhost:3001/dist/ssr/_example_basic.js",
             },
           },
-          { ModuleFederationPlugin: webpack.container.ModuleFederationPlugin }
+          {}
         )
       );
       break;

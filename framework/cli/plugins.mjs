@@ -116,19 +116,9 @@ export class ClientRSCPlugin {
               type: this.libraryType,
             }
           : undefined,
-      },
-      {
-        ModuleFederationPlugin:
-          compiler.webpack.container.ModuleFederationPlugin,
-      }
+      }, {}
     );
     clientRSCContainer.apply(compiler);
-
-    if (isServer) {
-      new StreamingTargetPlugin({
-        // name: this.containerName,
-      }).apply(compiler);
-    }
 
     class ContainerReferenceDependency extends compiler.webpack.dependencies
       .ModuleDependency {
