@@ -249,13 +249,16 @@ export class ClientRSCPlugin {
                   (plugin.constructor.name === "ModuleFederationPlugin" ||
                     plugin.constructor.name === "UniversalFederationPlugin")
                 ) {
+                  // @ts-expect-error
                   plugins.push(plugin);
                 }
               }
 
               let attached = 0;
               for (const plugin of plugins) {
+                // @ts-expect-error
                 if (plugin._options.remotes) {
+                  // @ts-expect-error
                   for (const key of Object.keys(plugin._options.remotes)) {
                     attached++;
                     const name = `rsc/remote/client/${key}`;
