@@ -54,7 +54,7 @@ export async function getWebpackConfig(
   }
 ): Promise<webpack.Configuration & { name: "server" | "ssr" | "browser" }> {
   const devtool =
-    mode === "development" ? "inline-module-source-map" : "source-map";
+    mode === "development" ? "source-map" : "source-map";
 
   const extensions = [".ts", ".tsx", ".js", ".jsx"];
 
