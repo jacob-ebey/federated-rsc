@@ -9,7 +9,7 @@ import VirtualModulesPlugin from "webpack-virtual-modules";
 
 import { generate } from "./generate.mjs";
 import { ClientRSCPlugin, ServerRSCPlugin } from "./plugins.mjs";
-import { ExternalTemplateRemotesPlugin } from "./thrid-party-plugins/external-template-remotes.mjs";
+import { ExternalTemplateRemotesPlugin } from "./third-party-plugins/external-template-remotes.mjs";
 
 export async function build() {
   const cwd = process.cwd();
