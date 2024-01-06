@@ -53,7 +53,10 @@ export function createRequestHandler(routes: AgnosticDataRouteObject[]) {
       if (!root) {
         return new Response("Not Found", {
           status: 404,
-          headers: { "Content-Type": "text/plain; charset=utf-8" },
+          headers: {
+            "Content-Type": "text/plain; charset=utf-8",
+            Vary: "Accept",
+          },
         });
       }
 
@@ -94,6 +97,7 @@ export function createRequestHandler(routes: AgnosticDataRouteObject[]) {
           headers: {
             "Content-Type": "text/x-component; charset=utf-8",
             "Transfer-Encoding": "chunked",
+            Vary: "Accept",
           },
         }
       );
@@ -101,7 +105,10 @@ export function createRequestHandler(routes: AgnosticDataRouteObject[]) {
       console.error(reason);
       return new Response("Internal Server Error", {
         status: 500,
-        headers: { "Content-Type": "text/plain; charset=utf-8" },
+        headers: {
+          "Content-Type": "text/plain; charset=utf-8",
+          Vary: "Accept",
+        },
       });
     }
   };

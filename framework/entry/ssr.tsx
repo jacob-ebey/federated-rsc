@@ -21,6 +21,10 @@ export async function handler(
     },
   });
 
+  if (request.headers.get("Accept")?.match(/\btext\/x-component\b/)) {
+    return response;
+  }
+
   const isComponentResponse = response.headers
     .get("Content-Type")
     ?.match(/\btext\/x-component\b/);
@@ -32,6 +36,7 @@ export async function handler(
         status: isComponentResponse ? 500 : response.status,
         headers: {
           "Content-Type": "text/plain; charset=utf-8",
+          Vary: "Accept",
         },
       }
     );
@@ -96,6 +101,7 @@ export async function handler(
                 headers: {
                   "Content-Type": "text/html; charset=utf-8",
                   "Transfer-Encoding": "chunked",
+                  Vary: "Accept",
                 },
               }
             )
