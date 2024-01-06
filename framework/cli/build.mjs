@@ -15,7 +15,7 @@ export async function build() {
   const cwd = process.cwd();
   const routesDir = path.resolve(cwd, "app/routes");
   const devtool = "source-map";
-  const mode = "production";
+  const mode = "development";
   const browserEntry = undefined;
   const ssrEntry = undefined;
   const generatedRoutes = undefined;

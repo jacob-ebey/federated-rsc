@@ -35,6 +35,9 @@ importers:
 
   framework:
     dependencies:
+      '@module-federation/node':
+        specifier: ^2.0.5
+        version: 2.0.5(react-dom@0.0.0-experimental-c5b937576-20231219)(react@0.0.0-experimental-c5b937576-20231219)(webpack@5.89.0)
       '@oxidation-compiler/napi':
         specifier: ^0.2.0
         version: 0.2.0
@@ -356,6 +359,65 @@ packages:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.1
       '@jridgewell/sourcemap-codec': 1.4.15
+    dev: false
+
+  /@module-federation/enhanced@0.0.7(webpack@5.89.0):
+    resolution: {integrity: sha512-l/RaHhdhnhz32926Sr3iRx98n4INJBQypbKcfjMYBMoevKLJM59p10q/9BYn6l5uwSkz6UMb5gJke9T5OtT7hQ==}
+    peerDependencies:
+      webpack: ^5.0.0
+    dependencies:
+      '@module-federation/sdk': 0.0.7
+      webpack: 5.89.0
+    dev: false
+
+  /@module-federation/node@2.0.5(react-dom@0.0.0-experimental-c5b937576-20231219)(react@0.0.0-experimental-c5b937576-20231219)(webpack@5.89.0):
+    resolution: {integrity: sha512-+7sF0wAkISlTCaFEKnxYGiQjVUCS0VD5tOds2yQ5thX3p57P/LMd0u0Ze094GrVraF4zkE/4o0Zd8kOCY2GhZQ==}
+    peerDependencies:
+      next: ^12||^13
+      react: ^16||^17||^18
+      react-dom: ^16||^17||^18
+      webpack: ^5.40.0
+    peerDependenciesMeta:
+      next:
+        optional: true
+      react:
+        optional: true
+      react-dom:
+        optional: true
+    dependencies:
+      '@module-federation/enhanced': 0.0.7(webpack@5.89.0)
+      '@module-federation/sdk': 0.0.7
+      '@module-federation/utilities': 3.0.5(react-dom@0.0.0-experimental-c5b937576-20231219)(react@0.0.0-experimental-c5b937576-20231219)(webpack@5.89.0)
+      node-fetch: 2.7.0
+      react: 0.0.0-experimental-c5b937576-20231219
+      react-dom: 0.0.0-experimental-c5b937576-20231219(react@0.0.0-experimental-c5b937576-20231219)
+      webpack: 5.89.0
+    transitivePeerDependencies:
+      - encoding
+    dev: false
+
+  /@module-federation/sdk@0.0.7:
+    resolution: {integrity: sha512-GSbM4c7lg+v1+Llgx7OxUZM4DKo+UlLp+2FwN3CqJDHwBq6y8dchhr8i0esmBXZvoF1+w5arm2p/SV18I0YFqw==}
+    dev: false
+
+  /@module-federation/utilities@3.0.5(react-dom@0.0.0-experimental-c5b937576-20231219)(react@0.0.0-experimental-c5b937576-20231219)(webpack@5.89.0):
+    resolution: {integrity: sha512-0D1dSWmZBUjkIloUzspcUjT3pbhHBSJ49Dn2RKWeqxN4Layx+7p5y9VkIckBRcgSawXktjGYHb5FA7vfaKh9nA==}
+    peerDependencies:
+      next: '*'
+      react: ^16 || ^17 || ^18
+      react-dom: ^16 || ^17 || ^18
+      webpack: ^5.40.0
+    peerDependenciesMeta:
+      next:
+        optional: true
+      react:
+        optional: true
+      react-dom:
+        optional: true
+    dependencies:
+      react: 0.0.0-experimental-c5b937576-20231219
+      react-dom: 0.0.0-experimental-c5b937576-20231219(react@0.0.0-experimental-c5b937576-20231219)
+      webpack: 5.89.0
     dev: false
 
   /@nodelib/fs.scandir@2.1.5:
@@ -1260,6 +1322,18 @@ packages:
     resolution: {integrity: sha512-Yd3UES5mWCSqR+qNT93S3UoYUkqAZ9lLg8a7g9rimsWmYGK8cVToA4/sF3RrshdyV3sAGMXVUmpMYOw+dLpOuw==}
     dev: false
 
+  /node-fetch@2.7.0:
+    resolution: {integrity: sha512-c4FRfUm/dbcWZ7U+1Wq0AwCyFL+3nt2bEw05wfxSz+DWpWsitgmSgYmy2dQdWyKC1694ELPqMs/YzUSNozLt8A==}
+    engines: {node: 4.x || >=6.0.0}
+    peerDependencies:
+      encoding: ^0.1.0
+    peerDependenciesMeta:
+      encoding:
+        optional: true
+    dependencies:
+      whatwg-url: 5.0.0
+    dev: false
+
   /node-releases@2.0.14:
     resolution: {integrity: sha512-y10wOWt8yZpqXmOgRo77WaHEmhYQYGNA6y421PKsKYWEK8aW+cqAphborZDhqfyKrbZEN92CN1X2KbafY2s7Yw==}
     dev: false
@@ -1481,6 +1555,10 @@ packages:
       is-number: 7.0.0
     dev: false
 
+  /tr46@0.0.3:
+    resolution: {integrity: sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw==}
+    dev: false
+
   /tree-kill@1.2.2:
     resolution: {integrity: sha512-L0Orpi8qGpRG//Nd+H90vFB+3iHnue1zSSGmNOOCh1GLJ7rUKVwV2HvijphGQS2UmhUZewS9VgvxYIdgr+fG1A==}
     hasBin: true
@@ -1524,6 +1602,10 @@ packages:
     dependencies:
       glob-to-regexp: 0.4.1
       graceful-fs: 4.2.11
+    dev: false
+
+  /webidl-conversions@3.0.1:
+    resolution: {integrity: sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==}
     dev: false
 
   /webpack-node-externals@3.0.0:
@@ -1585,6 +1667,13 @@ packages:
       - '@swc/core'
       - esbuild
       - uglify-js
+    dev: false
+
+  /whatwg-url@5.0.0:
+    resolution: {integrity: sha512-saE57nupxk6v3HY35+jzBwYa0rKSy0XR8JSxZPwgLr7ys0IBzhGviA1/TUGJLmSVqs8pb9AnvICXEuOHLprYTw==}
+    dependencies:
+      tr46: 0.0.3
+      webidl-conversions: 3.0.1
     dev: false
 
   /wrap-ansi@7.0.0:

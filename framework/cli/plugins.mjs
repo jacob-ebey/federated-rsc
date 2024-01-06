@@ -1,6 +1,12 @@
 import * as path from "node:path";
 
+import universe from "@module-federation/node";
+const { StreamingTargetPlugin, UniversalFederationPlugin } = universe;
+
 export class ServerRSCPlugin {
+  /**
+   * @param {Set<string>} clientModules
+   */
   constructor(clientModules) {
     this.clientModules = clientModules;
   }
@@ -13,18 +19,28 @@ export class ServerRSCPlugin {
     compiler.hooks.thisCompilation.tap(
       "MyPlugin",
       (compilation, { normalModuleFactory }) => {
+        /**
+         *
+         * @param {any} parser
+         */
         const handler = (parser) => {
-          parser.hooks.program.tap("MyPlugin", (ast) => {
-            const mod = parser.state.module;
+          parser.hooks.program.tap(
+            "MyPlugin",
+            /**
+             * @param {any} ast
+             */
+            (ast) => {
+              const mod = parser.state.module;
 
-            for (const node of ast.body) {
-              if (node.type !== "ExpressionStatement") break;
+              for (const node of ast.body) {
+                if (node.type !== "ExpressionStatement") break;
 
-              if (node.directive === "use client") {
-                clientModules.add(mod.resource);
+                if (node.directive === "use client") {
+                  clientModules.add(mod.resource);
+                }
               }
             }
-          });
+          );
         };
 
         normalModuleFactory.hooks.parser
@@ -44,6 +60,18 @@ export class ServerRSCPlugin {
 }
 
 export class ClientRSCPlugin {
+  /**
+   *
+   * @param {{
+   *   clientModules: Set<string>;
+   *   cwd: string;
+   *   rsdResource: string;
+   *   libraryType: string;
+   *   containerName: string;
+   *   howToLoad: string;
+   *   shared: any;
+   * }} args
+   */
   constructor({
     clientModules,
     cwd,
@@ -66,34 +94,48 @@ export class ClientRSCPlugin {
    * @param {import("webpack").Compiler} compiler
    */
   apply(compiler) {
-    const browserRSCContainer =
-      /** @type {typeof compiler.webpack.container.ModuleFederationPlugin & { _options: { remotes: Record<string, unknown> } }} */ (
-        new compiler.webpack.container.ModuleFederationPlugin({
-          name: this.containerName,
-          exposes: Array.from(this.clientModules).reduce(
-            (p, c) =>
-              Object.assign(p, {
-                [exposedNameFromResource(this.cwd, c)]: c,
-              }),
-            {}
-          ),
-          remotes: {
-            [this.containerName]: this.howToLoad,
-          },
-          shared: this.shared,
-          library: this.libraryType
-            ? {
-                name:
-                  this.libraryType === "var" ? this.containerName : undefined,
-                type: this.libraryType,
-              }
-            : undefined,
-        })
-      );
-    browserRSCContainer.apply(compiler);
+    const isServer = this.libraryType !== "var";
+    const clientRSCContainer = new UniversalFederationPlugin(
+      {
+        isServer,
+        name: this.containerName,
+        exposes: Array.from(this.clientModules).reduce(
+          (p, c) =>
+            Object.assign(p, {
+              [exposedNameFromResource(this.cwd, c)]: c,
+            }),
+          {}
+        ),
+        remotes: {
+          [this.containerName]: this.howToLoad,
+        },
+        shared: this.shared,
+        library: this.libraryType
+          ? {
+              name: this.libraryType === "var" ? this.containerName : undefined,
+              type: this.libraryType,
+            }
+          : undefined,
+      },
+      {
+        ModuleFederationPlugin:
+          compiler.webpack.container.ModuleFederationPlugin,
+      }
+    );
+    clientRSCContainer.apply(compiler);
+
+    if (isServer) {
+      new StreamingTargetPlugin({
+        // name: this.containerName,
+      }).apply(compiler);
+    }
 
     class ContainerReferenceDependency extends compiler.webpack.dependencies
       .ModuleDependency {
+      /**
+       *
+       * @param {string} request
+       */
       constructor(request) {
         super(request);
       }
@@ -112,6 +154,7 @@ export class ClientRSCPlugin {
         super("ensure chunk rsc container reference runtime");
       }
       generate() {
+        if (!this.compilation) throw new Error("No compilation");
         const runtimeTemplate = this.compilation.runtimeTemplate;
         return Template.asString([
           `var ogEnsureChunk = ${RuntimeGlobals.ensureChunk};`,
@@ -181,34 +224,45 @@ export class ClientRSCPlugin {
           new compiler.webpack.dependencies.NullDependency.Template()
         );
 
+        /**
+         *
+         * @param {any} parser
+         */
         const handler = (parser) => {
-          parser.hooks.program.tap("MyPlugin", (ast) => {
-            const mod = /** @type {import("webpack").NormalModule} */ (
-              parser.state.module
-            );
+          parser.hooks.program.tap(
+            "MyPlugin",
+            /**
+             *
+             * @param {any} ast
+             */
+            (ast) => {
+              const mod = /** @type {import("webpack").NormalModule} */ (
+                parser.state.module
+              );
 
-            if (mod.resource !== this.rsdResource) return;
+              if (mod.resource !== this.rsdResource) return;
 
-            console.log("Attaching RSC remotes to build");
+              console.log("Attaching RSC remotes to build");
 
-            if (browserRSCContainer._options.remotes) {
-              for (const key of Object.keys(
-                browserRSCContainer._options.remotes
-              )) {
-                const name = `rsc/remote/client/${key}`;
-                const block = new compiler.webpack.AsyncDependenciesBlock(
-                  {
-                    name,
-                  },
-                  null,
-                  name
-                );
-                block.addDependency(new ContainerReferenceDependency(key));
+              if (clientRSCContainer._options.remotes) {
+                for (const key of Object.keys(
+                  clientRSCContainer._options.remotes
+                )) {
+                  const name = `rsc/remote/client/${key}`;
+                  const block = new compiler.webpack.AsyncDependenciesBlock(
+                    {
+                      name,
+                    },
+                    null,
+                    name
+                  );
+                  block.addDependency(new ContainerReferenceDependency(key));
 
-                mod.addBlock(block);
+                  mod.addBlock(block);
+                }
               }
             }
-          });
+          );
         };
 
         normalModuleFactory.hooks.parser
@@ -223,6 +277,11 @@ export class ClientRSCPlugin {
           .for("javascript/dynamic")
           .tap("HarmonyModulesPlugin", handler);
 
+        /**
+         *
+         * @param {import("webpack").Chunk} chunk
+         * @param {Set<string>} set
+         */
         const requirementsHandler = (chunk, set) => {
           set.add(RuntimeGlobals.moduleFactoriesAddOnly);
           set.add(RuntimeGlobals.hasOwnProperty);
@@ -239,6 +298,10 @@ export class ClientRSCPlugin {
   }
 }
 
+/**
+ * @param {string} cwd
+ * @param {string} resource
+ */
 function exposedNameFromResource(cwd, resource) {
   const relative = path.relative(cwd, resource).replace(/\\/g, "/");
   return "./" + relative.replace(/\.\.\//g, "__/");
