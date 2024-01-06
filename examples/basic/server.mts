@@ -5,7 +5,7 @@ import { cors } from "hono/cors";
 
 import { createRequestHandler } from "framework";
 
-import { routes } from "./dist/server/main.js";
+import server from "./dist/server/main.js";
 
 const app = new Hono();
 
@@ -16,7 +16,10 @@ app.use(
 );
 
 app.all("*", async (c) => {
-  const handler = createRequestHandler(routes);
+  const handler = createRequestHandler(
+    // @ts-expect-error - It's not a static module
+    server.routes
+  );
 
   return handler(c.req.raw);
 });

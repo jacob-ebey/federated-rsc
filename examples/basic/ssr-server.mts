@@ -1,12 +1,12 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 
-import { handler } from "./dist/ssr/main.js";
+import ssr from "./dist/ssr/main.js";
 
 const app = new Hono();
 
 app.use("*", (c) => {
-  return handler(c.req.raw, "http://localhost:3001", [
+  return ssr.handler(c.req.raw, "http://localhost:3001", [
     "http://localhost:3001/dist/browser/main.js",
   ]);
 });

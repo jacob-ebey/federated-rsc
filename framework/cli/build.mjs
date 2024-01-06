@@ -103,7 +103,7 @@ export async function build() {
     resolve: { alias: { ...alias, "#routes": routesPath }, extensions },
     output: {
       library: {
-        type: "commonjs-static",
+        type: "commonjs-module",
       },
       path: path.resolve("./dist/server"),
     },
@@ -152,7 +152,7 @@ export async function build() {
     resolve: { alias, extensions },
     output: {
       library: {
-        type: "commonjs-static",
+        type: "commonjs-module",
       },
       path: path.resolve("./dist/ssr"),
     },
@@ -174,7 +174,7 @@ export async function build() {
         clientModules,
         cwd,
         rsdResource: rsdSsrResource,
-        libraryType: "commonjs-static",
+        libraryType: "commonjs-module",
         containerName,
         howToLoad: `commonjs ./${containerName}.js`,
         shared: {
