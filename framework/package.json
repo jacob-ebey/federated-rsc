@@ -32,6 +32,14 @@
       "types": "./dist/framework.webpack.d.ts",
       "default": "./dist/framework.webpack.js"
     },
+    "./webpack/plugins": {
+      "types": "./dist/webpack.plugins.d.ts",
+      "default": "./dist/webpack.plugins.js"
+    },
+    "./webpack/server-loader": {
+      "types": "./dist/webpack.server-loader.d.ts",
+      "default": "./dist/webpack.server-loader.js"
+    },
     "./entry/browser": "./entry/browser.tsx",
     "./entry/ssr": "./entry/ssr.tsx"
   },
@@ -48,6 +56,7 @@
     "react-dom": "0.0.0-experimental-c5b937576-20231219",
     "react-server-dom-webpack": "0.0.0-experimental-c5b937576-20231219",
     "webpack": "^5.89.0",
+    "webpackbar": "^6.0.0",
     "webpack-node-externals": "^3.0.0",
     "webpack-sources": "^3.2.3",
     "webpack-virtual-modules": "^0.6.1"

@@ -2,7 +2,7 @@ import * as stream from "node:stream";
 
 import * as React from "react";
 // @ts-expect-error - no types
-import RSD from "react-server-dom-webpack/server.node";
+import RSD from "react-server-dom-webpack/server";
 import {
   createStaticHandler,
   type AgnosticDataRouteObject,

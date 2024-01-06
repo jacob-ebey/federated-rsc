@@ -1,11 +1,15 @@
 import * as path from "node:path";
 
+import type * as webpack from "webpack";
 import oxc from "@oxidation-compiler/napi";
 
 /**
  * @type {import("webpack").LoaderDefinitionFunction}
  */
-export default async function (source) {
+export default async function (
+  this: webpack.LoaderContext<{ containerName: string; cwd: string }>,
+  source: string
+) {
   const cb = this.async();
   const resourcePath = this.resourcePath;
   const { containerName, cwd } = this.getOptions();
@@ -18,7 +22,12 @@ export default async function (source) {
   cb(null, source);
 }
 
-async function parseRSCMetadata(source, filePath, cwd, containerName) {
+async function parseRSCMetadata(
+  source: string,
+  filePath: string,
+  cwd: string,
+  containerName: string
+) {
   let parseResult = await oxc.parseAsync(source, {
     sourceFilename: filePath,
     sourceType: "module",
@@ -45,7 +54,7 @@ async function parseRSCMetadata(source, filePath, cwd, containerName) {
     return {
       useClient: false,
       useServer: false,
-    };
+    } as const;
   }
 
   if (useClient && useServer) {
@@ -102,15 +111,23 @@ async function parseRSCMetadata(source, filePath, cwd, containerName) {
     useClient,
     useServer,
     moduleExports,
-  };
+  } as
+    | { useClient: true; useServer: false; moduleExports: typeof moduleExports }
+    | {
+        useClient: false;
+        useServer: true;
+        moduleExports: typeof moduleExports;
+      };
 }
 
-function exposedNameFromResource(cwd, resource) {
+function exposedNameFromResource(cwd: string, resource: string) {
   const relative = path.relative(cwd, resource).replace(/\\/g, "/");
   return "./" + relative.replace(/\.\.\//g, "__/");
 }
 
-function createClientModule(moduleExports) {
+function createClientModule(
+  moduleExports: Array<{ publicName: string; identifier: string }>
+) {
   let code = "'use client';\n";
 
   let seen = new Set();

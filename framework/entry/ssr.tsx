@@ -1,10 +1,9 @@
 import * as stream from "node:stream";
 
 import * as React from "react";
+import RDS from "react-dom/server";
 // @ts-expect-error - no types
-import RDS from "react-dom/server.node";
-// @ts-expect-error - no types
-import RSD from "react-server-dom-webpack/client.node";
+import RSD from "react-server-dom-webpack/client";
 
 import { InlinePayload } from "framework/ssr";
 
@@ -107,12 +106,12 @@ export async function handler(
             )
           );
         },
-        onShellError(error: Error) {
+        onShellError(error) {
           if (!shellSent) {
             reject(error);
           }
         },
-        onError(error: Error) {
+        onError(error) {
           if (shellSent) return;
           console.error(error);
         },
