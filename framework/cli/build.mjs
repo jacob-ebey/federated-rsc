@@ -1,7 +1,7 @@
 import { createRequire } from "node:module";
 import * as fsp from "node:fs/promises";
 import * as path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 import webpack from "webpack";
 import nodeExternals from "webpack-node-externals";
@@ -19,11 +19,16 @@ export async function build() {
   const browserEntry = undefined;
   const ssrEntry = undefined;
   const generatedRoutes = undefined;
-  const containerName = "client_modules";
 
+  const webpackConfigPath = await findFileIfExists(cwd, [
+    "webpack.config.mjs",
+    "webpack.config.js",
+    "webpack.config.cjs",
+  ]);
   const pkgJson = JSON.parse(
     await fsp.readFile(path.resolve(cwd, "package.json"), "utf8")
   );
+  const containerName = snakeCase(pkgJson.name);
 
   const rsdBrowserResource =
     // @ts-expect-error - this is undefined sometimes for some reason
@@ -84,7 +89,8 @@ export async function build() {
   await fsp.writeFile(routesPath, generated, "utf8");
 
   const clientModules = new Set();
-  const serverStats = await runWebpack({
+  const serverStats = await runWebpack(webpackConfigPath, {
+    name: "server",
     devtool,
     mode,
     entry: serverEntry,
@@ -132,7 +138,8 @@ export async function build() {
       ssrEntryImport = "./" + ssrEntryImport;
     }
   }
-  const ssrStats = await runWebpack({
+  const ssrStats = await runWebpack(webpackConfigPath, {
+    name: "ssr",
     devtool,
     mode,
     entry: bootstrapSsrPath,
@@ -186,7 +193,8 @@ export async function build() {
       browserEntryImport = "./" + browserEntryImport;
     }
   }
-  const browserStats = await runWebpack({
+  const browserStats = await runWebpack(webpackConfigPath, {
+    name: "browser",
     devtool,
     mode,
     entry: bootstrapBrowserPath,
@@ -226,11 +234,36 @@ export async function build() {
 
 /**
  *
- * @param {webpack.Configuration} config
+ * @param {string | undefined} webpackConfigPath
+ * @param {webpack.Configuration & { name: "server" | "ssr" | "browser" }} config
  * @returns
  */
-function runWebpack(config) {
-  return new Promise((resolve, reject) => {
+function runWebpack(webpackConfigPath, config) {
+  return new Promise(async (resolve, reject) => {
+    const name = config.name;
+    if (webpackConfigPath) {
+      try {
+        const webpackConfig = await import(
+          pathToFileURL(webpackConfigPath).href
+        );
+        /** @type {import("framework/webpack").ConfigFunction | undefined} */
+        const configFunc =
+          typeof webpackConfig.default === "function"
+            ? webpackConfig.default
+            : typeof webpackConfig === "function"
+            ? webpackConfig
+            : undefined;
+        if (configFunc) {
+          let newConfig =
+            (await configFunc(config, {
+              build: name,
+            })) || config;
+          config = Object.assign(newConfig, { name });
+        }
+      } catch (err) {
+        return reject(err);
+      }
+    }
     webpack(config, (err, stats) => {
       if (err) {
         return reject(err);
@@ -244,4 +277,38 @@ function runWebpack(config) {
       resolve(stats);
     });
   });
+}
+
+/**
+ * @param {string} str
+ */
+function snakeCase(str) {
+  return str
+    .replace(/\W+/g, " ")
+    .split(/ |\B(?=[A-Z])/)
+    .map((word) => word.toLowerCase())
+    .join("_");
+}
+
+/**
+ *
+ * @param {string} dir
+ * @param {string[]} names
+ */
+async function findFileIfExists(dir, names) {
+  for (const name of names) {
+    const file = path.resolve(dir, name);
+    try {
+      const stats = await fsp.stat(file);
+      if (stats.isFile()) {
+        return file;
+      }
+    } catch (err) {
+      // @ts-expect-error
+      if (err.code !== "ENOENT") {
+        throw err;
+      }
+    }
+  }
+  return undefined;
 }

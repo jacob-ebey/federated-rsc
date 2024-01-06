@@ -28,6 +28,10 @@
       "types": "./dist/framework.ssr.d.ts",
       "default": "./dist/framework.ssr.js"
     },
+    "./webpack": {
+      "types": "./dist/framework.webpack.d.ts",
+      "default": "./dist/framework.webpack.js"
+    },
     "./entry/browser": "./entry/browser.tsx",
     "./entry/ssr": "./entry/ssr.tsx"
   },
