@@ -242,25 +242,40 @@ export class ClientRSCPlugin {
 
               if (mod.resource !== this.rsdResource) return;
 
-              console.log("Attaching RSC remotes to build");
-
-              if (clientRSCContainer._options.remotes) {
-                for (const key of Object.keys(
-                  clientRSCContainer._options.remotes
-                )) {
-                  const name = `rsc/remote/client/${key}`;
-                  const block = new compiler.webpack.AsyncDependenciesBlock(
-                    {
-                      name,
-                    },
-                    null,
-                    name
-                  );
-                  block.addDependency(new ContainerReferenceDependency(key));
-
-                  mod.addBlock(block);
+              const plugins = [clientRSCContainer];
+              for (const plugin of compiler.options.plugins) {
+                if (
+                  plugin &&
+                  (plugin.constructor.name === "ModuleFederationPlugin" ||
+                    plugin.constructor.name === "UniversalFederationPlugin")
+                ) {
+                  plugins.push(plugin);
                 }
               }
+
+              let attached = 0;
+              for (const plugin of plugins) {
+                if (plugin._options.remotes) {
+                  for (const key of Object.keys(plugin._options.remotes)) {
+                    attached++;
+                    const name = `rsc/remote/client/${key}`;
+                    const block = new compiler.webpack.AsyncDependenciesBlock(
+                      {
+                        name,
+                      },
+                      null,
+                      name
+                    );
+                    block.addDependency(new ContainerReferenceDependency(key));
+
+                    mod.addBlock(block);
+                  }
+                }
+              }
+
+              console.log(
+                `Attached ${attached} remotes to react-server-dom-webpack`
+              );
             }
           );
         };

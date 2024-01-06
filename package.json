@@ -2,6 +2,6 @@
   "private": true,
   "scripts": {
     "build": "pnpm -r build",
-    "start": "pnpm --filter @example/basic start"
+    "start": "pnpm --filter @example/* start"
   }
 }

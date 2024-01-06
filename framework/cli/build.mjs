@@ -15,7 +15,7 @@ export async function build() {
   const cwd = process.cwd();
   const routesDir = path.resolve(cwd, "app/routes");
   const devtool = "source-map";
-  const mode = "development";
+  const mode = "production";
   const browserEntry = undefined;
   const ssrEntry = undefined;
   const generatedRoutes = undefined;
@@ -67,7 +67,7 @@ export async function build() {
   const extensions = [".ts", ".tsx", ".js", ".jsx"];
 
   const esbuildLoader = {
-    loader: "esbuild-loader",
+    loader: fileURLToPath(import.meta.resolve("esbuild-loader")),
     options: {
       loader: "tsx",
       target: "es2020",
@@ -257,6 +257,7 @@ function runWebpack(webpackConfigPath, config) {
           let newConfig =
             (await configFunc(config, {
               build: name,
+              webpack,
             })) || config;
           config = Object.assign(newConfig, { name });
         }

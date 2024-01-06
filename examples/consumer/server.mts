@@ -14,7 +14,6 @@ app.use(
   cors({ origin: "*", allowMethods: ["HEAD", "GET"] }),
   serveStatic()
 );
-app.use("/dist/ssr/*", serveStatic());
 
 app.all("*", async (c) => {
   const handler = createRequestHandler(
@@ -28,7 +27,7 @@ app.all("*", async (c) => {
 serve(
   {
     ...app,
-    port: 3001,
+    port: 4001,
   },
   (info) => {
     console.log(`RSC listening on http://localhost:${info.port}`);
