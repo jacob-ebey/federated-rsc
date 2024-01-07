@@ -6,7 +6,7 @@ import { type AgnosticDataRouteObject } from "@remix-run/router";
 
 export { type Params } from "@remix-run/router";
 
-import { createStaticRequestHandler } from "framework";
+import { createStaticRequestHandler } from "framework/server.shared";
 
 export function createRequestHandler(routes: AgnosticDataRouteObject[]) {
   return async (request: Request) => {

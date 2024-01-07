@@ -35,9 +35,18 @@
       },
       "default": "./server-only.js"
     },
+    "./server.shared": {
+      "types": "./dist/framework.server.shared.d.ts",
+      "default": "./dist/framework.server.shared.js"
+    },
     "./ssr": {
       "types": "./dist/framework.ssr.d.ts",
       "default": "./dist/framework.ssr.js"
+    },
+    "./react.client": {
+      "types": "./dist/framework.client.browser.d.ts",
+      "browser": "./dist/framework.client.browser.js",
+      "default": "./dist/framework.client.node.js"
     },
     "./webpack": {
       "types": "./dist/framework.webpack.d.ts",
@@ -52,14 +61,8 @@
       "default": "./dist/webpack.server-loader.js"
     },
     "./entry/browser": "./entry/browser.tsx",
+    "./entry/server": "./entry/server.tsx",
     "./entry/ssr": "./entry/ssr.tsx"
-  },
-  "imports": {
-    "#react.client": {
-      "types": "./dist/framework.client.browser.d.ts",
-      "browser": "./dist/framework.client.browser.js",
-      "default": "./dist/framework.client.node.js"
-    }
   },
   "scripts": {
     "build": "tsc -p tsconfig.lib.json"

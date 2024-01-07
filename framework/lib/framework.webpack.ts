@@ -1,5 +1,4 @@
 import * as fsp from "node:fs/promises";
-import { createRequire } from "node:module";
 import * as path from "node:path";
 import { pathToFileURL } from "node:url";
 
@@ -161,15 +160,14 @@ async function baseServerConfig({
   mode: "development" | "production";
   routesDir: string;
 }): Promise<webpack.Configuration & { name: "server" }> {
+  const bootstrapPath = path.resolve(cwd, "___bootstrap_serverr.js");
+  const routesPath = path.resolve(cwd, "___routes_server.js");
+
+  let serverEntryImport = "framework/entry/server";
+
   routesDir = path.resolve(cwd, routesDir || "app/routes");
 
   // TODO: Make this a virtual module, but for now this is nice for debugging the output still.
-  const routesPath = path.resolve(cwd, "./routes.ts");
-  let serverEntry = path.relative(cwd, path.resolve(cwd, routesPath));
-  if (!serverEntry.startsWith(".")) {
-    serverEntry = "./" + serverEntry;
-  }
-
   const generated = await generateServerRoutes(routesPath, routesDir);
 
   await fsp.mkdir(path.dirname(path.resolve(routesPath)), { recursive: true });
@@ -179,17 +177,24 @@ async function baseServerConfig({
     name: "server",
     devtool,
     mode,
-    entry: serverEntry,
+    entry: bootstrapPath,
     target: "node18",
     externals: [
       nodeExternals({
-        allowlist: ["framework", "framework/client"],
+        allowlist: [
+          "framework",
+          "framework/server",
+          "framework/server.shared",
+          "framework/client",
+          "framework/client.shared",
+          "framework/entry/server",
+        ],
       }),
     ],
     resolve: {
       alias: { "#routes": routesPath },
       extensions,
-      conditionNames: ["react-server", "node"],
+      conditionNames: ["react-server", "webpack", "node", "require", "default"],
     },
     output: {
       library: {
@@ -215,6 +220,12 @@ async function baseServerConfig({
       ],
     },
     plugins: [
+      new VirtualModulesPlugin({
+        [bootstrapPath]: `export const handler = (...args) => import(${JSON.stringify(
+          serverEntryImport
+        )}).then(m => m.handler(...args));`,
+        [routesPath]: generated,
+      }),
       new ServerRSCPlugin(clientModules),
       !!process.env.PROFILE &&
         new WebpackBar({
@@ -253,6 +264,9 @@ async function baseSSRConfig({
   const rsdResource = require.resolve("react-server-dom-webpack/client.node");
 
   return {
+    optimization: {
+      minimize: false,
+    },
     name: "ssr",
     devtool,
     mode,
@@ -261,14 +275,20 @@ async function baseSSRConfig({
     externals: [
       nodeExternals({
         allowlist: [
+          "framework",
           "framework/client",
+          "framework/client.shared",
           "framework/ssr",
+          "framework/react.client",
           "framework/entry/ssr",
           "react-server-dom-webpack/client",
         ],
       }),
     ],
-    resolve: { extensions },
+    resolve: {
+      conditionNames: ["webpack", "node", "require", "default"],
+      extensions,
+    },
     output: {
       library: {
         type: "commonjs-module",

@@ -52,3 +52,5 @@ export async function Component({ params }: { params: Params<"*"> }) {
     </div>
   );
 }
+
+Component.api = true;

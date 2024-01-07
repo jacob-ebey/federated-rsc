@@ -5,7 +5,7 @@ import type * as webpack from "webpack";
 import extractUrlAndGlobal from "webpack/lib/util/extractUrlAndGlobal";
 import { RawSource } from "webpack-sources";
 import {
-  StreamingTargetPlugin,
+  // StreamingTargetPlugin,
   UniversalFederationPlugin,
 } from "@module-federation/node";
 
@@ -95,11 +95,11 @@ export class ClientRSCPlugin {
       );
     clientRSCContainer.apply(compiler);
 
-    if (isServer) {
-      new StreamingTargetPlugin({
-        // name: this.containerName,
-      }).apply(compiler);
-    }
+    // if (isServer) {
+    //   new StreamingTargetPlugin({
+    //     // name: this.containerName,
+    //   }).apply(compiler);
+    // }
 
     class ContainerReferenceDependency extends compiler.webpack.dependencies
       .ModuleDependency {
@@ -193,38 +193,38 @@ export class ClientRSCPlugin {
         //   }
         // });
 
-        compilation.hooks.optimizeModules.tap("MyPlugin", (modules) => {
-          for (const mod of modules as webpack.NormalModule[]) {
-            if (
-              mod.userRequest &&
-              mod.userRequest.startsWith("webpack/container/")
-            ) {
-              // create a new module with the id of the userRequest
-            }
-          }
-        });
+        // compilation.hooks.optimizeModules.tap("MyPlugin", (modules) => {
+        //   for (const mod of modules as webpack.NormalModule[]) {
+        //     if (
+        //       mod.userRequest &&
+        //       mod.userRequest.startsWith("webpack/container/")
+        //     ) {
+        //       // create a new module with the id of the userRequest
+        //     }
+        //   }
+        // });
 
         compilation.hooks.optimizeModuleIds.tap("MyPlugin", (modules) => {
           for (const mod of modules as webpack.NormalModule[]) {
+            console.log({ userRequest: mod.userRequest });
             if (
               mod.userRequest &&
-              (mod.userRequest.startsWith("rsc/remote/client/") ||
-                mod.userRequest.startsWith("webpack/container/"))
+              mod.userRequest.startsWith("webpack/container/")
             ) {
               compilation.chunkGraph.setModuleId(mod, mod.userRequest);
             }
           }
         });
-        // compilation.hooks.optimizeChunks.tap("MyPlugin", (chunks) => {
-        //   for (const chunk of chunks) {
-        //     if (
-        //       chunk.name &&
-        //       chunk.getModules().some((mod) => mod.type === "remote-module")
-        //     ) {
-        //       chunk.id = chunk.name;
-        //     }
-        //   }
-        // });
+        compilation.hooks.optimizeChunks.tap("MyPlugin", (chunks) => {
+          for (const chunk of chunks) {
+            if (
+              chunk.name &&
+              chunk.getModules().some((mod) => mod.type === "remote-module")
+            ) {
+              chunk.id = chunk.name;
+            }
+          }
+        });
 
         compilation.dependencyFactories.set(
           ContainerReferenceDependency,

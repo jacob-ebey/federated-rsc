@@ -2,7 +2,33 @@
 
 import * as React from "react";
 
-import { createFromReadableStream } from "#react.client";
+import { createFromReadableStream } from "framework/react.client";
+
+interface RouterContext {
+  routes: Record<string, React.ReactElement>;
+}
+
+const routerContext = React.createContext<null | RouterContext>(null);
+
+export function Route({ id }: { id: string }) {
+  const context = React.useContext(routerContext);
+  if (!context) throw new Error("No router context found");
+  return context.routes[id] || null;
+}
+
+export function Router({
+  children,
+  routes,
+}: {
+  children: React.ReactNode;
+  routes: Record<string, React.ReactElement>;
+}) {
+  return (
+    <routerContext.Provider value={{ routes }}>
+      {children}
+    </routerContext.Provider>
+  );
+}
 
 export type PromiseStreamItem<T> = null | { head: T; tail: PromiseStream<T> };
 export type PromiseStream<T> = Promise<PromiseStreamItem<T>>;
