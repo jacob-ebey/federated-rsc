@@ -39,11 +39,21 @@ export async function ServerComponent({ url }: { url: string | URL }) {
   if (!response.body) {
     throw new Error("Expected a body");
   }
-
   return (
     <StreamReader
       cache={{ current: null }}
-      promiseStream={toPromiseStream(response.body)}
+      promiseStream={toPromiseStream(
+        response.body.pipeThrough(
+          new TransformStream({
+            transform(chunk, controller) {
+              // Uint8Array -> base64 string
+              controller.enqueue(
+                btoa(String.fromCharCode(...new Uint8Array(chunk))) + "\n"
+              );
+            },
+          })
+        )
+      )}
     />
   );
 }

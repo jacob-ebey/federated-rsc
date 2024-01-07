@@ -2,7 +2,7 @@
 
 import * as React from "react";
 
-export function Counter() {
+function CounterConsumer() {
   const [count, setCount] = React.useState(0);
   return (
     <div>
@@ -12,3 +12,5 @@ export function Counter() {
     </div>
   );
 }
+
+export { CounterConsumer as Counter };

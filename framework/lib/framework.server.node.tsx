@@ -80,6 +80,7 @@ export function createRequestHandler(routes: AgnosticDataRouteObject[]) {
           }
         ),
         {
+          identifierPrefix: Date.now().toString(36),
           onError(error: Error) {
             console.error(error);
           },

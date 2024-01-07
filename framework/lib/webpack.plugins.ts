@@ -62,36 +62,37 @@ export class ClientRSCPlugin {
 
   apply(compiler: webpack.Compiler) {
     const isServer = this.options.libraryType !== "var";
-    const clientRSCContainer = new UniversalFederationPlugin(
-      {
-        isServer,
-        name: this.options.containerName,
-        exposes: Array.from(this.options.clientModules).reduce(
-          (p, c) =>
-            Object.assign(p, {
-              [exposedNameFromResource(this.options.cwd, c)]: c,
-            }),
-          {}
-        ),
-        remotes: {
-          [this.options.containerName]: this.options.howToLoad,
-        },
-        shared: this.options.shared,
-        library: this.options.libraryType
-          ? {
-              name:
-                this.options.libraryType === "var"
-                  ? this.options.containerName
-                  : undefined,
-              type: this.options.libraryType,
-            }
-          : undefined,
-      },
-      {
-        ModuleFederationPlugin:
-          compiler.webpack.container.ModuleFederationPlugin,
-      }
-    );
+    const clientRSCContainer =
+      new compiler.webpack.container.ModuleFederationPlugin(
+        {
+          // isServer,
+          name: this.options.containerName,
+          exposes: Array.from(this.options.clientModules).reduce(
+            (p, c) =>
+              Object.assign(p, {
+                [exposedNameFromResource(this.options.cwd, c)]: c,
+              }),
+            {}
+          ),
+          remotes: {
+            [this.options.containerName]: this.options.howToLoad,
+          },
+          shared: this.options.shared,
+          library: this.options.libraryType
+            ? {
+                name:
+                  this.options.libraryType === "var"
+                    ? this.options.containerName
+                    : undefined,
+                type: this.options.libraryType,
+              }
+            : undefined,
+        }
+        // {
+        //   ModuleFederationPlugin:
+        //     compiler.webpack.container.ModuleFederationPlugin,
+        // }
+      );
     clientRSCContainer.apply(compiler);
 
     if (isServer) {
@@ -124,18 +125,28 @@ export class ClientRSCPlugin {
         const runtimeTemplate = this.compilation.runtimeTemplate;
         return Template.asString([
           `var ogEnsureChunk = ${RuntimeGlobals.ensureChunk};`,
+          "var seenContainers = new Set();",
           "// this function allows you to load federated modules through react server component decoding",
           `${RuntimeGlobals.ensureChunk} = ${runtimeTemplate.basicFunction(
             ["chunkId"],
             [
               "if (typeof chunkId === 'string' && chunkId.startsWith('rsc/remote/client/')) {",
               Template.indent([
-                "var splitIndex = chunkId.indexOf(':', 18);",
-                "var remote = chunkId.slice(0, splitIndex);",
-                "var remoteModuleId = remote.slice(18);",
-                "var [exposed] = chunkId.slice(splitIndex + 1).split('#');",
-                "var promises = [];",
-                `${RuntimeGlobals.ensureChunkHandlers}.remotes(chunkId, promises);`,
+                `let existing = ${RuntimeGlobals.moduleCache}[chunkId];`,
+                "if (existing)",
+                "if (existing.loaded) return Promise.resolve();",
+                "else existing.promise;",
+                "let splitIndex = chunkId.indexOf(':', 18);",
+                "let remote = chunkId.slice(0, splitIndex);",
+                "let remoteModuleId = remote.slice(18);",
+                "let [exposed] = chunkId.slice(splitIndex + 1).split('#');",
+                "let promises = [ogEnsureChunk(remote)];",
+                `${RuntimeGlobals.moduleCache}[chunkId] = {
+                  id: chunkId,
+                  loaded: false,
+                  exports: {},
+                };`,
+                // `${RuntimeGlobals.ensureChunkHandlers}.remotes(remote, promises);`,
                 `return Promise.all(promises).then(${runtimeTemplate.basicFunction(
                   ["r"],
                   [
@@ -148,14 +159,17 @@ export class ClientRSCPlugin {
                   ["factory"],
                   [
                     "var mod = factory();",
+                    // `console.log({mod, exports: ${RuntimeGlobals.moduleCache}[chunkId].exports});`,
+                    `Object.assign(${RuntimeGlobals.moduleCache}[chunkId].exports, mod);`,
                     // TODO: if HMR is an issue, make this a Proxy to the underlying module
-                    `${RuntimeGlobals.moduleCache}[chunkId] = {
-                      id: chunkId,
-                      loaded: true,
-                      exports: mod,
-                    };`,
+                    // `${RuntimeGlobals.moduleCache}[chunkId] = {
+                    //   id: chunkId,
+                    //   loaded: true,
+                    //   exports: mod,
+                    // };`,
+                    "console.log({chunkId,Counter:mod.Counter});",
                   ]
-                )})`,
+                )});`,
               ]),
               "}",
               "return ogEnsureChunk(chunkId);",
@@ -168,16 +182,49 @@ export class ClientRSCPlugin {
     compiler.hooks.compilation.tap(
       "MyPlugin",
       (compilation, { normalModuleFactory }) => {
+        // compilation.hooks.optimizeChunkIds.tap("MyPlugin", (chunks) => {
+        //   for (const chunk of chunks) {
+        //     if (chunk.id === "_example_basic") {
+        //       console.log(chunk);
+        //     }
+        //     if (chunk.name && chunk.name.startsWith("rsc/remote/client/")) {
+        //       chunk.id = chunk.name;
+        //     }
+        //   }
+        // });
+
+        compilation.hooks.optimizeModules.tap("MyPlugin", (modules) => {
+          for (const mod of modules as webpack.NormalModule[]) {
+            if (
+              mod.userRequest &&
+              mod.userRequest.startsWith("webpack/container/")
+            ) {
+              // create a new module with the id of the userRequest
+            }
+          }
+        });
+
         compilation.hooks.optimizeModuleIds.tap("MyPlugin", (modules) => {
           for (const mod of modules as webpack.NormalModule[]) {
             if (
               mod.userRequest &&
-              mod.userRequest.startsWith("webpack/container/reference/")
+              (mod.userRequest.startsWith("rsc/remote/client/") ||
+                mod.userRequest.startsWith("webpack/container/"))
             ) {
               compilation.chunkGraph.setModuleId(mod, mod.userRequest);
             }
           }
         });
+        // compilation.hooks.optimizeChunks.tap("MyPlugin", (chunks) => {
+        //   for (const chunk of chunks) {
+        //     if (
+        //       chunk.name &&
+        //       chunk.getModules().some((mod) => mod.type === "remote-module")
+        //     ) {
+        //       chunk.id = chunk.name;
+        //     }
+        //   }
+        // });
 
         compilation.dependencyFactories.set(
           ContainerReferenceDependency,
@@ -202,7 +249,7 @@ export class ClientRSCPlugin {
                 (plugin.constructor.name === "ModuleFederationPlugin" ||
                   plugin.constructor.name === "UniversalFederationPlugin")
               ) {
-                // @ts-expect-error
+                //// @ts-expect-error
                 plugins.push(plugin);
               }
             }

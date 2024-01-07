@@ -11,14 +11,27 @@ export function StreamReader({
   promiseStream,
   cache,
 }: {
-  promiseStream: PromiseStream<Uint8Array>;
+  promiseStream: PromiseStream<string>;
   cache: { current: null | Promise<React.JSX.Element> };
 }) {
   const element = React.use(
     (cache.current =
       cache.current ||
       (createFromReadableStream(
-        fromPromiseStream(promiseStream)
+        fromPromiseStream(promiseStream).pipeThrough(
+          new TransformStream({
+            transform(chunk, controller) {
+              // base64 string -> Uint8Array
+              controller.enqueue(
+                new Uint8Array(
+                  atob(chunk as string)
+                    .split("")
+                    .map((c) => c.charCodeAt(0))
+                )
+              );
+            },
+          })
+        )
       ) as Promise<React.JSX.Element>))
   );
 
