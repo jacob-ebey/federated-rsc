@@ -1,4 +1,4 @@
-import { ServerComponent } from "framework/server";
+import { ServerComponent } from "framework";
 
 import { Counter } from "../../components/counter";
 

@@ -183,10 +183,14 @@ async function baseServerConfig({
     target: "node18",
     externals: [
       nodeExternals({
-        allowlist: ["framework/server", "framework/client"],
+        allowlist: ["framework", "framework/client"],
       }),
     ],
-    resolve: { alias: { "#routes": routesPath }, extensions },
+    resolve: {
+      alias: { "#routes": routesPath },
+      extensions,
+      conditionNames: ["react-server", "node"],
+    },
     output: {
       library: {
         type: "commonjs-module",
@@ -259,7 +263,6 @@ async function baseSSRConfig({
         allowlist: [
           "framework/client",
           "framework/ssr",
-          "framework/entry/browser",
           "framework/entry/ssr",
           "react-server-dom-webpack/client",
         ],

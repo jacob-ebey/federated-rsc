@@ -4,7 +4,8 @@
   "files": [
     "bin",
     "cli",
-    "dist"
+    "dist",
+    "entry"
   ],
   "bin": {
     "remix": "./bin/remix.cjs"
@@ -13,8 +14,11 @@
   "types": "dist/framework.server.node.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/framework.server.node.d.ts",
-      "default": "./dist/framework.server.node.js"
+      "types": "./dist/framework.d.ts",
+      "react-server": {
+        "default": "./dist/framework.js"
+      },
+      "default": "./server-only.js"
     },
     "./browser": {
       "types": "./dist/framework.browser.d.ts",
@@ -25,8 +29,11 @@
       "default": "./dist/framework.client.js"
     },
     "./server": {
-      "types": "./dist/framework.server.shared.d.ts",
-      "default": "./dist/framework.server.shared.js"
+      "types": "./dist/framework.server.node.d.ts",
+      "react-server": {
+        "default": "./dist/framework.server.node.js"
+      },
+      "default": "./server-only.js"
     },
     "./ssr": {
       "types": "./dist/framework.ssr.d.ts",
