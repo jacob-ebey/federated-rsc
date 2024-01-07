@@ -89,7 +89,6 @@ export async function handler(
         bootstrapScripts,
         onShellReady() {
           shellSent = true;
-          console.log("Shell Ready");
           resolve(
             new Response(
               stream.Readable.toWeb(

@@ -24,6 +24,10 @@
       "types": "./dist/framework.client.d.ts",
       "default": "./dist/framework.client.js"
     },
+    "./server": {
+      "types": "./dist/framework.server.shared.d.ts",
+      "default": "./dist/framework.server.shared.js"
+    },
     "./ssr": {
       "types": "./dist/framework.ssr.d.ts",
       "default": "./dist/framework.ssr.js"
@@ -43,6 +47,13 @@
     "./entry/browser": "./entry/browser.tsx",
     "./entry/ssr": "./entry/ssr.tsx"
   },
+  "imports": {
+    "#react.client": {
+      "types": "./dist/framework.client.browser.d.ts",
+      "browser": "./dist/framework.client.browser.js",
+      "default": "./dist/framework.client.node.js"
+    }
+  },
   "scripts": {
     "build": "tsc -p tsconfig.lib.json"
   },
@@ -52,9 +63,9 @@
     "@remix-run/router": "^1.14.1",
     "esbuild-loader": "^4.0.2",
     "fast-glob": "^3.3.2",
-    "react": "0.0.0-experimental-c5b937576-20231219",
-    "react-dom": "0.0.0-experimental-c5b937576-20231219",
-    "react-server-dom-webpack": "0.0.0-experimental-c5b937576-20231219",
+    "react": "0.0.0-experimental-1d5667a12-20240102",
+    "react-dom": "0.0.0-experimental-1d5667a12-20240102",
+    "react-server-dom-webpack": "0.0.0-experimental-1d5667a12-20240102",
     "webpack": "^5.89.0",
     "webpackbar": "^6.0.0",
     "webpack-node-externals": "^3.0.0",

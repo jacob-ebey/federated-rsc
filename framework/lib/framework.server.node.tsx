@@ -9,7 +9,7 @@ import {
   type Params,
 } from "@remix-run/router";
 
-export * from "./framework.server.shared";
+export { type Params } from "@remix-run/router";
 
 export function createRequestHandler(routes: AgnosticDataRouteObject[]) {
   return async (request: Request) => {
@@ -30,7 +30,7 @@ export function createRequestHandler(routes: AgnosticDataRouteObject[]) {
             Component?: React.FunctionComponent<{
               params: Params<string>;
               children: React.ReactNode;
-            }> & { standalone?: boolean };
+            }>;
           };
         }
       >;

@@ -1,8 +1,9 @@
 import { type Params } from "framework";
 
+import { Counter } from "../../components/counter";
+
 export async function Component({ params }: { params: Params<"*"> }) {
   const query = params["*"];
-  console.log(params);
 
   if (!query) throw new Error("No query provided");
 
@@ -14,7 +15,7 @@ export async function Component({ params }: { params: Params<"*"> }) {
   const weather = await fetch(url.href).then((response) => response.json());
 
   return (
-    <div className="bg-white shadow-2xl p-6 rounded-2xl border-2 border-gray-50 w-full">
+    <div className="bg-white shadow-2xl p-6 rounded-2xl border-2 border-gray-50 w-full bg-blue-500">
       <div className="flex flex-col">
         <div>
           <h2 className="font-bold text-gray-600 text-center">
@@ -46,8 +47,8 @@ export async function Component({ params }: { params: Params<"*"> }) {
           </a>
         </div> */}
       </div>
+
+      <Counter />
     </div>
   );
 }
-
-Component.standalone = true;

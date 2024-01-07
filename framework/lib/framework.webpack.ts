@@ -53,8 +53,8 @@ export async function getWebpackConfig(
     mode: "development" | "production";
   }
 ): Promise<webpack.Configuration & { name: "server" | "ssr" | "browser" }> {
-  const devtool =
-    mode === "development" ? "source-map" : "source-map";
+  const devtool = false;
+  // mode === "development" ? "eval-cheap-source-map" : "source-map";
 
   const extensions = [".ts", ".tsx", ".js", ".jsx"];
 
@@ -155,7 +155,7 @@ async function baseServerConfig({
   clientModules: Set<string>;
   containerName: string;
   cwd: string;
-  devtool: string;
+  devtool: string | false;
   esbuildLoader: WebpackLoader;
   extensions: string[];
   mode: "development" | "production";
@@ -181,7 +181,11 @@ async function baseServerConfig({
     mode,
     entry: serverEntry,
     target: "node18",
-    externals: [nodeExternals()],
+    externals: [
+      nodeExternals({
+        allowlist: ["framework/server", "framework/client"],
+      }),
+    ],
     resolve: { alias: { "#routes": routesPath }, extensions },
     output: {
       library: {
@@ -192,8 +196,7 @@ async function baseServerConfig({
     module: {
       rules: [
         {
-          test: /\.m?[tj]sx?$/,
-          exclude: /node_modules/,
+          test: /\.[mc]?[tj]sx?$/,
           use: [
             {
               loader: require.resolve("framework/webpack/server-loader"),
@@ -233,7 +236,7 @@ async function baseSSRConfig({
   clientModules: Set<string>;
   containerName: string;
   cwd: string;
-  devtool: string;
+  devtool: string | false;
   esbuildLoader: WebpackLoader;
   extensions: string[];
   mode: "development" | "production";
@@ -272,8 +275,7 @@ async function baseSSRConfig({
     module: {
       rules: [
         {
-          test: /\.m?[tj]sx?$/,
-          exclude: /node_modules/,
+          test: /\.[mc]?[tj]sx?$/,
           use: [esbuildLoader],
         },
       ],
@@ -320,7 +322,7 @@ async function baseBrowserConfig({
   clientModules: Set<string>;
   containerName: string;
   cwd: string;
-  devtool: string;
+  devtool: string | false;
   esbuildLoader: WebpackLoader;
   extensions: string[];
   mode: "development" | "production";
@@ -347,8 +349,7 @@ async function baseBrowserConfig({
     module: {
       rules: [
         {
-          test: /\.m?[tj]sx?$/,
-          exclude: /node_modules/,
+          test: /\.[mc]?[tj]sx?$/,
           use: [esbuildLoader],
         },
       ],

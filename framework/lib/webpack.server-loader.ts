@@ -16,7 +16,7 @@ export default async function (
   const meta = await parseRSCMetadata(source, resourcePath, cwd, containerName);
 
   if (meta.useClient) {
-    return cb(null, createClientModule(meta.moduleExports));
+    source = createClientModule(meta.moduleExports);
   }
 
   cb(null, source);
@@ -65,6 +65,24 @@ async function parseRSCMetadata(
 
   let moduleExports = [];
   for (let node of program.body) {
+    // Commonjs static exports.xyz = ...
+    if (
+      node.type === "ExpressionStatement" &&
+      node.expression.type === "AssignmentExpression" &&
+      node.expression.operator === "=" &&
+      node.expression.left.type === "StaticMemberExpression" &&
+      node.expression.left.object.type === "IdentifierReference" &&
+      node.expression.left.object.name === "exports" &&
+      node.expression.left.property.type === "IdentifierName"
+    ) {
+      let name = node.expression.left.property.name;
+      moduleExports.push({
+        identifier,
+        localName: name,
+        publicName: name,
+      });
+    }
+
     // Handle FunctionDeclaration exports
     if (
       node.type === "ExportNamedDeclaration" &&
@@ -133,8 +151,9 @@ function createClientModule(
   let seen = new Set();
   for (const { publicName, identifier } of moduleExports) {
     if (seen.has(publicName)) {
-      throw new Error(`Duplicate export name: ${publicName}`);
+      continue;
     }
+    seen.add(publicName);
 
     const serverReference = `{
       $$typeof: Symbol.for('react.client.reference'),

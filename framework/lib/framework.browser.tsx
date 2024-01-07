@@ -17,9 +17,20 @@ export function hydrate() {
   addEventListener("rscready", hydrateInternal, { once: true });
 }
 
+function Root({ initialRoot }: { initialRoot: any }) {
+  return React.use(initialRoot) as React.JSX.Element;
+}
+
 async function hydrateInternal() {
-  const root = RSD.createFromReadableStream(__RSC__.stream);
+  const root = RSD.createFromReadableStream(__RSC__.stream, {
+    callServer: window.callServer,
+  });
   React.startTransition(() => {
-    hydrateRoot(document, root);
+    hydrateRoot(
+      document,
+      <React.StrictMode>
+        <Root initialRoot={root} />
+      </React.StrictMode>
+    );
   });
 }
