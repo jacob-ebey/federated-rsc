@@ -159,15 +159,7 @@ export class ClientRSCPlugin {
                   ["factory"],
                   [
                     "var mod = factory();",
-                    // `console.log({mod, exports: ${RuntimeGlobals.moduleCache}[chunkId].exports});`,
                     `Object.assign(${RuntimeGlobals.moduleCache}[chunkId].exports, mod);`,
-                    // TODO: if HMR is an issue, make this a Proxy to the underlying module
-                    // `${RuntimeGlobals.moduleCache}[chunkId] = {
-                    //   id: chunkId,
-                    //   loaded: true,
-                    //   exports: mod,
-                    // };`,
-                    "console.log({chunkId,Counter:mod.Counter});",
                   ]
                 )});`,
               ]),
@@ -182,31 +174,8 @@ export class ClientRSCPlugin {
     compiler.hooks.compilation.tap(
       "MyPlugin",
       (compilation, { normalModuleFactory }) => {
-        // compilation.hooks.optimizeChunkIds.tap("MyPlugin", (chunks) => {
-        //   for (const chunk of chunks) {
-        //     if (chunk.id === "_example_basic") {
-        //       console.log(chunk);
-        //     }
-        //     if (chunk.name && chunk.name.startsWith("rsc/remote/client/")) {
-        //       chunk.id = chunk.name;
-        //     }
-        //   }
-        // });
-
-        // compilation.hooks.optimizeModules.tap("MyPlugin", (modules) => {
-        //   for (const mod of modules as webpack.NormalModule[]) {
-        //     if (
-        //       mod.userRequest &&
-        //       mod.userRequest.startsWith("webpack/container/")
-        //     ) {
-        //       // create a new module with the id of the userRequest
-        //     }
-        //   }
-        // });
-
         compilation.hooks.optimizeModuleIds.tap("MyPlugin", (modules) => {
           for (const mod of modules as webpack.NormalModule[]) {
-            console.log({ userRequest: mod.userRequest });
             if (
               mod.userRequest &&
               mod.userRequest.startsWith("webpack/container/")
