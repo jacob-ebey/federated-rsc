@@ -11,14 +11,14 @@ export function StreamReader({
   promiseStream,
   cache,
 }: {
-  promiseStream: PromiseStream<string>;
+  promiseStream: PromiseStream<Uint8Array>;
   cache: { current: null | Promise<React.JSX.Element> };
 }) {
   const element = React.use(
     (cache.current =
       cache.current ||
       (createFromReadableStream(
-        fromPromiseStream(promiseStream).pipeThrough(createBase64DecodeStream())
+        fromPromiseStream(promiseStream)
       ) as Promise<React.JSX.Element>))
   );
 
@@ -40,25 +40,4 @@ function fromPromiseStream<T = any>(promise: PromiseStream<T>) {
       return go(promise);
     },
   });
-}
-
-function sleep(ms: number) {
-  return new Promise<void>((resolve) => setTimeout(resolve, ms));
-}
-
-function createBase64DecodeStream() {
-  return new TransformStream<string, Uint8Array>({
-    async transform(chunk, controller) {
-      const result = await base64ToBufferAsync(chunk);
-      controller.enqueue(result);
-    },
-  });
-}
-
-function base64ToBufferAsync(base64: string) {
-  // I'm lazy, okay
-  const dataUrl = "data:application/octet-binary;base64," + base64;
-  return fetch(dataUrl)
-    .then((res) => res.arrayBuffer())
-    .then((buffer) => new Uint8Array(buffer));
 }

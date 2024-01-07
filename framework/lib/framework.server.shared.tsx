@@ -43,16 +43,7 @@ export async function ServerComponent({ url }: { url: string | URL }) {
   return (
     <StreamReader
       cache={{ current: null }}
-      promiseStream={toPromiseStream(
-        response.body.pipeThrough(
-          new TransformStream<Uint8Array, string>({
-            transform(chunk, controller) {
-              const result = Buffer.from(chunk).toString("base64");
-              controller.enqueue(result);
-            },
-          })
-        )
-      )}
+      promiseStream={toPromiseStream(response.body)}
     />
   );
 }
