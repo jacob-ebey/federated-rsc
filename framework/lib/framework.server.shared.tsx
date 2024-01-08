@@ -6,7 +6,7 @@ import {
   type Params,
 } from "@remix-run/router";
 
-import { Route, Router } from "framework/client";
+import { Outlet, OutletProvider } from "framework/client";
 
 export function createStaticRequestHandler(routes: AgnosticDataRouteObject[]) {
   const handler = createStaticHandler(routes, {
@@ -26,20 +26,15 @@ export function createStaticRequestHandler(routes: AgnosticDataRouteObject[]) {
           Component?: React.FunctionComponent<{
             params: Params<string>;
             children: React.ReactNode;
-          }> & {
-            api?: boolean;
-          };
+          }>;
         };
       }
     >;
 
-    let lastRouteId = null;
+    let lastRouteId = "!";
     let toRender: React.ReactElement | string | null = null;
-    const routes: null | Record<string, React.ReactElement> = matches[
-      matches.length - 1
-    ]?.route.Component?.api
-      ? null
-      : {};
+    const routes: null | Record<string, React.ReactElement> =
+      request.headers.has("Api") ? null : {};
 
     for (let i = matches.length - 1; i >= 0; i--) {
       const {
@@ -48,17 +43,13 @@ export function createStaticRequestHandler(routes: AgnosticDataRouteObject[]) {
       } = matches[i];
       if (Component) {
         if (!routes) {
-          toRender = React.createElement(Component, {
-            params,
-            children: toRender,
-          });
+          toRender = <Component params={params}>{toRender}</Component>;
         } else {
-          routes[id] = React.createElement(Component, {
-            params,
-            children: lastRouteId ? (
-              <Route key={lastRouteId} id={lastRouteId} />
-            ) : null,
-          });
+          routes[id] = (
+            <Component params={params}>
+              <Outlet key={lastRouteId} id={lastRouteId} />
+            </Component>
+          );
 
           toRender = lastRouteId = id;
         }
@@ -78,9 +69,9 @@ export function createStaticRequestHandler(routes: AgnosticDataRouteObject[]) {
     let root: React.ReactElement;
     if (typeof toRender === "string") {
       root = (
-        <Router routes={routes!}>
-          <Route key={toRender} id={toRender} />
-        </Router>
+        <OutletProvider outlets={routes!}>
+          <Outlet key={toRender} id={toRender} />
+        </OutletProvider>
       );
     } else {
       root = toRender;

@@ -183,7 +183,6 @@ async function baseServerConfig({
           "framework/server",
           "framework/server.shared",
           "framework/client",
-          "framework/client.shared",
           "framework/entry/server",
         ],
       }),
@@ -274,7 +273,6 @@ async function baseSSRConfig({
         allowlist: [
           "framework",
           "framework/client",
-          "framework/client.shared",
           "framework/ssr",
           "framework/react.client",
           "framework/entry/ssr",
@@ -315,7 +313,12 @@ async function baseSSRConfig({
         howToLoad: `commonjs ./${containerName}.js`,
         shared: {
           react: pkgJson.dependencies.react,
+          "react/jsx-runtime": pkgJson.dependencies.react,
           "react-dom": pkgJson.dependencies["react-dom"],
+          framework: "*",
+          "framework/client": "*",
+          "framework/react.client": "*",
+          "react-server-dom-webpack/client": "*",
         },
       }),
       !!process.env.PROFILE &&
@@ -362,7 +365,17 @@ async function baseBrowserConfig({
     mode,
     entry: bootstrapPath,
     target: "browserslist:last 2 versions",
-    resolve: { extensions },
+    resolve: {
+      conditionNames: [
+        "browser",
+        "webpack",
+        "module",
+        "import",
+        "require",
+        "default",
+      ],
+      extensions,
+    },
     output: {
       path: path.resolve(cwd, "./dist/browser"),
     },
@@ -388,7 +401,13 @@ async function baseBrowserConfig({
         libraryType: "var",
         shared: {
           react: pkgJson.dependencies.react,
+          "react/jsx-runtime": pkgJson.dependencies.react,
           "react-dom": pkgJson.dependencies["react-dom"],
+          framework: "*",
+          "framework/browser": "*",
+          "framework/client": "*",
+          "framework/react.client": "*",
+          "react-server-dom-webpack/client": "*",
         },
       }),
       !!process.env.PROFILE &&

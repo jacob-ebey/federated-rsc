@@ -4,10 +4,6 @@ import * as React from "react";
 
 import { createFromReadableStream } from "framework/react.client";
 
-interface RouterContext {
-  routes: Record<string, React.ReactElement>;
-}
-
 export interface LocationState {
   root: React.Usable<React.ReactElement>;
   url: URL;
@@ -31,25 +27,26 @@ export function Location({
   return React.use(location.root) as React.JSX.Element;
 }
 
-const routerContext = React.createContext<null | RouterContext>(null);
+const outletContext = React.createContext<null | Record<
+  string,
+  React.ReactElement
+>>(null);
 
-export function Route({ id }: { id: string }) {
-  const context = React.useContext(routerContext);
+export function Outlet({ id }: { id: string }) {
+  const context = React.useContext(outletContext);
   if (!context) throw new Error("No router context found");
-  return context.routes[id] || null;
+  return context[id] ?? null;
 }
 
-export function Router({
+export function OutletProvider({
   children,
-  routes,
+  outlets,
 }: {
   children: React.ReactNode;
-  routes: Record<string, React.ReactElement>;
+  outlets: Record<string, React.ReactElement>;
 }) {
   return (
-    <routerContext.Provider value={{ routes }}>
-      {children}
-    </routerContext.Provider>
+    <outletContext.Provider value={outlets}>{children}</outletContext.Provider>
   );
 }
 
