@@ -188,7 +188,9 @@ export class ClientRSCPlugin {
           for (const chunk of chunks) {
             if (
               chunk.name &&
-              chunk.getModules().some((mod) => mod.type === "remote-module")
+              compilation.chunkGraph
+                .getChunkModules(chunk)
+                .some((mod) => mod.type === "remote-module")
             ) {
               chunk.id = chunk.name;
             }

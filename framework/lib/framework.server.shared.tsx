@@ -79,7 +79,7 @@ export function createStaticRequestHandler(routes: AgnosticDataRouteObject[]) {
     if (typeof toRender === "string") {
       root = (
         <Router routes={routes!}>
-          <Route id={toRender} />
+          <Route key={toRender} id={toRender} />
         </Router>
       );
     } else {
