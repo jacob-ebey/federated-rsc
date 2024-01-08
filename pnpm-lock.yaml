@@ -143,6 +143,9 @@ importers:
       '@types/webpack-sources':
         specifier: ^3.2.3
         version: 3.2.3
+      typescript:
+        specifier: ^5.3.3
+        version: 5.3.3
 
 packages:
 
@@ -426,8 +429,8 @@ packages:
     resolution: {integrity: sha512-+7sF0wAkISlTCaFEKnxYGiQjVUCS0VD5tOds2yQ5thX3p57P/LMd0u0Ze094GrVraF4zkE/4o0Zd8kOCY2GhZQ==}
     peerDependencies:
       next: ^12||^13
-      react: 0.0.0-experimental-1d5667a12-20240102
-      react-dom: 0.0.0-experimental-1d5667a12-20240102
+      react: ^16||^17||^18
+      react-dom: ^16||^17||^18
       webpack: ^5.40.0
     peerDependenciesMeta:
       next:
@@ -454,8 +457,8 @@ packages:
     resolution: {integrity: sha512-0D1dSWmZBUjkIloUzspcUjT3pbhHBSJ49Dn2RKWeqxN4Layx+7p5y9VkIckBRcgSawXktjGYHb5FA7vfaKh9nA==}
     peerDependencies:
       next: '*'
-      react: 0.0.0-experimental-1d5667a12-20240102
-      react-dom: 0.0.0-experimental-1d5667a12-20240102
+      react: ^16 || ^17 || ^18
+      react-dom: ^16 || ^17 || ^18
       webpack: ^5.40.0
     peerDependenciesMeta:
       next:
@@ -1594,6 +1597,12 @@ packages:
     resolution: {integrity: sha512-t0rzBq87m3fVcduHDUFhKmyyX+9eo6WQjZvf51Ea/M0Q7+T374Jp1aUiyUl0GKxp8M/OETVHSDvmkyPgvX+X2w==}
     engines: {node: '>=10'}
     dev: false
+
+  /typescript@5.3.3:
+    resolution: {integrity: sha512-pXWcraxM0uxAS+tN0AG/BF2TyqmHO014Z070UsJ+pFvYuRSq8KH8DmWpnbXe0pEPDHXZV3FcAbJkijJ5oNEnWw==}
+    engines: {node: '>=14.17'}
+    hasBin: true
+    dev: true
 
   /undici-types@5.26.5:
     resolution: {integrity: sha512-JlCMO+ehdEIKqlFxk6IfVoAUVmgz7cU7zD/h9XZ0qzeosSHmUJVOzSQvvYSYWXkFXC+IfLKSIffhv0sVZup6pA==}
