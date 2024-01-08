@@ -1,4 +1,4 @@
-# Federated React RSC
+# Federated RSC
 
 Welp, we've finally done it.
 
