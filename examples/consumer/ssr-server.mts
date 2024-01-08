@@ -9,7 +9,7 @@ dns.setDefaultResultOrder("ipv4first");
 
 const app = new Hono();
 
-app.use("/about", (c) => {
+app.use("/about/*", (c) => {
   return ssr.handler(c.req.raw, "http://localhost:3001", [
     "http://localhost:4001/dist/browser/main.js",
   ]);

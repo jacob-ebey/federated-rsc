@@ -8,6 +8,29 @@ interface RouterContext {
   routes: Record<string, React.ReactElement>;
 }
 
+export interface LocationState {
+  root: React.Usable<React.ReactElement>;
+  url: URL;
+}
+
+export function Location({
+  getSetLocation,
+  initialRoot,
+  initialURL,
+}: {
+  getSetLocation: (setLocation: (location: LocationState) => void) => void;
+  initialRoot: React.Usable<React.ReactElement>;
+  initialURL: URL;
+}) {
+  const [location, _setLocation] = React.useState<LocationState>({
+    root: initialRoot,
+    url: initialURL,
+  });
+  if (getSetLocation) getSetLocation(_setLocation);
+
+  return React.use(location.root) as React.JSX.Element;
+}
+
 const routerContext = React.createContext<null | RouterContext>(null);
 
 export function Route({ id }: { id: string }) {
