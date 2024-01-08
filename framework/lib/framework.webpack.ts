@@ -170,9 +170,6 @@ async function baseServerConfig({
   // TODO: Make this a virtual module, but for now this is nice for debugging the output still.
   const generated = await generateServerRoutes(routesPath, routesDir);
 
-  await fsp.mkdir(path.dirname(path.resolve(routesPath)), { recursive: true });
-  await fsp.writeFile(routesPath, generated, "utf8");
-
   return {
     name: "server",
     devtool,
