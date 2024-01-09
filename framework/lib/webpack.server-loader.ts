@@ -3,6 +3,8 @@ import * as path from "node:path";
 import type * as webpack from "webpack";
 import oxc from "@oxidation-compiler/napi";
 
+import { exposedNameFromResource } from "./utils";
+
 /**
  * @type {import("webpack").LoaderDefinitionFunction}
  */
@@ -136,11 +138,6 @@ async function parseRSCMetadata(
         useServer: true;
         moduleExports: typeof moduleExports;
       };
-}
-
-function exposedNameFromResource(cwd: string, resource: string) {
-  const relative = path.relative(cwd, resource).replace(/\\/g, "/");
-  return "./" + relative.replace(/\.\.\//g, "__/");
 }
 
 function createClientModule(

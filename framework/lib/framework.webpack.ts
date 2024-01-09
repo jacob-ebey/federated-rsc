@@ -7,6 +7,8 @@ import webpack from "webpack";
 import WebpackBar from "webpackbar";
 import nodeExternals from "webpack-node-externals";
 import VirtualModulesPlugin from "webpack-virtual-modules";
+// @ts-expect-error
+import VisualizerPlugin from "webpack-visualizer-plugin2";
 
 import {
   ClientRSCPlugin,
@@ -216,6 +218,9 @@ async function baseServerConfig({
       ],
     },
     plugins: [
+      new webpack.DefinePlugin({
+        ___CONTAINER_NAME___: JSON.stringify(containerName),
+      }),
       new VirtualModulesPlugin({
         [bootstrapPath]: `export const handler = (...args) => import(${JSON.stringify(
           serverEntryImport
@@ -271,9 +276,7 @@ async function baseSSRConfig({
     externals: [
       nodeExternals({
         allowlist: [
-          "framework",
           "framework/client",
-          "framework/ssr",
           "framework/react.client",
           "framework/entry/ssr",
           "react-server-dom-webpack/client",
@@ -299,6 +302,9 @@ async function baseSSRConfig({
       ],
     },
     plugins: [
+      new webpack.DefinePlugin({
+        ___CONTAINER_NAME___: JSON.stringify(containerName),
+      }),
       new VirtualModulesPlugin({
         [bootstrapPath]: `export const handler = (...args) => import(${JSON.stringify(
           ssrEntryImport
@@ -315,10 +321,10 @@ async function baseSSRConfig({
           react: pkgJson.dependencies.react,
           "react/jsx-runtime": pkgJson.dependencies.react,
           "react-dom": pkgJson.dependencies["react-dom"],
-          framework: "*",
-          "framework/client": "*",
-          "framework/react.client": "*",
-          "react-server-dom-webpack/client": "*",
+          framework: { singleton: true },
+          "framework/client": { singleton: true },
+          "framework/react.client": { singleton: true },
+          "react-server-dom-webpack/client": { singleton: true },
         },
       }),
       !!process.env.PROFILE &&
@@ -328,6 +334,7 @@ async function baseSSRConfig({
           fancy: false,
           profile: !!process.env.PROFILE,
         }),
+      new VisualizerPlugin(),
     ],
   };
 }
@@ -388,6 +395,9 @@ async function baseBrowserConfig({
       ],
     },
     plugins: [
+      new webpack.DefinePlugin({
+        ___CONTAINER_NAME___: JSON.stringify(containerName),
+      }),
       new ExternalTemplateRemotesPlugin(),
       new VirtualModulesPlugin({
         [bootstrapPath]: `import(${JSON.stringify(browserEntryImport)})`,
@@ -403,11 +413,10 @@ async function baseBrowserConfig({
           react: pkgJson.dependencies.react,
           "react/jsx-runtime": pkgJson.dependencies.react,
           "react-dom": pkgJson.dependencies["react-dom"],
-          framework: "*",
-          "framework/browser": "*",
-          "framework/client": "*",
-          "framework/react.client": "*",
-          "react-server-dom-webpack/client": "*",
+          framework: { singleton: true },
+          "framework/client": { singleton: true },
+          "framework/react.client": { singleton: true },
+          "react-server-dom-webpack/client": { singleton: true },
         },
       }),
       !!process.env.PROFILE &&

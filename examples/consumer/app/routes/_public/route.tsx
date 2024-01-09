@@ -1,30 +1,15 @@
-import { Counter } from "../../components/counter";
+import { RSCFrame } from "framework";
 
 export function Component({ children }: { children: React.ReactNode }) {
   return (
-    <html>
-      <head>
-        <title>My App</title>
-      </head>
-      <body>
-        <header>
-          <nav>
-            <ul>
-              <li>
-                <a href="/">Home</a>
-              </li>
-              <li>
-                <a href="/about">About</a>
-              </li>
-              <li>
-                <a href="/about/sub">About Sub</a>
-              </li>
-            </ul>
-          </nav>
-        </header>
-        <Counter />
+    <RSCFrame url="http://localhost:3001/layout">
+      <div style={{ backgroundColor: "yellow", padding: "1rem" }}>
+        <ul>
+          <li>Pink = Remote</li>
+          <li>Yellow = Host</li>
+        </ul>
         {children}
-      </body>
-    </html>
+      </div>
+    </RSCFrame>
   );
 }

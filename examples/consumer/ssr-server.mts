@@ -9,14 +9,19 @@ dns.setDefaultResultOrder("ipv4first");
 
 const app = new Hono();
 
+app.use("/", (c) => {
+  return handler(c.req.raw, "http://localhost:4001", [
+    "http://localhost:4001/dist/browser/main.js",
+  ]);
+});
 app.use("/about/*", (c) => {
-  return handler(c.req.raw, "http://localhost:3001", [
+  return handler(c.req.raw, "http://localhost:4001", [
     "http://localhost:4001/dist/browser/main.js",
   ]);
 });
 
 app.use("*", (c) => {
-  return handler(c.req.raw, "http://localhost:4001", [
+  return handler(c.req.raw, "http://localhost:3001", [
     "http://localhost:4001/dist/browser/main.js",
   ]);
 });

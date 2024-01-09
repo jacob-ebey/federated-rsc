@@ -1,12 +1,10 @@
-import { Counter } from "../../components/counter";
-
 export function Component({ children }: { children: React.ReactNode }) {
   return (
     <html>
       <head>
         <title>My App</title>
       </head>
-      <body>
+      <body style={{ backgroundColor: "pink", padding: "1rem" }}>
         <header>
           <nav>
             <ul>
@@ -19,10 +17,12 @@ export function Component({ children }: { children: React.ReactNode }) {
               <li>
                 <a href="/about/sub">About Sub</a>
               </li>
+              <li>
+                <a href="/not-found">Not Found</a>
+              </li>
             </ul>
           </nav>
         </header>
-        <Counter />
         {children}
       </body>
     </html>

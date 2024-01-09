@@ -35,10 +35,10 @@ export async function Component({
   const weather = await fetch(url.href).then((response) => response.json());
 
   return (
-    <>
-      <React.Suspense fallback={<div>Artificial delay...</div>}>
+    <div style={{ backgroundColor: "pink", padding: "1rem" }}>
+      {/* <React.Suspense fallback={<div>Artificial delay...</div>}> */}
         <ArtificialDelayExample />
-      </React.Suspense>
+      {/* </React.Suspense> */}
       <TemperatureSwitch>
         <div
           style={{
@@ -120,7 +120,7 @@ export async function Component({
       <React.Suspense fallback={<div>Children loading...</div>}>
         {children}
       </React.Suspense>
-    </>
+    </div>
   );
 }
 

@@ -4,10 +4,8 @@ import type * as webpack from "webpack";
 // @ts-expect-error - no types
 import extractUrlAndGlobal from "webpack/lib/util/extractUrlAndGlobal";
 import { RawSource } from "webpack-sources";
-import {
-  // StreamingTargetPlugin,
-  UniversalFederationPlugin,
-} from "@module-federation/node";
+
+import { exposedNameFromResource } from "./utils";
 
 export class ServerRSCPlugin {
   constructor(private clientModules: Set<string>) {}
@@ -290,11 +288,6 @@ export class ClientRSCPlugin {
       }
     );
   }
-}
-
-function exposedNameFromResource(cwd: string, resource: string) {
-  const relative = path.relative(cwd, resource).replace(/\\/g, "/");
-  return "./" + relative.replace(/\.\.\//g, "__/");
 }
 
 // Below is from ModuleFederation / universe or somewhere like that and should probably be imported from there instead

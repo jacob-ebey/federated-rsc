@@ -8,9 +8,15 @@ export function Component() {
     <>
       <h1>Hello Index</h1>
       <Counter />
-      <RSCFrame url="http://localhost:3001/weather/seattle">
-        <RSCFrame url="http://localhost:3001/weather/portland" />
-      </RSCFrame>
+      <div style={{ backgroundColor: "yellow", padding: "1rem" }}>
+        <RSCFrame url="http://localhost:3001/weather/seattle">
+          <div style={{ backgroundColor: "yellow", padding: "1rem" }}>
+            <React.Suspense fallback="Artificlas fddalskdfslkfjla">
+              <RSCFrame url="http://localhost:3001/weather/portland" />
+            </React.Suspense>
+          </div>
+        </RSCFrame>
+      </div>
     </>
   );
 }

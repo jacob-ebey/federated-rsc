@@ -8,6 +8,10 @@ import {
 
 import { Outlet, OutletProvider } from "framework/client";
 
+declare global {
+  const ___CONTAINER_NAME___: string;
+}
+
 export function createStaticRequestHandler(routes: AgnosticDataRouteObject[]) {
   const handler = createStaticHandler(routes, {
     future: { v7_relativeSplatPath: true },
@@ -42,16 +46,18 @@ export function createStaticRequestHandler(routes: AgnosticDataRouteObject[]) {
         route: { Component, id },
       } = matches[i];
       if (Component) {
+        let aliasedId = ___CONTAINER_NAME___ + "/" + id;
+
         if (!routes) {
           toRender = <Component params={params}>{toRender}</Component>;
         } else {
-          routes[id] = (
+          routes[aliasedId] = (
             <Component params={params}>
               <Outlet key={lastRouteId} id={lastRouteId} />
             </Component>
           );
 
-          toRender = lastRouteId = id;
+          toRender = lastRouteId = aliasedId;
         }
       }
     }

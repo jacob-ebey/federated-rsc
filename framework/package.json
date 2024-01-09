@@ -68,7 +68,6 @@
     "build": "tsc -p tsconfig.lib.json"
   },
   "dependencies": {
-    "@module-federation/node": "^2.0.5",
     "@oxidation-compiler/napi": "^0.2.0",
     "@remix-run/router": "^1.14.1",
     "esbuild-loader": "^4.0.2",
@@ -80,6 +79,7 @@
     "webpack-node-externals": "^3.0.0",
     "webpack-sources": "^3.2.3",
     "webpack-virtual-modules": "^0.6.1",
+    "webpack-visualizer-plugin2": "^1.1.0",
     "webpackbar": "^6.0.0"
   },
   "devDependencies": {

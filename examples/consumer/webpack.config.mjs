@@ -16,16 +16,6 @@ export default (config, { build, webpack }) => {
               "_example_basic@http://localhost:3001/dist/browser/_example_basic.js",
           },
         })
-        // new UniversalFederationPlugin(
-        //   {
-        //     isServer: false,
-        //     remotes: {
-        //       _example_basic:
-        //         "_example_basic@http://localhost:3001/dist/browser/_example_basic.js",
-        //     },
-        //   },
-        //   { ModuleFederationPlugin: webpack.container.ModuleFederationPlugin }
-        // )
       );
       break;
     case "ssr":
@@ -36,16 +26,6 @@ export default (config, { build, webpack }) => {
               "commonjs ../../../basic/dist/ssr/_example_basic.js",
           },
         })
-        // new UniversalFederationPlugin(
-        //   {
-        //     isServer: true,
-        //     remotes: {
-        //       _example_basic:
-        //         "_example_basic@http://localhost:3001/dist/ssr/_example_basic.js",
-        //     },
-        //   },
-        //   { ModuleFederationPlugin: webpack.container.ModuleFederationPlugin }
-        // )
       );
       break;
   }
