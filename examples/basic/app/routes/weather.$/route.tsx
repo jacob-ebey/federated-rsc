@@ -1,3 +1,4 @@
+import * as React from "react";
 import { type Params } from "framework";
 
 import {
@@ -6,7 +7,18 @@ import {
   TemperatureToggle,
 } from "./temperature-switch";
 
-export async function Component({ params }: { params: Params<"*"> }) {
+async function ArtificialDelayExample() {
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+  return <div>Delayed for 1 second</div>;
+}
+
+export async function Component({
+  children,
+  params,
+}: {
+  children?: React.ReactNode;
+  params: Params<"*">;
+}) {
   const query = params["*"];
 
   if (!query) throw new Error("No query provided");
@@ -23,84 +35,92 @@ export async function Component({ params }: { params: Params<"*"> }) {
   const weather = await fetch(url.href).then((response) => response.json());
 
   return (
-    <TemperatureSwitch>
-      <div
-        style={{
-          padding: "1.5rem",
-          borderRadius: "0.5rem",
-          border: "2px solid #f3f4f6",
-        }}
-      >
+    <>
+      <React.Suspense fallback={<div>Artificial delay...</div>}>
+        <ArtificialDelayExample />
+      </React.Suspense>
+      <TemperatureSwitch>
         <div
           style={{
-            display: "flex",
-            flexDirection: "column",
+            padding: "1.5rem",
+            borderRadius: "0.5rem",
+            border: "2px solid #f3f4f6",
           }}
         >
-          <div>
-            <h2
-              style={{
-                fontSize: "1.5rem",
-                color: "#374151",
-              }}
-            >
-              {weather.location.name}, {weather.location.region}
-            </h2>
-          </div>
-          <TemperatureToggle />
           <div
             style={{
-              margin: "1rem 0",
+              display: "flex",
+              flexDirection: "column",
             }}
           >
+            <div>
+              <h2
+                style={{
+                  fontSize: "1.5rem",
+                  color: "#374151",
+                }}
+              >
+                {weather.location.name}, {weather.location.region}
+              </h2>
+            </div>
+            <TemperatureToggle />
             <div
               style={{
-                display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
-                gap: "1rem",
+                margin: "1rem 0",
               }}
             >
-              <div>
-                <span>
-                  <img
-                    height="64"
-                    width="64"
-                    alt={weather.current.condition.text}
-                    src={weather.current.condition.icon}
-                  />
-                </span>
-              </div>
-              <div>
-                <h4
-                  style={{
-                    fontSize: "2rem",
-                    color: "#374151",
-                  }}
-                >
-                  <TemperatureDisplay
-                    c={weather.current.temp_c}
-                    f={weather.current.temp_f}
-                  />
-                </h4>
-                <p
-                  style={{
-                    fontSize: "1rem",
-                    color: "#374151",
-                  }}
-                >
-                  Feels like{" "}
-                  <TemperatureDisplay
-                    c={weather.current.feelslike_c}
-                    f={weather.current.feelslike_f}
-                  />
-                </p>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: "1rem",
+                }}
+              >
+                <div>
+                  <span>
+                    <img
+                      height="64"
+                      width="64"
+                      alt={weather.current.condition.text}
+                      src={weather.current.condition.icon}
+                    />
+                  </span>
+                </div>
+                <div>
+                  <h4
+                    style={{
+                      fontSize: "2rem",
+                      color: "#374151",
+                    }}
+                  >
+                    <TemperatureDisplay
+                      c={weather.current.temp_c}
+                      f={weather.current.temp_f}
+                    />
+                  </h4>
+                  <p
+                    style={{
+                      fontSize: "1rem",
+                      color: "#374151",
+                    }}
+                  >
+                    Feels like{" "}
+                    <TemperatureDisplay
+                      c={weather.current.feelslike_c}
+                      f={weather.current.feelslike_f}
+                    />
+                  </p>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </TemperatureSwitch>
+      </TemperatureSwitch>
+      <React.Suspense fallback={<div>Children loading...</div>}>
+        {children}
+      </React.Suspense>
+    </>
   );
 }
 

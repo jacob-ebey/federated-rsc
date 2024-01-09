@@ -25,7 +25,13 @@ function toPromiseStream<T = any>(input: ReadableStream<T>): PromiseStream<T> {
   return go();
 }
 
-export async function ServerComponent({ url }: { url: string | URL }) {
+export async function RSCFrame({
+  children,
+  url,
+}: {
+  children?: React.ReactNode;
+  url: string | URL;
+}) {
   const response = await fetch(url, {
     headers: {
       Accept: "text/x-component",
@@ -57,6 +63,8 @@ export async function ServerComponent({ url }: { url: string | URL }) {
           })
         )
       )}
-    />
+    >
+      {children}
+    </StreamReader>
   );
 }

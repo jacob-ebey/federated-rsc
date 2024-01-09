@@ -1,5 +1,5 @@
 import * as React from "react";
-import { ServerComponent } from "framework";
+import { RSCFrame } from "framework";
 
 import { Counter } from "../../components/counter";
 
@@ -8,10 +8,9 @@ export function Component() {
     <>
       <h1>Hello Index</h1>
       <Counter />
-        <ServerComponent url="http://localhost:3001/weather/seattle" />
-      <React.Suspense fallback="Loading weather...">
-        <ServerComponent url="http://localhost:3001/weather/portland" />
-      </React.Suspense>
+      <RSCFrame url="http://localhost:3001/weather/seattle">
+        <RSCFrame url="http://localhost:3001/weather/portland" />
+      </RSCFrame>
     </>
   );
 }

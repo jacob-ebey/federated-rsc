@@ -78,6 +78,7 @@ export class ClientRSCPlugin {
             [this.options.containerName]: this.options.howToLoad,
           },
           shared: this.options.shared,
+          remoteType: this.options.libraryType as "commonjs-static" | "var",
           library: this.options.libraryType
             ? {
                 name:

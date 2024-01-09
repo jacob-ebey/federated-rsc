@@ -5,7 +5,7 @@ import { serveStatic } from "@hono/node-server/serve-static";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 
-import server from "./dist/server/main.js";
+import { handler } from "./dist/server/main.js";
 
 dns.setDefaultResultOrder("ipv4first");
 
@@ -18,7 +18,7 @@ app.use(
 );
 
 app.all("*", async (c) => {
-  return server.handler(c.req.raw);
+  return handler(c.req.raw);
 });
 
 serve(

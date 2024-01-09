@@ -29,7 +29,7 @@ export function Location({
 
 const outletContext = React.createContext<null | Record<
   string,
-  React.ReactElement
+  React.ReactNode
 >>(null);
 
 export function Outlet({ id }: { id: string }) {
@@ -38,13 +38,12 @@ export function Outlet({ id }: { id: string }) {
   return context[id] ?? null;
 }
 
-export function OutletProvider({
-  children,
-  outlets,
-}: {
+export interface OutletProviderProps {
   children: React.ReactNode;
-  outlets: Record<string, React.ReactElement>;
-}) {
+  outlets: Record<string, React.ReactNode>;
+}
+
+export function OutletProvider({ children, outlets }: OutletProviderProps) {
   return (
     <outletContext.Provider value={outlets}>{children}</outletContext.Provider>
   );
@@ -54,16 +53,20 @@ export type PromiseStreamItem<T> = null | { head: T; tail: PromiseStream<T> };
 export type PromiseStream<T> = Promise<PromiseStreamItem<T>>;
 
 export function StreamReader({
-  promiseStream,
   cache,
+  children,
+  promiseStream,
 }: {
-  promiseStream: PromiseStream<string>;
   cache: { current: null | Promise<React.JSX.Element> };
+  children?: React.ReactNode;
+  promiseStream: PromiseStream<string>;
 }) {
-  const element = React.use(
+  const element = React.use<
+    React.ReactElement<OutletProviderProps, typeof OutletProvider>
+  >(
     (cache.current =
       cache.current ||
-      (createFromReadableStream(
+      createFromReadableStream(
         fromPromiseStream(promiseStream).pipeThrough(
           new TransformStream({
             transform(chunk, controller) {
@@ -78,10 +81,20 @@ export function StreamReader({
             },
           })
         )
-      ) as Promise<React.JSX.Element>))
+      ))
   );
 
-  return element;
+  if (!element?.props?.outlets) throw new Error("No outlets found");
+
+  return React.useMemo(() => {
+    return React.cloneElement(element, {
+      ...element.props,
+      outlets: {
+        ...element.props.outlets,
+        ["!"]: children,
+      },
+    });
+  }, [element, children]);
 }
 
 function fromPromiseStream<T = any>(promise: PromiseStream<T>) {

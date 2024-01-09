@@ -194,7 +194,7 @@ async function baseServerConfig({
     },
     output: {
       library: {
-        type: "commonjs-module",
+        type: "commonjs-static",
       },
       path: path.resolve(cwd, "./dist/server"),
     },
@@ -286,7 +286,7 @@ async function baseSSRConfig({
     },
     output: {
       library: {
-        type: "commonjs-module",
+        type: "commonjs-static",
       },
       path: path.resolve(cwd, "./dist/ssr"),
     },
@@ -308,7 +308,7 @@ async function baseSSRConfig({
         clientModules,
         cwd,
         rsdResource,
-        libraryType: "commonjs-module",
+        libraryType: "commonjs-static",
         containerName,
         howToLoad: `commonjs ./${containerName}.js`,
         shared: {
