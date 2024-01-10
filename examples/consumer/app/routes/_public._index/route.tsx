@@ -11,9 +11,7 @@ export function Component() {
       <div style={{ backgroundColor: "yellow", padding: "1rem" }}>
         <RSCFrame url="http://localhost:3001/weather/seattle">
           <div style={{ backgroundColor: "yellow", padding: "1rem" }}>
-            <React.Suspense fallback="Artificlas fddalskdfslkfjla">
-              <RSCFrame url="http://localhost:3001/weather/portland" />
-            </React.Suspense>
+            <RSCFrame url="http://localhost:3001/weather/portland" />
           </div>
         </RSCFrame>
       </div>

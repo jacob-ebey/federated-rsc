@@ -1,5 +1,3 @@
-import * as path from "node:path";
-
 import webpack from "webpack";
 
 import { getWebpackConfig } from "framework/webpack";
