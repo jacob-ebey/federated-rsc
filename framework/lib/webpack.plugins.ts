@@ -233,7 +233,7 @@ export class ClientRSCPlugin {
             for (const plugin of plugins) {
               // @ts-ignore
               if (plugin._options.remotes) {
-                // @ts-
+                // @ts-ignore
                 for (const key of Object.keys(plugin._options.remotes)) {
                   attached++;
                   const name = `rsc/remote/client/${key}`;
