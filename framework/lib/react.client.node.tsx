@@ -37,3 +37,14 @@ export function createFromReadableStream(
     ),
   });
 }
+
+export function registerServerReference(
+  proxy: unknown,
+  mod: string,
+  exp: string
+) {
+  return RSD.createServerReference(
+    mod + "#" + exp,
+    typeof "window" !== "undefined" ? window.callServer : undefined
+  );
+}

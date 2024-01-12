@@ -7,9 +7,69 @@ import {
 } from "@remix-run/router";
 
 import { Outlet, OutletProvider } from "framework/client";
+import { renderToReadableStream } from "framework/react.server";
 
 declare global {
-  const ___CONTAINER_NAME___: string;
+  var ___CONTAINER_NAME___: string;
+}
+
+// @ts-expect-error
+console.log(Outlet, Outlet.$$typeof, Outlet.$$id);
+
+export function createRequestHandler(routes: AgnosticDataRouteObject[]) {
+  return async (request: Request) => {
+    const handler = createStaticRequestHandler(routes);
+
+    try {
+      const context = await handler(request);
+
+      if (context instanceof Response) {
+        return context;
+      }
+
+      const body = renderToReadableStream(
+        context.root,
+        new Proxy(
+          {},
+          {
+            get(_, prop, __) {
+              const [___, ...exposedRest] = String(prop).split(":");
+              const [____, ...exportedRest] = exposedRest.join(":").split("#");
+              const exported = exportedRest.join("#");
+
+              return {
+                id: prop,
+                name: exported,
+                chunks: [prop],
+                async: true,
+              };
+            },
+          }
+        ),
+        {
+          identifierPrefix: Date.now().toString(36),
+          signal: request.signal,
+          onError(error: Error) {
+            console.error(error);
+          },
+        }
+      );
+
+      return new Response(body, {
+        status: context.status,
+        headers: context.headers,
+      });
+    } catch (reason) {
+      console.error(reason);
+      return new Response("Internal Server Error", {
+        status: 500,
+        headers: {
+          "Content-Type": "text/plain; charset=utf-8",
+          Vary: "Accept",
+        },
+      });
+    }
+  };
 }
 
 export function createStaticRequestHandler(routes: AgnosticDataRouteObject[]) {

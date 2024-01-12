@@ -48,10 +48,12 @@ export async function getWebpackConfig(
     clientModules,
     cwd,
     mode,
+    serverModules,
   }: {
     clientModules: Set<string>;
     cwd: string;
     mode: "development" | "production";
+    serverModules: Set<string>;
   }
 ): Promise<webpack.Configuration & { name: "server" | "ssr" | "browser" }> {
   const devtool = false;
@@ -86,6 +88,7 @@ export async function getWebpackConfig(
         devtool,
         extensions,
         routesDir,
+        serverModules,
       });
       break;
     case "ssr":
@@ -98,6 +101,7 @@ export async function getWebpackConfig(
         devtool,
         extensions,
         pkgJson,
+        serverModules,
       });
       break;
     case "browser":
@@ -110,6 +114,7 @@ export async function getWebpackConfig(
         devtool,
         extensions,
         pkgJson,
+        serverModules,
       });
       break;
   }
@@ -152,6 +157,7 @@ async function baseServerConfig({
   extensions,
   mode,
   routesDir,
+  serverModules,
 }: {
   clientModules: Set<string>;
   containerName: string;
@@ -161,6 +167,7 @@ async function baseServerConfig({
   extensions: string[];
   mode: "development" | "production";
   routesDir: string;
+  serverModules: Set<string>;
 }): Promise<webpack.Configuration & { name: "server" }> {
   const bootstrapPath = path.resolve(cwd, "___bootstrap_serverr.js");
   const routesPath = path.resolve(cwd, "___routes_server.js");
@@ -183,7 +190,6 @@ async function baseServerConfig({
         allowlist: [
           "framework",
           "framework/server",
-          "framework/server.shared",
           "framework/client",
           "framework/entry/server",
         ],
@@ -204,16 +210,7 @@ async function baseServerConfig({
       rules: [
         {
           test: /\.[mc]?[tj]sx?$/,
-          use: [
-            {
-              loader: require.resolve("framework/webpack/server-loader"),
-              options: {
-                containerName,
-                cwd,
-              },
-            },
-            esbuildLoader,
-          ],
+          use: [esbuildLoader],
         },
       ],
     },
@@ -227,7 +224,7 @@ async function baseServerConfig({
         )}).then(m => m.handler(...args));`,
         [routesPath]: generated,
       }),
-      new ServerRSCPlugin(clientModules),
+      new ServerRSCPlugin({ clientModules, serverModules, cwd, containerName }),
       !!process.env.PROFILE &&
         new WebpackBar({
           name: "server",
@@ -248,6 +245,7 @@ async function baseSSRConfig({
   extensions,
   mode,
   pkgJson,
+  serverModules,
 }: {
   clientModules: Set<string>;
   containerName: string;
@@ -257,6 +255,7 @@ async function baseSSRConfig({
   extensions: string[];
   mode: "development" | "production";
   pkgJson: any;
+  serverModules: Set<string>;
 }): Promise<webpack.Configuration & { name: "ssr" }> {
   const bootstrapPath = path.resolve(cwd, "___bootstrap_ssr.js");
 
@@ -317,6 +316,7 @@ async function baseSSRConfig({
         libraryType: "commonjs-static",
         containerName,
         howToLoad: `commonjs ./${containerName}.js`,
+        serverModules,
         shared: {
           react: pkgJson.dependencies.react,
           "react/jsx-runtime": pkgJson.dependencies.react,
@@ -348,6 +348,7 @@ async function baseBrowserConfig({
   extensions,
   mode,
   pkgJson,
+  serverModules,
 }: {
   clientModules: Set<string>;
   containerName: string;
@@ -357,6 +358,7 @@ async function baseBrowserConfig({
   extensions: string[];
   mode: "development" | "production";
   pkgJson: any;
+  serverModules: Set<string>;
 }): Promise<webpack.Configuration & { name: "browser" }> {
   const bootstrapPath = path.resolve(cwd, "___bootstrap_browser.js");
 
@@ -409,6 +411,7 @@ async function baseBrowserConfig({
         containerName,
         howToLoad: `script ${containerName}@[${webpack.RuntimeGlobals.publicPath}]${containerName}.js`,
         libraryType: "var",
+        serverModules,
         shared: {
           react: pkgJson.dependencies.react,
           "react/jsx-runtime": pkgJson.dependencies.react,

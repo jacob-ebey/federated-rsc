@@ -1,5 +1,6 @@
 import * as path from "node:path";
 
+import { rscClientPlugin, rscServerPlugin } from "unplugin-rsc";
 import type * as webpack from "webpack";
 // @ts-expect-error - no types
 import extractUrlAndGlobal from "webpack/lib/util/extractUrlAndGlobal";
@@ -8,40 +9,45 @@ import { RawSource } from "webpack-sources";
 import { exposedNameFromResource } from "./utils";
 
 export class ServerRSCPlugin {
-  constructor(private clientModules: Set<string>) {}
+  constructor(
+    private options: {
+      clientModules: Set<string>;
+      containerName: string;
+      cwd: string;
+      serverModules: Set<string>;
+    }
+  ) {}
 
   apply(compiler: webpack.Compiler) {
-    const clientModules = this.clientModules;
-    compiler.hooks.thisCompilation.tap(
-      "MyPlugin",
-      (compilation, { normalModuleFactory }) => {
-        const handler = (parser: any) => {
-          parser.hooks.program.tap("MyPlugin", (ast: any) => {
-            const mod = parser.state.module;
+    const { clientModules, containerName, cwd, serverModules } = this.options;
 
-            for (const node of ast.body) {
-              if (node.type !== "ExpressionStatement") break;
-
-              if (node.directive === "use client") {
-                clientModules.add(mod.resource);
-              }
-            }
-          });
-        };
-
-        normalModuleFactory.hooks.parser
-          .for("javascript/auto")
-          .tap("HarmonyModulesPlugin", handler);
-
-        normalModuleFactory.hooks.parser
-          .for("javascript/esm")
-          .tap("HarmonyModulesPlugin", handler);
-
-        normalModuleFactory.hooks.parser
-          .for("javascript/dynamic")
-          .tap("HarmonyModulesPlugin", handler);
-      }
-    );
+    rscServerPlugin
+      .webpack({
+        include: /\.[mc]?[tj]sx?$/,
+        exclude: "this_should_never_match_anything",
+        transformModuleId: (id, type) => {
+          return (
+            `rsc/remote/${type.replace(/^use /, "")}/${containerName}:` +
+            exposedNameFromResource(cwd, id)
+          );
+        },
+        useClientRuntime: {
+          function: "registerClientReference",
+          module: "framework/client-runtime",
+        },
+        useServerRuntime: {
+          function: "registerServerReference",
+          module: "framework/server-runtime",
+        },
+        onModuleFound(id, type) {
+          if (type === "use client") {
+            clientModules.add(id);
+          } else if (type === "use server") {
+            serverModules.add(id);
+          }
+        },
+      })
+      .apply(compiler);
   }
 }
 
@@ -54,36 +60,65 @@ export class ClientRSCPlugin {
       libraryType: string;
       containerName: string;
       howToLoad: string;
+      serverModules: Set<string>;
       shared: any;
     }
   ) {}
 
   apply(compiler: webpack.Compiler) {
+    const {
+      clientModules,
+      containerName,
+      cwd,
+      howToLoad,
+      rsdResource,
+      serverModules,
+      shared,
+      libraryType,
+    } = this.options;
     const isServer = this.options.libraryType !== "var";
+
+    rscClientPlugin.webpack({
+      include: /\.[mc]?[tj]sx?$/,
+      exclude: "this_should_never_match_anything",
+      transformModuleId: (id, type) => {
+        return (
+          `rsc/remote/${type.replace(/^use /, "")}/${containerName}` +
+          exposedNameFromResource(cwd, id)
+        );
+      },
+      useServerRuntime: {
+        function: "registerServerReference",
+        module: "framework/server-runtime",
+      },
+      onModuleFound(id, type) {
+        if (type === "use server") {
+          serverModules.add(id);
+        }
+      },
+    });
+
     const clientRSCContainer =
       new compiler.webpack.container.ModuleFederationPlugin(
         {
           // isServer,
-          name: this.options.containerName,
+          name: containerName,
           exposes: Array.from(this.options.clientModules).reduce(
             (p, c) =>
               Object.assign(p, {
-                [exposedNameFromResource(this.options.cwd, c)]: c,
+                [exposedNameFromResource(cwd, c)]: c,
               }),
             {}
           ),
           remotes: {
-            [this.options.containerName]: this.options.howToLoad,
+            [containerName]: howToLoad,
           },
-          shared: this.options.shared,
-          remoteType: this.options.libraryType as "commonjs-static" | "var",
-          library: this.options.libraryType
+          shared: shared,
+          remoteType: libraryType as "commonjs-static" | "var",
+          library: libraryType
             ? {
-                name:
-                  this.options.libraryType === "var"
-                    ? this.options.containerName
-                    : undefined,
-                type: this.options.libraryType,
+                name: libraryType === "var" ? containerName : undefined,
+                type: libraryType,
               }
             : undefined,
         }
@@ -210,7 +245,7 @@ export class ClientRSCPlugin {
             const mod =
               /** @type {import("webpack").NormalModule} */ parser.state.module;
 
-            if (mod.resource !== this.options.rsdResource) return;
+            if (mod.resource !== rsdResource) return;
 
             const plugins = [clientRSCContainer];
             for (const plugin of compiler.options.plugins) {

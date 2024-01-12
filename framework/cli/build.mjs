@@ -8,6 +8,7 @@ export async function build() {
     process.env.NODE_ENV === "development" ? "development" : "production";
 
   const clientModules = new Set();
+  const serverModules = new Set();
   console.log("Building server bundle...");
   console.time("server");
   await runWebpack(
@@ -15,9 +16,11 @@ export async function build() {
       clientModules,
       cwd,
       mode,
+      serverModules,
     })
   );
   console.timeEnd("server");
+  console.log(clientModules);
 
   console.log("\nBuilding ssr and browser bundles...");
   console.time("ssr");
@@ -28,6 +31,7 @@ export async function build() {
         clientModules,
         cwd,
         mode,
+        serverModules,
       })
     ).then(() => console.timeEnd("ssr")),
 
@@ -36,6 +40,7 @@ export async function build() {
         clientModules,
         cwd,
         mode,
+        serverModules,
       })
     ).then(() => console.timeEnd("browser")),
   ]);

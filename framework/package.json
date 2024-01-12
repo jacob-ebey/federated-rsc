@@ -29,24 +29,39 @@
       "default": "./dist/framework.client.js"
     },
     "./server": {
-      "types": "./dist/framework.server.node.d.ts",
+      "types": "./dist/framework.server.d.ts",
       "react-server": {
-        "default": "./dist/framework.server.node.js"
+        "default": "./dist/framework.server.js"
       },
       "default": "./server-only.js"
     },
-    "./server.shared": {
-      "types": "./dist/framework.server.shared.d.ts",
-      "default": "./dist/framework.server.shared.js"
+    "./client-runtime": {
+      "types": "./dist/framework.client-runtime.d.ts",
+      "react-server": {
+        "default": "./dist/framework.client-runtime.server.js"
+      },
+      "default": "./dist/framework.client-runtime.client.js"
+    },
+    "./server-runtime": {
+      "types": "./dist/framework.server-runtime.d.ts",
+      "react-server": {
+        "default": "./dist/framework.server-runtime.server.js"
+      },
+      "default": "./dist/framework.server-runtime.client.js"
     },
     "./ssr": {
       "types": "./dist/framework.ssr.d.ts",
       "default": "./dist/framework.ssr.js"
     },
     "./react.client": {
-      "types": "./dist/framework.client.browser.d.ts",
-      "browser": "./dist/framework.client.browser.js",
-      "default": "./dist/framework.client.node.js"
+      "types": "./dist/react.client.browser.d.ts",
+      "browser": "./dist/react.client.browser.js",
+      "default": "./dist/react.client.node.js"
+    },
+    "./react.server": {
+      "types": "./dist/react.server.browser.d.ts",
+      "browser": "./dist/react.server.browser.js",
+      "default": "./dist/react.server.node.js"
     },
     "./webpack": {
       "types": "./dist/framework.webpack.d.ts",
@@ -55,10 +70,6 @@
     "./webpack/plugins": {
       "types": "./dist/webpack.plugins.d.ts",
       "default": "./dist/webpack.plugins.js"
-    },
-    "./webpack/server-loader": {
-      "types": "./dist/webpack.server-loader.d.ts",
-      "default": "./dist/webpack.server-loader.js"
     },
     "./entry/browser": "./entry/browser.tsx",
     "./entry/server": "./entry/server.tsx",
@@ -75,6 +86,7 @@
     "react": "0.0.0-experimental-1d5667a12-20240102",
     "react-dom": "0.0.0-experimental-1d5667a12-20240102",
     "react-server-dom-webpack": "0.0.0-experimental-1d5667a12-20240102",
+    "unplugin-rsc": "0.0.3",
     "webpack": "^5.89.0",
     "webpack-node-externals": "^3.0.0",
     "webpack-sources": "^3.2.3",
