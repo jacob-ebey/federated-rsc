@@ -1,6 +1,8 @@
+//@ts-nocheck
+
 // import universe from "@module-federation/node";
 // const { UniversalFederationPlugin } = universe;
-//@ts-ignore
+//@ts-nocheck
 import * as mfp  from "@module-federation/enhanced";
 //@ts-ignore
 const {ModuleFederationPlugin} = mfp.default
