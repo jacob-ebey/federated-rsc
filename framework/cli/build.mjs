@@ -22,6 +22,7 @@ export async function build() {
   console.log("\nBuilding ssr and browser bundles...");
   console.time("ssr");
   console.time("browser");
+  debugger
   await Promise.all([
     runWebpack(
       await getWebpackConfig("ssr", {

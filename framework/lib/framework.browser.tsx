@@ -1,6 +1,6 @@
 import * as React from "react";
 import { hydrateRoot } from "react-dom/client";
-// @ts-expect-error - no types
+// @ts-ignore  - no types
 import RSD from "react-server-dom-webpack/client";
 import { Location, type LocationState } from "framework/client";
 

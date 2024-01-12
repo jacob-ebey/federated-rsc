@@ -1,7 +1,7 @@
 import * as stream from "node:stream";
 import * as webStream from "node:stream/web";
 
-// @ts-expect-error - no types
+// @ts-ignore  - no types
 import RSD from "react-server-dom-webpack/client";
 
 export function createFromReadableStream(

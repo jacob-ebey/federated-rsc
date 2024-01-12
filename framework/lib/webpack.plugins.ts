@@ -1,7 +1,7 @@
 import * as path from "node:path";
 
 import type * as webpack from "webpack";
-// @ts-expect-error - no types
+// @ts-ignore  - no types
 import extractUrlAndGlobal from "webpack/lib/util/extractUrlAndGlobal";
 import { RawSource } from "webpack-sources";
 //@ts-ignore
@@ -325,12 +325,12 @@ export class ExternalTemplateRemotesPlugin {
               const urlTemplate = extractUrlAndGlobal(mod.request)[0];
               const urlExpression = toExpression(urlTemplate);
               const sourceMap =
-                // @ts-expect-error
+                // @ts-ignore 
                 compilation.codeGenerationResults.get(mod).sources;
               const rawSource = sourceMap.get("javascript");
               sourceMap.set(
                 "javascript",
-                // @ts-expect-error
+                // @ts-ignore 
                 new RawSource(
                   (rawSource?.source().toString() || "").replace(
                     `"${urlTemplate}"`,

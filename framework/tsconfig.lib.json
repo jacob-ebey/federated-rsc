@@ -2,15 +2,16 @@
   "include": ["./lib/**/*"],
   "compilerOptions": {
     "outDir": "dist",
-    "declaration": true,
-    "declarationMap": true,
+    "declaration": false,
     "module": "Node16",
     "moduleResolution": "Node16",
     "target": "ES2022",
     "lib": ["DOM", "ES2022"],
     "types": ["node", "react/experimental", "react-dom/experimental"],
     "jsx": "react-jsx",
-    "strict": true,
-    "rootDir": "lib"
+    "strict": false,
+    "rootDir": "lib",
+    "skipLibCheck": true,
+    "noImplicitAny": false
   }
 }

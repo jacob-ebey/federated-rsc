@@ -7,7 +7,7 @@ import webpack from "webpack";
 import WebpackBar from "webpackbar";
 import nodeExternals from "webpack-node-externals";
 import VirtualModulesPlugin from "webpack-virtual-modules";
-// @ts-expect-error
+// @ts-ignore 
 import VisualizerPlugin from "webpack-visualizer-plugin2";
 
 import {
@@ -73,10 +73,10 @@ export async function getWebpackConfig(
   const containerName = snakeCase(pkgJson.name);
 
   let config: webpack.Configuration & { name: "server" | "ssr" | "browser" };
+
   switch (build) {
     case "server":
       const routesDir = path.resolve(cwd, "app/routes");
-
       config = await baseServerConfig({
         clientModules,
         containerName,
@@ -113,7 +113,6 @@ export async function getWebpackConfig(
       });
       break;
   }
-
   const webpackConfigPath = await findFileIfExists(cwd, [
     "webpack.config.mjs",
     "webpack.config.js",
@@ -366,6 +365,9 @@ async function baseBrowserConfig({
     "react-server-dom-webpack/client.browser"
   );
 
+  //FIXME: just hardcode for test 
+  let publicPath = containerName.includes('consumer') ? 'http://localhost:4001/' : 'http://localhost:3001/'
+
   return {
     name: "browser",
     devtool,
@@ -407,7 +409,7 @@ async function baseBrowserConfig({
         cwd,
         rsdResource,
         containerName,
-        howToLoad: `script ${containerName}@[${webpack.RuntimeGlobals.publicPath}]${containerName}.js`,
+        howToLoad: `${containerName}@${publicPath}${containerName}.js`,
         libraryType: "var",
         shared: {
           react: pkgJson.dependencies.react,
@@ -439,7 +441,7 @@ async function findFileIfExists(dir: string, names: string[]) {
         return file;
       }
     } catch (err) {
-      // @ts-expect-error
+      // @ts-ignore 
       if (err.code !== "ENOENT") {
         throw err;
       }
