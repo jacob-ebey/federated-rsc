@@ -2,14 +2,15 @@
 
 import * as React from "react";
 
-export function Counter() {
+function CounterBasic() {
   const [count, setCount] = React.useState(0);
   return (
     <div>
-      <h1>Counter</h1>
-      <p>Current count: {count}</p>
+      <p>Basic count: {count}</p>
       <button onClick={() => setCount(count - 1)}>Decrement</button>
       <button onClick={() => setCount(count + 1)}>Increment</button>
     </div>
   );
 }
+
+export { CounterBasic as Counter };

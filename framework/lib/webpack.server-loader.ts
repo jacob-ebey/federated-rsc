@@ -1,24 +1,35 @@
 import * as path from "node:path";
 
+import type * as webpack from "webpack";
 import oxc from "@oxidation-compiler/napi";
+
+import { exposedNameFromResource } from "./utils";
 
 /**
  * @type {import("webpack").LoaderDefinitionFunction}
  */
-export default async function (source) {
+export default async function (
+  this: webpack.LoaderContext<{ containerName: string; cwd: string }>,
+  source: string
+) {
   const cb = this.async();
   const resourcePath = this.resourcePath;
   const { containerName, cwd } = this.getOptions();
   const meta = await parseRSCMetadata(source, resourcePath, cwd, containerName);
 
   if (meta.useClient) {
-    return cb(null, createClientModule(meta.moduleExports));
+    source = createClientModule(meta.moduleExports);
   }
 
   cb(null, source);
 }
 
-async function parseRSCMetadata(source, filePath, cwd, containerName) {
+async function parseRSCMetadata(
+  source: string,
+  filePath: string,
+  cwd: string,
+  containerName: string
+) {
   let parseResult = await oxc.parseAsync(source, {
     sourceFilename: filePath,
     sourceType: "module",
@@ -45,7 +56,7 @@ async function parseRSCMetadata(source, filePath, cwd, containerName) {
     return {
       useClient: false,
       useServer: false,
-    };
+    } as const;
   }
 
   if (useClient && useServer) {
@@ -56,6 +67,24 @@ async function parseRSCMetadata(source, filePath, cwd, containerName) {
 
   let moduleExports = [];
   for (let node of program.body) {
+    // Commonjs static exports.xyz = ...
+    if (
+      node.type === "ExpressionStatement" &&
+      node.expression.type === "AssignmentExpression" &&
+      node.expression.operator === "=" &&
+      node.expression.left.type === "StaticMemberExpression" &&
+      node.expression.left.object.type === "IdentifierReference" &&
+      node.expression.left.object.name === "exports" &&
+      node.expression.left.property.type === "IdentifierName"
+    ) {
+      let name = node.expression.left.property.name;
+      moduleExports.push({
+        identifier,
+        localName: name,
+        publicName: name,
+      });
+    }
+
     // Handle FunctionDeclaration exports
     if (
       node.type === "ExportNamedDeclaration" &&
@@ -102,22 +131,26 @@ async function parseRSCMetadata(source, filePath, cwd, containerName) {
     useClient,
     useServer,
     moduleExports,
-  };
+  } as
+    | { useClient: true; useServer: false; moduleExports: typeof moduleExports }
+    | {
+        useClient: false;
+        useServer: true;
+        moduleExports: typeof moduleExports;
+      };
 }
 
-function exposedNameFromResource(cwd, resource) {
-  const relative = path.relative(cwd, resource).replace(/\\/g, "/");
-  return "./" + relative.replace(/\.\.\//g, "__/");
-}
-
-function createClientModule(moduleExports) {
+function createClientModule(
+  moduleExports: Array<{ publicName: string; identifier: string }>
+) {
   let code = "'use client';\n";
 
   let seen = new Set();
   for (const { publicName, identifier } of moduleExports) {
     if (seen.has(publicName)) {
-      throw new Error(`Duplicate export name: ${publicName}`);
+      continue;
     }
+    seen.add(publicName);
 
     const serverReference = `{
       $$typeof: Symbol.for('react.client.reference'),

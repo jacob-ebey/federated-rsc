@@ -1,18 +1,27 @@
+import dns from "node:dns";
+
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 
-import ssr from "./dist/ssr/main.js";
+import { handler } from "./dist/ssr/main.js";
+
+dns.setDefaultResultOrder("ipv4first");
 
 const app = new Hono();
 
-app.use("/about", (c) => {
-  return ssr.handler(c.req.raw, "http://localhost:3001", [
+app.use("/", (c) => {
+  return handler(c.req.raw, "http://localhost:4001", [
+    "http://localhost:4001/dist/browser/main.js",
+  ]);
+});
+app.use("/about/*", (c) => {
+  return handler(c.req.raw, "http://localhost:4001", [
     "http://localhost:4001/dist/browser/main.js",
   ]);
 });
 
 app.use("*", (c) => {
-  return ssr.handler(c.req.raw, "http://localhost:4001", [
+  return handler(c.req.raw, "http://localhost:3001", [
     "http://localhost:4001/dist/browser/main.js",
   ]);
 });
