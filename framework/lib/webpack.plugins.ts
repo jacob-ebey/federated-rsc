@@ -5,7 +5,9 @@ import type * as webpack from "webpack";
 import extractUrlAndGlobal from "webpack/lib/util/extractUrlAndGlobal";
 import { RawSource } from "webpack-sources";
 //@ts-ignore
-import {ModuleFederationPlugin} from '@module-federation/enhanced'
+import * as mfp from '@module-federation/enhanced'
+//@ts-ignore
+const {ModuleFederationPlugin} = mfp.default
 import { exposedNameFromResource } from "./utils";
 
 export class ServerRSCPlugin {
@@ -227,9 +229,9 @@ export class ClientRSCPlugin {
 
             let attached = 0;
             for (const plugin of plugins) {
-              // @ts-expect-error
+              // @ts-ignore
               if (plugin._options.remotes) {
-                // @ts-expect-error
+                // @ts-ignore
                 for (const key of Object.keys(plugin._options.remotes)) {
                   attached++;
                   const name = `rsc/remote/client/${key}`;

@@ -1,6 +1,6 @@
 import * as stream from "node:stream";
 
-// @ts-expect-error - no types
+// @ts-ignore - no types
 import RSD from "react-server-dom-webpack/server";
 import { type AgnosticDataRouteObject } from "@remix-run/router";
 
