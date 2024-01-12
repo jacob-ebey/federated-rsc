@@ -4,7 +4,8 @@ import type * as webpack from "webpack";
 // @ts-expect-error - no types
 import extractUrlAndGlobal from "webpack/lib/util/extractUrlAndGlobal";
 import { RawSource } from "webpack-sources";
-
+//@ts-ignore
+import {ModuleFederationPlugin} from '@module-federation/enhanced'
 import { exposedNameFromResource } from "./utils";
 
 export class ServerRSCPlugin {
@@ -61,7 +62,7 @@ export class ClientRSCPlugin {
   apply(compiler: webpack.Compiler) {
     const isServer = this.options.libraryType !== "var";
     const clientRSCContainer =
-      new compiler.webpack.container.ModuleFederationPlugin(
+      new ModuleFederationPlugin(
         {
           // isServer,
           name: this.options.containerName,
@@ -219,7 +220,7 @@ export class ClientRSCPlugin {
                 (plugin.constructor.name === "ModuleFederationPlugin" ||
                   plugin.constructor.name === "UniversalFederationPlugin")
               ) {
-                //// @ts-expect-error
+                // @ts-ignore
                 plugins.push(plugin);
               }
             }
