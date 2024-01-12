@@ -1,7 +1,9 @@
 // import universe from "@module-federation/node";
 // const { UniversalFederationPlugin } = universe;
 //@ts-ignore
-import { ModuleFederationPlugin } from "@module-federation/enhanced";
+import * as mfp  from "@module-federation/enhanced";
+//@ts-ignore
+const {ModuleFederationPlugin} = mfp.default
 /** @type {import("framework/webpack").ConfigFunction} */
 export default (config, { build, webpack }) => {
   if (!config.plugins) {
