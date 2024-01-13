@@ -1,10 +1,6 @@
-import * as path from "node:path";
-
+import { ModuleFederationPlugin } from "@module-federation/enhanced";
 import { rscClientPlugin, rscServerPlugin } from "unplugin-rsc";
 import type * as webpack from "webpack";
-// @ts-expect-error - no types
-import extractUrlAndGlobal from "webpack/lib/util/extractUrlAndGlobal";
-import { RawSource } from "webpack-sources";
 
 import { exposedNameFromResource } from "./utils";
 
@@ -55,11 +51,12 @@ export class ClientRSCPlugin {
   constructor(
     private options: {
       clientModules: Set<string>;
-      cwd: string;
-      rsdResource: string;
-      libraryType: string;
       containerName: string;
+      cwd: string;
       howToLoad: string;
+      libraryType: string;
+      remoteType: string;
+      rsdResource: string;
       serverModules: Set<string>;
       shared: any;
     }
@@ -71,10 +68,11 @@ export class ClientRSCPlugin {
       containerName,
       cwd,
       howToLoad,
+      libraryType,
+      remoteType,
       rsdResource,
       serverModules,
       shared,
-      libraryType,
     } = this.options;
 
     rscClientPlugin.webpack({
@@ -97,36 +95,54 @@ export class ClientRSCPlugin {
       },
     });
 
-    const clientRSCContainer =
-      new compiler.webpack.container.ModuleFederationPlugin(
-        {
-          // isServer,
-          name: containerName,
-          exposes: Array.from(clientModules).reduce(
-            (p, c) =>
-              Object.assign(p, {
-                [exposedNameFromResource(cwd, c)]: c,
-              }),
-            {}
-          ),
-          remotes: {
-            [containerName]: howToLoad,
-          },
-          shared: shared,
-          remoteType: libraryType as "commonjs-static" | "var",
-          library: libraryType
-            ? {
-                name: libraryType === "var" ? containerName : undefined,
-                type: libraryType,
-              }
-            : undefined,
-        }
-        // {
-        //   ModuleFederationPlugin:
-        //     compiler.webpack.container.ModuleFederationPlugin,
-        // }
-      );
+    const plugins: any[] = [];
+    for (const plugin of compiler.options.plugins) {
+      if (
+        plugin &&
+        (plugin.constructor.name === "ModuleFederationPlugin" ||
+          plugin.constructor.name === "UniversalFederationPlugin")
+      ) {
+        //// @ts-expect-error
+        plugins.push(plugin);
+      }
+    }
+
+    const clientRSCContainer = new ModuleFederationPlugin({
+      // isServer,
+      name: containerName,
+      exposes: Array.from(clientModules).reduce(
+        (p, c) =>
+          Object.assign(p, {
+            [exposedNameFromResource(cwd, c)]: c,
+          }),
+        {}
+      ),
+      remotes: {
+        ...plugins.reduce(
+          (r, p) => ({
+            ...r,
+            ...p._options.remotes,
+          }),
+          {}
+        ),
+        [containerName]: howToLoad,
+      },
+      runtimePlugins: [
+        require.resolve("framework/webpack.federation-runtime-plugin"),
+      ],
+      shared: shared,
+      remoteType,
+      library: libraryType
+        ? {
+            name: ["var", "window"].includes(libraryType)
+              ? containerName
+              : undefined,
+            type: libraryType,
+          }
+        : undefined,
+    });
     clientRSCContainer.apply(compiler);
+    plugins.push(clientRSCContainer);
 
     // if (isServer) {
     //   new StreamingTargetPlugin({
@@ -246,23 +262,9 @@ export class ClientRSCPlugin {
 
             if (mod.resource !== rsdResource) return;
 
-            const plugins = [clientRSCContainer];
-            for (const plugin of compiler.options.plugins) {
-              if (
-                plugin &&
-                (plugin.constructor.name === "ModuleFederationPlugin" ||
-                  plugin.constructor.name === "UniversalFederationPlugin")
-              ) {
-                //// @ts-expect-error
-                plugins.push(plugin);
-              }
-            }
-
             let attached = 0;
             for (const plugin of plugins) {
-              // @ts-expect-error
               if (plugin._options.remotes) {
-                // @ts-expect-error
                 for (const key of Object.keys(plugin._options.remotes)) {
                   attached++;
                   const name = `rsc/remote/client/${key}`;
@@ -346,71 +348,7 @@ export class ExternalTemplateRemotesPlugin {
             }
           }
         );
-
-        compilation.hooks.afterCodeGeneration.tap(
-          ExternalTemplateRemotesPlugin.PLUGIN_NAME,
-          function () {
-            scriptExternalModules.forEach((mod) => {
-              const urlTemplate = extractUrlAndGlobal(mod.request)[0];
-              const urlExpression = toExpression(urlTemplate);
-              const sourceMap =
-                // @ts-expect-error
-                compilation.codeGenerationResults.get(mod).sources;
-              const rawSource = sourceMap.get("javascript");
-              sourceMap.set(
-                "javascript",
-                // @ts-expect-error
-                new RawSource(
-                  (rawSource?.source().toString() || "").replace(
-                    `"${urlTemplate}"`,
-                    urlExpression
-                  )
-                )
-              );
-            });
-          }
-        );
       }
     );
   }
-}
-
-function toExpression(templateUrl: string) {
-  const result = [];
-  const current = [];
-  let isExpression = false;
-  let invalid = false;
-  for (const c of templateUrl) {
-    if (c === "[") {
-      if (isExpression) {
-        invalid = true;
-        break;
-      }
-      isExpression = true;
-      if (current.length) {
-        result.push(`"${current.join("")}"`);
-        current.length = 0;
-      }
-    } else if (c === "]") {
-      if (!isExpression) {
-        invalid = true;
-        break;
-      }
-      isExpression = false;
-      if (current.length) {
-        result.push(`${current.join("")}`);
-        current.length = 0;
-      }
-      current.length = 0;
-    } else {
-      current.push(c);
-    }
-  }
-  if (isExpression || invalid) {
-    throw new Error(`Invalid template URL "${templateUrl}"`);
-  }
-  if (current.length) {
-    result.push(`"${current.join("")}"`);
-  }
-  return result.join(" + ");
 }

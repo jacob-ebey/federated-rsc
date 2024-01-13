@@ -111,7 +111,7 @@ export async function handler(
           }
         },
         onError(error) {
-          if (shellSent) return;
+          if (shellSent || request.signal.aborted) return;
           console.error(error);
         },
       }

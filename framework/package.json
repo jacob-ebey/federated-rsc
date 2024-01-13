@@ -71,6 +71,10 @@
       "types": "./dist/webpack.plugins.d.ts",
       "default": "./dist/webpack.plugins.js"
     },
+    "./webpack.federation-runtime-plugin": {
+      "types": "./dist/webpack.federation-runtime-plugin.d.ts",
+      "default": "./dist/webpack.federation-runtime-plugin.js"
+    },
     "./entry/browser": "./entry/browser.tsx",
     "./entry/server": "./entry/server.tsx",
     "./entry/ssr": "./entry/ssr.tsx"
@@ -79,6 +83,8 @@
     "build": "tsc -p tsconfig.lib.json"
   },
   "dependencies": {
+    "@module-federation/enhanced": "0.0.8",
+    "@module-federation/runtime": "0.0.8",
     "@oxidation-compiler/napi": "^0.2.0",
     "@remix-run/router": "^1.14.1",
     "esbuild-loader": "^4.0.2",
@@ -90,7 +96,6 @@
     "webpack": "^5.89.0",
     "webpack-format-messages": "^3.0.1",
     "webpack-node-externals": "^3.0.0",
-    "webpack-sources": "^3.2.3",
     "webpack-virtual-modules": "^0.6.1",
     "webpack-visualizer-plugin2": "^1.1.0",
     "webpackbar": "^6.0.0"
@@ -100,7 +105,6 @@
     "@types/react": "^18.2.46",
     "@types/react-dom": "^18.2.18",
     "@types/webpack-node-externals": "^3.0.4",
-    "@types/webpack-sources": "^3.2.3",
     "typescript": "^5.3.3"
   }
 }

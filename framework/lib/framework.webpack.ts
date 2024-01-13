@@ -314,6 +314,7 @@ async function baseSSRConfig({
         cwd,
         rsdResource,
         libraryType: "commonjs-static",
+        remoteType: "commonjs",
         containerName,
         howToLoad: `commonjs ./${containerName}.js`,
         serverModules,
@@ -409,8 +410,9 @@ async function baseBrowserConfig({
         cwd,
         rsdResource,
         containerName,
-        howToLoad: `script ${containerName}@[${webpack.RuntimeGlobals.publicPath}]${containerName}.js`,
+        howToLoad: `${containerName}@[public_path]${containerName}.js`,
         libraryType: "var",
+        remoteType: "script",
         serverModules,
         shared: {
           react: pkgJson.dependencies.react,

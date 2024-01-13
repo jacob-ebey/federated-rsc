@@ -47,6 +47,7 @@ export function createRequestHandler(routes: AgnosticDataRouteObject[]) {
           identifierPrefix: Date.now().toString(36),
           signal: request.signal,
           onError(error: Error) {
+            if (request.signal.aborted) return;
             console.error(error);
           },
         }
