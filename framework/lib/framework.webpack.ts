@@ -407,7 +407,7 @@ async function baseBrowserConfig({
         cwd,
         rsdResource,
         containerName,
-        howToLoad: `script ${containerName}@[${webpack.RuntimeGlobals.publicPath}]${containerName}.js`,
+        howToLoad: `${containerName}@[public_path]${containerName}.js`,
         libraryType: "var",
         shared: {
           react: pkgJson.dependencies.react,
@@ -493,6 +493,7 @@ async function generateServerRoutes(outFile: string, routesDir: string) {
       .replace(/\\/g, "/");
     relative = relative.startsWith(".") ? relative : "./" + relative;
 
+    //@ts-ignore
     routeIds.push(routeId);
     routes[routeId] = {
       relative,
@@ -508,6 +509,7 @@ async function generateServerRoutes(outFile: string, routesDir: string) {
   const rootRoutes = [];
   for (const routeId of routeIds) {
     const route = routes[routeId];
+    //@ts-ignore
     const split = routeId.split(".");
     let found = false;
     for (let i = split.length - 1; i > 0; i--) {
@@ -520,6 +522,7 @@ async function generateServerRoutes(outFile: string, routesDir: string) {
       }
     }
     if (!found) {
+      //@ts-ignore
       rootRoutes.push(route);
     }
   }

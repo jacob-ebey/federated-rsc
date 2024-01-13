@@ -60,6 +60,7 @@ export class ClientRSCPlugin {
   ) {}
 
   apply(compiler: webpack.Compiler) {
+      compiler.webpack.library.EnableLibraryPlugin.setEnabled(compiler, 'script')
     const isServer = this.options.libraryType !== "var";
     const clientRSCContainer =
       new ModuleFederationPlugin(
@@ -76,8 +77,11 @@ export class ClientRSCPlugin {
           remotes: {
             [this.options.containerName]: this.options.howToLoad,
           },
+            runtimePlugins:[
+require.resolve('./runtimePlugin')
+            ],
           shared: this.options.shared,
-          remoteType: this.options.libraryType as "commonjs-static" | "var",
+          remoteType: this.options.libraryType === 'var' ? 'script' : 'commonjs-static',
           library: this.options.libraryType
             ? {
                 name:
@@ -310,29 +314,29 @@ export class ExternalTemplateRemotesPlugin {
           }
         );
 
-        compilation.hooks.afterCodeGeneration.tap(
-          ExternalTemplateRemotesPlugin.PLUGIN_NAME,
-          function () {
-            scriptExternalModules.forEach((mod) => {
-              const urlTemplate = extractUrlAndGlobal(mod.request)[0];
-              const urlExpression = toExpression(urlTemplate);
-              const sourceMap =
-                // @ts-expect-error
-                compilation.codeGenerationResults.get(mod).sources;
-              const rawSource = sourceMap.get("javascript");
-              sourceMap.set(
-                "javascript",
-                // @ts-expect-error
-                new RawSource(
-                  (rawSource?.source().toString() || "").replace(
-                    `"${urlTemplate}"`,
-                    urlExpression
-                  )
-                )
-              );
-            });
-          }
-        );
+        // compilation.hooks.afterCodeGeneration.tap(
+        //   ExternalTemplateRemotesPlugin.PLUGIN_NAME,
+        //   function () {
+        //     scriptExternalModules.forEach((mod) => {
+        //       const urlTemplate = extractUrlAndGlobal(mod.request)[0];
+        //       const urlExpression = urlTemplate
+        //       const sourceMap =
+        //         // @ts-expect-error
+        //         compilation.codeGenerationResults.get(mod).sources;
+        //       const rawSource = sourceMap.get("javascript");
+        //       sourceMap.set(
+        //         "javascript",
+        //         // @ts-expect-error
+        //         new RawSource(
+        //           (rawSource?.source().toString() || "").replace(
+        //             `"${urlTemplate}"`,
+        //             urlExpression
+        //           )
+        //         )
+        //       );
+        //     });
+        //   }
+        // );
       }
     );
   }
@@ -351,6 +355,7 @@ function toExpression(templateUrl: string) {
       }
       isExpression = true;
       if (current.length) {
+          //@ts-ignore
         result.push(`"${current.join("")}"`);
         current.length = 0;
       }
@@ -361,11 +366,13 @@ function toExpression(templateUrl: string) {
       }
       isExpression = false;
       if (current.length) {
+          //@ts-ignore
         result.push(`${current.join("")}`);
         current.length = 0;
       }
       current.length = 0;
     } else {
+        //@ts-ignore
       current.push(c);
     }
   }
@@ -373,6 +380,7 @@ function toExpression(templateUrl: string) {
     throw new Error(`Invalid template URL "${templateUrl}"`);
   }
   if (current.length) {
+      //@ts-ignore
     result.push(`"${current.join("")}"`);
   }
   return result.join(" + ");
