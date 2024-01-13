@@ -1,7 +1,9 @@
 "use client";
 
 import * as React from "react";
-
+// if(typeof window !== "undefined") {
+//     import('_example_basic')
+// }
 function CounterConsumer() {
   const [count, setCount] = React.useState(0);
   return (

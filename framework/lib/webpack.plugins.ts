@@ -61,6 +61,9 @@ export class ClientRSCPlugin {
   apply(compiler: webpack.Compiler) {
       compiler.webpack.library.EnableLibraryPlugin.setEnabled(compiler, 'script')
     const isServer = this.options.libraryType !== "var";
+     const userPlugin = compiler.options.plugins.find((p: any) => p.name === 'ModuleFederationPlugin')
+      //@ts-ignore
+      const userOptions = userPlugin?._options;
     const clientRSCContainer =
       new ModuleFederationPlugin(
         {
@@ -74,6 +77,7 @@ export class ClientRSCPlugin {
             {}
           ),
           remotes: {
+              ...userOptions?.remotes,
             [this.options.containerName]: this.options.howToLoad,
           },
             runtimePlugins:[
@@ -153,7 +157,7 @@ export class ClientRSCPlugin {
                   ]
                 )}).then(${runtimeTemplate.basicFunction(
                   ["container"],
-                  ["console.log('container request'); return container.get(exposed);"]
+                  ["return container.get(exposed);"]
                 )}).then(${runtimeTemplate.basicFunction(
                   ["factory"],
                   [
