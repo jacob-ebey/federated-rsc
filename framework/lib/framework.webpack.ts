@@ -72,7 +72,7 @@ export async function getWebpackConfig(
   const pkgJson = JSON.parse(
     await fsp.readFile(path.resolve(cwd, "package.json"), "utf8")
   );
-  const containerName = snakeCase(pkgJson.name);
+  const containerName = pkgJson.name;
 
   let config: webpack.Configuration & { name: "server" | "ssr" | "browser" };
   switch (build) {
@@ -411,7 +411,7 @@ async function baseBrowserConfig({
         rsdResource,
         containerName,
         howToLoad: `${containerName}@[public_path]${containerName}.js`,
-        libraryType: "var",
+        libraryType: "window",
         remoteType: "script",
         serverModules,
         shared: {

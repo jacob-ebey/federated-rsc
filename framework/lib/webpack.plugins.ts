@@ -95,15 +95,11 @@ export class ClientRSCPlugin {
       },
     });
 
-    const plugins: any[] = [];
+    const federationPlugins: any[] = [];
     for (const plugin of compiler.options.plugins) {
-      if (
-        plugin &&
-        (plugin.constructor.name === "ModuleFederationPlugin" ||
-          plugin.constructor.name === "UniversalFederationPlugin")
-      ) {
+      if (plugin && plugin.constructor.name === "ModuleFederationPlugin") {
         //// @ts-expect-error
-        plugins.push(plugin);
+        federationPlugins.push(plugin);
       }
     }
 
@@ -118,7 +114,7 @@ export class ClientRSCPlugin {
         {}
       ),
       remotes: {
-        ...plugins.reduce(
+        ...federationPlugins.reduce(
           (r, p) => ({
             ...r,
             ...p._options.remotes,
@@ -142,7 +138,7 @@ export class ClientRSCPlugin {
         : undefined,
     });
     clientRSCContainer.apply(compiler);
-    plugins.push(clientRSCContainer);
+    // plugins.push(clientRSCContainer);
 
     // if (isServer) {
     //   new StreamingTargetPlugin({
@@ -150,16 +146,16 @@ export class ClientRSCPlugin {
     //   }).apply(compiler);
     // }
 
-    class ContainerReferenceDependency extends compiler.webpack.dependencies
-      .ModuleDependency {
-      constructor(request: string) {
-        super(request);
-      }
+    // class ContainerReferenceDependency extends compiler.webpack.dependencies
+    //   .ModuleDependency {
+    //   constructor(request: string) {
+    //     super(request);
+    //   }
 
-      get type() {
-        return "container-reference";
-      }
-    }
+    //   get type() {
+    //     return "container-reference";
+    //   }
+    // }
 
     const RuntimeGlobals = compiler.webpack.RuntimeGlobals;
     const Template = compiler.webpack.Template;
@@ -189,28 +185,35 @@ export class ClientRSCPlugin {
                 "let remote = chunkId.slice(0, splitIndex);",
                 "let remoteModuleId = remote.slice(18);",
                 "let [exposed] = chunkId.slice(splitIndex + 1).split('#');",
-                "let promises = [ogEnsureChunk(remote)];",
-                `${RuntimeGlobals.moduleCache}[chunkId] = {
-                  id: chunkId,
-                  loaded: false,
-                  exports: {},
-                };`,
-                // `${RuntimeGlobals.ensureChunkHandlers}.remotes(remote, promises);`,
-                `return Promise.all(promises).then(${runtimeTemplate.basicFunction(
-                  ["r"],
-                  [
-                    `return ${RuntimeGlobals.require}("webpack/container/reference/" + remoteModuleId);`,
-                  ]
-                )}).then(${runtimeTemplate.basicFunction(
-                  ["container"],
-                  ["return container.get(exposed);"]
-                )}).then(${runtimeTemplate.basicFunction(
-                  ["factory"],
-                  [
-                    "var mod = factory();",
-                    `Object.assign(${RuntimeGlobals.moduleCache}[chunkId].exports, mod);`,
-                  ]
-                )});`,
+                "console.log(__webpack_require__.federation);",
+                `${RuntimeGlobals.moduleCache}[chunkId] = {`,
+                Template.indent([
+                  "id: chunkId,",
+                  "loaded: false,",
+                  "exports: {},",
+                ]),
+                `};`,
+                `return __webpack_require__.federation.runtime.loadRemote(remoteModuleId + "/" + exposed).then((mod) => {`,
+                Template.indent(["console.log(mod.runtime.get);"]),
+                `});`,
+
+                // "let promises = [ogEnsureChunk(remote)];",
+                // // `${RuntimeGlobals.ensureChunkHandlers}.remotes(remote, promises);`,
+                // `return Promise.all(promises).then(${runtimeTemplate.basicFunction(
+                //   ["r"],
+                //   [
+                //     `return ${RuntimeGlobals.require}("webpack/container/reference/" + remoteModuleId);`,
+                //   ]
+                // )}).then(${runtimeTemplate.basicFunction(
+                //   ["container"],
+                //   ["return container.get(exposed);"]
+                // )}).then(${runtimeTemplate.basicFunction(
+                //   ["factory"],
+                //   [
+                //     "var mod = factory();",
+                //     `Object.assign(${RuntimeGlobals.moduleCache}[chunkId].exports, mod);`,
+                //   ]
+                // )});`,
               ]),
               "}",
               "return ogEnsureChunk(chunkId);",
@@ -246,61 +249,61 @@ export class ClientRSCPlugin {
           }
         });
 
-        compilation.dependencyFactories.set(
-          ContainerReferenceDependency,
-          normalModuleFactory
-        );
-        compilation.dependencyTemplates.set(
-          ContainerReferenceDependency,
-          new compiler.webpack.dependencies.NullDependency.Template()
-        );
+        // compilation.dependencyFactories.set(
+        //   ContainerReferenceDependency,
+        //   normalModuleFactory
+        // );
+        // compilation.dependencyTemplates.set(
+        //   ContainerReferenceDependency,
+        //   new compiler.webpack.dependencies.NullDependency.Template()
+        // );
 
-        const handler = (parser: any) => {
-          parser.hooks.program.tap("MyPlugin", (ast: any) => {
-            const mod =
-              /** @type {import("webpack").NormalModule} */ parser.state.module;
+        // const handler = (parser: any) => {
+        //   parser.hooks.program.tap("MyPlugin", (ast: any) => {
+        //     const mod =
+        //       /** @type {import("webpack").NormalModule} */ parser.state.module;
 
-            if (mod.resource !== rsdResource) return;
+        //     if (mod.resource !== rsdResource) return;
 
-            let attached = 0;
-            for (const plugin of plugins) {
-              if (plugin._options.remotes) {
-                for (const key of Object.keys(plugin._options.remotes)) {
-                  attached++;
-                  const name = `rsc/remote/client/${key}`;
-                  const block = new compiler.webpack.AsyncDependenciesBlock(
-                    {
-                      name,
-                    },
-                    null,
-                    name
-                  );
-                  block.addDependency(new ContainerReferenceDependency(key));
+        //     let attached = 0;
+        //     for (const plugin of plugins) {
+        //       if (plugin._options.remotes) {
+        //         for (const key of Object.keys(plugin._options.remotes)) {
+        //           attached++;
+        //           const name = `rsc/remote/client/${key}`;
+        //           const block = new compiler.webpack.AsyncDependenciesBlock(
+        //             {
+        //               name,
+        //             },
+        //             null,
+        //             name
+        //           );
+        //           block.addDependency(new ContainerReferenceDependency(key));
 
-                  mod.addBlock(block);
-                }
-              }
-            }
+        //           mod.addBlock(block);
+        //         }
+        //       }
+        //     }
 
-            if (process.env.DEBUG === "1") {
-              console.log(
-                `ℹ ${compiler.options.name} attached ${attached} remotes to react-server-dom-webpack\n`
-              );
-            }
-          });
-        };
+        //     if (process.env.DEBUG === "1") {
+        //       console.log(
+        //         `ℹ ${compiler.options.name} attached ${attached} remotes to react-server-dom-webpack\n`
+        //       );
+        //     }
+        //   });
+        // };
 
-        normalModuleFactory.hooks.parser
-          .for("javascript/auto")
-          .tap("HarmonyModulesPlugin", handler);
+        // normalModuleFactory.hooks.parser
+        //   .for("javascript/auto")
+        //   .tap("HarmonyModulesPlugin", handler);
 
-        normalModuleFactory.hooks.parser
-          .for("javascript/esm")
-          .tap("HarmonyModulesPlugin", handler);
+        // normalModuleFactory.hooks.parser
+        //   .for("javascript/esm")
+        //   .tap("HarmonyModulesPlugin", handler);
 
-        normalModuleFactory.hooks.parser
-          .for("javascript/dynamic")
-          .tap("HarmonyModulesPlugin", handler);
+        // normalModuleFactory.hooks.parser
+        //   .for("javascript/dynamic")
+        //   .tap("HarmonyModulesPlugin", handler);
 
         /**
          *

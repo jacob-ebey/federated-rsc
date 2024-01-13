@@ -30,14 +30,14 @@ export function createRequestHandler(routes: AgnosticDataRouteObject[]) {
           {},
           {
             get(_, prop, __) {
-              const [___, ...exposedRest] = String(prop).split(":");
-              const [____, ...exportedRest] = exposedRest.join(":").split("#");
+              const [rscId, ...exposedRest] = String(prop).split(":");
+              const [exposed, ...exportedRest] = exposedRest.join(":").split("#");
               const exported = exportedRest.join("#");
-
+              const id = `${rscId}:${exposed}`;
               return {
-                id: prop,
+                id,
                 name: exported,
-                chunks: [prop],
+                chunks: [id],
                 async: true,
               };
             },
