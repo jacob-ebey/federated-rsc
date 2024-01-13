@@ -5,11 +5,10 @@ console.log(__webpack_require__.p)
 console.log('federation',require.federation)
 //@ts-ignore
 __webpack_require__.federation.initOptions.remotes.forEach((remote: any) => {
-console.log(remote.entry);
+//@ts-ignore
+console.log({entry:remote.entry, public:__webpack_require__.p});
 //@ts-ignore
 remote.entry = __webpack_require__.p + remote.entry.split('[public_path]')[1]
-    console.log(remote.entry);
-
 })
 
 //@ts-ignore

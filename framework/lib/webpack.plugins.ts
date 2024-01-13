@@ -77,7 +77,7 @@ export class ClientRSCPlugin {
             [this.options.containerName]: this.options.howToLoad,
           },
             runtimePlugins:[
-require.resolve('./runtimePlugin')
+                require.resolve('./runtimePlugin')
             ],
           shared: this.options.shared,
           remoteType: this.options.libraryType === 'var' ? 'script' : 'commonjs-static',

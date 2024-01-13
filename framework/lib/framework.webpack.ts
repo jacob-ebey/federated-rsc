@@ -364,9 +364,6 @@ async function baseBrowserConfig({
     "react-server-dom-webpack/client.browser"
   );
 
-  //FIXME: just hardcode for test
-  let publicPath = containerName.includes('consumer') ? 'http://localhost:4001/' : 'http://localhost:3001/'
-
   return {
     name: "browser",
     devtool,
