@@ -33,11 +33,11 @@ export class ServerRSCPlugin {
         },
         useClientRuntime: {
           function: "registerClientReference",
-          module: "framework/client-runtime",
+          module: "framework/runtime",
         },
         useServerRuntime: {
           function: "registerServerReference",
-          module: "framework/server-runtime",
+          module: "framework/runtime",
         },
         onModuleFound(id, type) {
           if (type === "use client") {
@@ -76,7 +76,6 @@ export class ClientRSCPlugin {
       shared,
       libraryType,
     } = this.options;
-    const isServer = this.options.libraryType !== "var";
 
     rscClientPlugin.webpack({
       include: /\.[mc]?[tj]sx?$/,
@@ -89,7 +88,7 @@ export class ClientRSCPlugin {
       },
       useServerRuntime: {
         function: "registerServerReference",
-        module: "framework/server-runtime",
+        module: "framework/runtime",
       },
       onModuleFound(id, type) {
         if (type === "use server") {
@@ -103,7 +102,7 @@ export class ClientRSCPlugin {
         {
           // isServer,
           name: containerName,
-          exposes: Array.from(this.options.clientModules).reduce(
+          exposes: Array.from(clientModules).reduce(
             (p, c) =>
               Object.assign(p, {
                 [exposedNameFromResource(cwd, c)]: c,

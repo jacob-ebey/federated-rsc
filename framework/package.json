@@ -10,8 +10,8 @@
   "bin": {
     "remix": "./bin/remix.cjs"
   },
-  "main": "dist/framework.server.node.js",
-  "types": "dist/framework.server.node.d.ts",
+  "main": "dist/framework.js",
+  "types": "dist/framework.d.ts",
   "exports": {
     ".": {
       "types": "./dist/framework.d.ts",
@@ -35,12 +35,12 @@
       },
       "default": "./server-only.js"
     },
-    "./client-runtime": {
-      "types": "./dist/framework.client-runtime.d.ts",
+    "./runtime": {
+      "types": "./dist/framework.runtime.d.ts",
       "react-server": {
-        "default": "./dist/framework.client-runtime.server.js"
+        "default": "./dist/framework.runtime.server.js"
       },
-      "default": "./dist/framework.client-runtime.client.js"
+      "default": "./dist/framework.runtime.client.js"
     },
     "./server-runtime": {
       "types": "./dist/framework.server-runtime.d.ts",

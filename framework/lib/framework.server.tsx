@@ -13,9 +13,6 @@ declare global {
   var ___CONTAINER_NAME___: string;
 }
 
-// @ts-expect-error
-console.log(Outlet, Outlet.$$typeof, Outlet.$$id);
-
 export function createRequestHandler(routes: AgnosticDataRouteObject[]) {
   return async (request: Request) => {
     const handler = createStaticRequestHandler(routes);

@@ -1,3 +1,4 @@
+import * as path from "node:path";
 import webpack from "webpack";
 
 import { getWebpackConfig } from "framework/webpack";
@@ -20,7 +21,11 @@ export async function build() {
     })
   );
   console.timeEnd("server");
-  console.log(clientModules);
+
+  console.log("\nCreating container for client modules:");
+  for (const clientModule of clientModules) {
+    console.log(`  - ${path.relative(cwd, clientModule)}`);
+  }
 
   console.log("\nBuilding ssr and browser bundles...");
   console.time("ssr");
