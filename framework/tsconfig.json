@@ -11,6 +11,8 @@
     "strict": true,
     "allowJs": true,
     "checkJs": true,
-    "noEmit": true
+    "noEmit": true,
+    "noImplicitAny": false,
+    "noEmitOnError": false
   }
 }

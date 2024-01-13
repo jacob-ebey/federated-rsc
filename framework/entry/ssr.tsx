@@ -2,7 +2,7 @@ import * as stream from "node:stream";
 
 import * as React from "react";
 import RDS from "react-dom/server";
-// @ts-expect-error - no types
+//@ts-expect-error - no types
 import RSD from "react-server-dom-webpack/client";
 
 import { InlinePayload } from "framework/ssr";

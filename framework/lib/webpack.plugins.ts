@@ -5,7 +5,6 @@ import extractUrlAndGlobal from "webpack/lib/util/extractUrlAndGlobal";
 import { RawSource } from "webpack-sources";
 //@ts-ignore
 import {ModuleFederationPlugin} from '@module-federation/enhanced'
-//@ts-ignore
 import { exposedNameFromResource } from "./utils";
 
 export class ServerRSCPlugin {

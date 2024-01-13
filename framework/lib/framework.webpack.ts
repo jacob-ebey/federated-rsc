@@ -7,7 +7,6 @@ import webpack from "webpack";
 import WebpackBar from "webpackbar";
 import nodeExternals from "webpack-node-externals";
 import VirtualModulesPlugin from "webpack-virtual-modules";
-// @ts-expect-error
 import VisualizerPlugin from "webpack-visualizer-plugin2";
 
 import {

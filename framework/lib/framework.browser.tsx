@@ -1,6 +1,5 @@
 import * as React from "react";
 import { hydrateRoot } from "react-dom/client";
-
 import RSD from "react-server-dom-webpack/client";
 import { Location, type LocationState } from "framework/client";
 

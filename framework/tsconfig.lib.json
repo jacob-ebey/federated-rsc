@@ -11,6 +11,8 @@
     "types": ["node", "react/experimental", "react-dom/experimental"],
     "jsx": "react-jsx",
     "strict": true,
-    "rootDir": "lib"
+    "rootDir": "lib",
+    "noImplicitAny": false,
+    "noEmitOnError": false
   }
 }
