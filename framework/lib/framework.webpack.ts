@@ -72,10 +72,10 @@ export async function getWebpackConfig(
   const containerName = snakeCase(pkgJson.name);
 
   let config: webpack.Configuration & { name: "server" | "ssr" | "browser" };
+
   switch (build) {
     case "server":
       const routesDir = path.resolve(cwd, "app/routes");
-
       config = await baseServerConfig({
         clientModules,
         containerName,
@@ -112,7 +112,6 @@ export async function getWebpackConfig(
       });
       break;
   }
-
   const webpackConfigPath = await findFileIfExists(cwd, [
     "webpack.config.mjs",
     "webpack.config.js",
@@ -365,6 +364,9 @@ async function baseBrowserConfig({
     "react-server-dom-webpack/client.browser"
   );
 
+  //FIXME: just hardcode for test
+  let publicPath = containerName.includes('consumer') ? 'http://localhost:4001/' : 'http://localhost:3001/'
+
   return {
     name: "browser",
     devtool,
@@ -438,7 +440,7 @@ async function findFileIfExists(dir: string, names: string[]) {
         return file;
       }
     } catch (err) {
-      // @ts-expect-error
+      // @ts-ignore
       if (err.code !== "ENOENT") {
         throw err;
       }
