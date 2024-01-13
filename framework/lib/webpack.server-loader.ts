@@ -78,6 +78,7 @@ async function parseRSCMetadata(
       node.expression.left.property.type === "IdentifierName"
     ) {
       let name = node.expression.left.property.name;
+      //@ts-ignore
       moduleExports.push({
         identifier,
         localName: name,
@@ -92,6 +93,8 @@ async function parseRSCMetadata(
         node.declaration?.type === "ClassDeclaration")
     ) {
       let name = node.declaration.id.name;
+      //@ts-ignore
+
       moduleExports.push({
         identifier,
         localName: name,
@@ -104,6 +107,8 @@ async function parseRSCMetadata(
       for (const specifier of node.specifiers) {
         let localName = specifier.local.name;
         let publicName = specifier.exported.name;
+        //@ts-ignore
+
         moduleExports.push({
           identifier,
           localName,
@@ -119,6 +124,8 @@ async function parseRSCMetadata(
       }
 
       let name = node.declaration.id.name;
+      //@ts-ignore
+
       moduleExports.push({
         identifier,
         localName: name,
