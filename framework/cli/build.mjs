@@ -1,5 +1,8 @@
 import * as path from "node:path";
+
 import webpack from "webpack";
+// @ts-expect-error
+import { formatMessages } from "webpack-format-messages";
 
 import { getWebpackConfig } from "framework/webpack";
 
@@ -10,8 +13,7 @@ export async function build() {
 
   const clientModules = new Set();
   const serverModules = new Set();
-  console.log("Building server bundle...");
-  console.time("server");
+  console.log("🧩 building server bundle...");
   await runWebpack(
     await getWebpackConfig("server", {
       clientModules,
@@ -20,16 +22,19 @@ export async function build() {
       serverModules,
     })
   );
-  console.timeEnd("server");
 
-  console.log("\nCreating container for client modules:");
-  for (const clientModule of clientModules) {
-    console.log(`  - ${path.relative(cwd, clientModule)}`);
+  const clientModulesArray = Array.from(clientModules);
+  console.log(`\nℹ client modules in container: ${clientModulesArray.length}`);
+  if (process.env.DEBUG) {
+    for (const clientModule of clientModules) {
+      console.log(`  - file://${path.relative(cwd, clientModule)}`);
+    }
   }
+  console.log();
 
-  console.log("\nBuilding ssr and browser bundles...");
-  console.time("ssr");
-  console.time("browser");
+  console.log("🧩 building ssr bundle...");
+  console.log("🧩 building browser bundle...");
+  console.log();
   await Promise.all([
     runWebpack(
       await getWebpackConfig("ssr", {
@@ -38,8 +43,7 @@ export async function build() {
         mode,
         serverModules,
       })
-    ).then(() => console.timeEnd("ssr")),
-
+    ),
     runWebpack(
       await getWebpackConfig("browser", {
         clientModules,
@@ -47,8 +51,9 @@ export async function build() {
         mode,
         serverModules,
       })
-    ).then(() => console.timeEnd("browser")),
+    ),
   ]);
+  console.log();
 }
 
 /**
@@ -56,18 +61,62 @@ export async function build() {
  * @returns
  */
 function runWebpack(config) {
+  console.time(`🎉 built ${config.name} bundle in`);
+  const endTimer = startTimer();
   return new Promise(async (resolve, reject) => {
     webpack(config, (err, stats) => {
       if (err) {
         return reject(err);
       }
       if (!stats) {
-        return reject(new Error("No stats returned from webpack"));
+        return reject(new Error("no stats returned from webpack"));
       }
-      if (stats.hasErrors()) {
-        return reject(new Error(stats.toString()));
+      const messages = formatMessages(stats);
+
+      const errorsOrWarnings =
+        !!messages.errors.length || !!messages.warnings.length;
+
+      if (errorsOrWarnings) console.log("\n\n");
+      if (messages.errors.length) {
+        messages.errors.forEach(
+          /**
+           * @param {string} e
+           */
+          (e) => console.log(e)
+        );
+        console.log("\n\n");
+        return reject(new Error(`${config.name} build failed`));
       }
+
+      if (messages.warnings.length) {
+        messages.warnings.forEach(
+          /**
+           * @param {string} e
+           */
+          (e) => console.log(e)
+        );
+      }
+      if (errorsOrWarnings) console.log("\n\n");
       resolve(stats);
     });
-  });
+  })
+    .then((stats) => {
+      endTimer(`🎉 built ${config.name} bundle in`);
+      return stats;
+    })
+    .catch((err) => {
+      endTimer(`❌ built ${config.name} bundle in`);
+      throw err;
+    });
+}
+
+function startTimer() {
+  let start = process.hrtime.bigint();
+  /**
+   * @param {string} msg
+   */
+  return (msg) => {
+    const end = process.hrtime.bigint();
+    console.log(`${msg} ${(end - start) / 1000000n}ms`);
+  };
 }

@@ -3,6 +3,8 @@
 import("../cli/build.mjs")
   .then(({ build }) => build())
   .catch((reason) => {
-    console.error(reason);
+    if (process.env.DEBUG) {
+      console.error(reason);
+    }
     process.exit(1);
   });

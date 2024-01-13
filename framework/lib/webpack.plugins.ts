@@ -281,8 +281,8 @@ export class ClientRSCPlugin {
             }
 
             if (process.env.DEBUG === "1") {
-              console.debug(
-                `Attached ${attached} remotes to react-server-dom-webpack`
+              console.log(
+                `ℹ ${compiler.options.name} attached ${attached} remotes to react-server-dom-webpack\n`
               );
             }
           });

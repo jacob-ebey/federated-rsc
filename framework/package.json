@@ -88,6 +88,7 @@
     "react-server-dom-webpack": "0.0.0-experimental-1d5667a12-20240102",
     "unplugin-rsc": "0.0.3",
     "webpack": "^5.89.0",
+    "webpack-format-messages": "^3.0.1",
     "webpack-node-externals": "^3.0.0",
     "webpack-sources": "^3.2.3",
     "webpack-virtual-modules": "^0.6.1",

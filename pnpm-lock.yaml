@@ -115,6 +115,9 @@ importers:
       webpack:
         specifier: ^5.89.0
         version: 5.89.0
+      webpack-format-messages:
+        specifier: ^3.0.1
+        version: 3.0.1
       webpack-node-externals:
         specifier: ^3.0.0
         version: 3.0.0
@@ -1359,6 +1362,11 @@ packages:
     hasBin: true
     dev: false
 
+  /kleur@4.1.5:
+    resolution: {integrity: sha512-o+NO+8WrRiQEE4/7nwRJhN1HWpVmJm511pBHUxPLtp0BUISzlBplORYSmTclCnJvQq2tKu/sgl3xVpkc7ZWuQQ==}
+    engines: {node: '>=6'}
+    dev: false
+
   /loader-runner@4.3.0:
     resolution: {integrity: sha512-3R/1M+yS3j5ou80Me59j7F9IMs4PXs3VqRrm0TU3AbKPxlmpoY1TNscJV/oGJXo8qCatFGTfDbY6W6ipGOYXfg==}
     engines: {node: '>=6.11.5'}
@@ -1765,6 +1773,13 @@ packages:
   /webidl-conversions@3.0.1:
     resolution: {integrity: sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==}
     dev: true
+
+  /webpack-format-messages@3.0.1:
+    resolution: {integrity: sha512-fugZKtOjc7Qz2sQHIJlHnGeBAg9C7lHfrcZVge5HT9pNfNWgedlZVtoPg1E/7cdrUuIczuqFex2wtGfp6F+DgA==}
+    engines: {node: '>=6'}
+    dependencies:
+      kleur: 4.1.5
+    dev: false
 
   /webpack-node-externals@3.0.0:
     resolution: {integrity: sha512-LnL6Z3GGDPht/AigwRh2dvL9PQPFQ8skEpVrWZXLWBYmqcaojHNN0onvHzie6rq7EWKrrBfPYqNEzTJgiwEQDQ==}
