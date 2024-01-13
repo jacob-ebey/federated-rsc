@@ -1,5 +1,4 @@
 import * as React from "react";
-// @ts-expect-error - no types
 import RSD from "react-server-dom-webpack/client";
 
 declare global {

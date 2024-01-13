@@ -10,6 +10,7 @@ export async function InlinePayload({
   let initialScript = null;
   if (!decoder) {
     decoder = new TextDecoder();
+    //@ts-ignore
     initialScript = (
       <script
         dangerouslySetInnerHTML={{
