@@ -6,7 +6,7 @@ console.log('federation',require.federation)
 //@ts-ignore
 __webpack_require__.federation.initOptions.remotes.forEach((remote: any) => {
     if(remote.entry.includes('[public_path]')) {
-//@ts-ignore
+        //@ts-ignore
         remote.entry = __webpack_require__.p + remote.entry.split('[public_path]')[1]
     }
 })
@@ -21,15 +21,12 @@ export default function (): FederationRuntimePlugin {
             console.log('init', args.userOptions.remotes);
             console.log('remotes',args.options.remotes)
             // loop over object
-            for (const remote of args.options.remotes) {
-                console.log(remote);
-                // args.options.remotes[key]
-            }
             //@ts-ignore
             return args;
         },
         errorLoadRemote({ id, error, from, origin }) {
-            console.error({id, error, from}, 'offline');
+            console.error(error)
+            console.error({id, from}, 'offline');
             // const pg = function () {
             //     console.error(id, 'offline', error);
             //     return null;

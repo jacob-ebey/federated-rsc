@@ -2,9 +2,9 @@
 // const { UniversalFederationPlugin } = universe;
 import mfp from "@module-federation/enhanced";
 //@ts-ignore
-const { ModuleFederationPlugin } = mfp;
+const {ModuleFederationPlugin} = mfp;
 /** @type {import("framework/webpack").ConfigFunction} */
-export default (config, { build, webpack }) => {
+export default (config, {build, webpack}) => {
   if (!config.plugins) {
     config.plugins = [];
   }
@@ -17,6 +17,9 @@ export default (config, { build, webpack }) => {
       config.plugins.push(
         new ModuleFederationPlugin({
           name: "_example_consumer",
+          runtimePlugins: [
+            './runtimePlugin'
+          ],
           remotes: {
             _example_basic:
               "_example_basic@http://localhost:3001/dist/browser/_example_basic.js",

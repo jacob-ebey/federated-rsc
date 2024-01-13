@@ -153,7 +153,7 @@ export class ClientRSCPlugin {
                   ]
                 )}).then(${runtimeTemplate.basicFunction(
                   ["container"],
-                  ["return container.get(exposed);"]
+                  ["console.log('container request'); return container.get(exposed);"]
                 )}).then(${runtimeTemplate.basicFunction(
                   ["factory"],
                   [
