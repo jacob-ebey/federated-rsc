@@ -1,14 +1,10 @@
 import * as path from "node:path";
 
 import type * as webpack from "webpack";
-// @ts-expect-error - no types
 import extractUrlAndGlobal from "webpack/lib/util/extractUrlAndGlobal";
 import { RawSource } from "webpack-sources";
 //@ts-ignore
-import {
-
-    ModuleFederationPlugin
-} from '@module-federation/enhanced'
+import {ModuleFederationPlugin} from '@module-federation/enhanced'
 //@ts-ignore
 import { exposedNameFromResource } from "./utils";
 
@@ -92,10 +88,6 @@ export class ClientRSCPlugin {
               }
             : undefined,
         }
-        // {
-        //   ModuleFederationPlugin:
-        //     compiler.webpack.container.ModuleFederationPlugin,
-        // }
       );
     clientRSCContainer.apply(compiler);
 
