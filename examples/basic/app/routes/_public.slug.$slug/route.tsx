@@ -1,3 +1,3 @@
 export function Component() {
-  return <h1>Hello Slug</h1>;
+	return <h1>Hello Slug</h1>;
 }

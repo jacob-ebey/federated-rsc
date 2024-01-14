@@ -6,7 +6,7 @@
     "target": "ES2022",
     "lib": ["DOM", "ES2022"],
     "types": ["node", "react/experimental", "react-dom/experimental"],
-    "jsx": "react-jsx",
+    "jsx": "react",
     "allowImportingTsExtensions": true,
     "strict": true,
     "allowJs": true,

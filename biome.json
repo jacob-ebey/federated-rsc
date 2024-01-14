@@ -1,0 +1,30 @@
+{
+	"$schema": "https://biomejs.dev/schemas/1.5.1/schema.json",
+	"files": {
+		"ignoreUnknown": true,
+		"include": [
+			"**/*.ts",
+			"**/*.mts",
+			"**/*.tsx",
+			"**/*.js",
+			"**/*.mjs",
+			"**/*.cjs",
+			"**/*.jsx",
+			"**/*.json",
+			"**/*.md"
+		],
+		"ignore": ["node_modules", "dist"]
+	},
+	"organizeImports": {
+		"enabled": true
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"recommended": true
+		}
+	},
+	"formatter": {
+		"enabled": true
+	}
+}

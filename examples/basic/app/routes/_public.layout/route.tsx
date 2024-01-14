@@ -1,3 +1,3 @@
 export function Component({ children }: { children: React.ReactNode }) {
-  return children;
+	return children;
 }

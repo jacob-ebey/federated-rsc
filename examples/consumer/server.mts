@@ -12,21 +12,21 @@ dns.setDefaultResultOrder("ipv4first");
 const app = new Hono();
 
 app.use(
-  "/dist/browser/*",
-  cors({ origin: "*", allowMethods: ["HEAD", "GET"] }),
-  serveStatic()
+	"/dist/browser/*",
+	cors({ origin: "*", allowMethods: ["HEAD", "GET"] }),
+	serveStatic(),
 );
 
 app.all("*", async (c) => {
-  return handler(c.req.raw);
+	return handler(c.req.raw);
 });
 
 serve(
-  {
-    ...app,
-    port: 4001,
-  },
-  (info) => {
-    console.log(`RSC listening on http://localhost:${info.port}`);
-  }
+	{
+		...app,
+		port: 4001,
+	},
+	(info) => {
+		console.log(`RSC listening on http://localhost:${info.port}`);
+	},
 );
