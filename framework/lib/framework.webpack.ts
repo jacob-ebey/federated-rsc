@@ -411,7 +411,7 @@ async function baseBrowserConfig({
         rsdResource,
         containerName,
         howToLoad: `${containerName}@[public_path]${containerName}.js`,
-        libraryType: "var",
+        libraryType: "window",
         remoteType: "script",
         serverModules,
         shared: {

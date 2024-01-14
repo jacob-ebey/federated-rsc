@@ -1,4 +1,11 @@
+import { getHeaders, getURL } from "framework";
+
 export function Component({ children }: { children: React.ReactNode }) {
+  const headers = getHeaders();
+  const url = getURL();
+
+  const renderedFor = headers.get("X-Forwarded-For") || url.href;
+
   return (
     <html>
       <head>
@@ -22,6 +29,7 @@ export function Component({ children }: { children: React.ReactNode }) {
               </li>
             </ul>
           </nav>
+          <p>RENDERED FOR: {renderedFor}</p>
         </header>
         {children}
       </body>

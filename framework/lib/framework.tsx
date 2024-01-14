@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { type Params } from "@remix-run/router";
 
 import {
@@ -32,11 +33,25 @@ export async function RSCFrame({
   children?: React.ReactNode;
   url: string | URL;
 }) {
-  const response = await fetch(url, {
-    headers: {
-      Accept: "text/x-component",
-    },
-  });
+  const serverContextRef = INTERNAL_getServerContextRef();
+  if (!serverContextRef.current) {
+    throw new Error("No server context found");
+  }
+  const { request } = serverContextRef.current;
+
+  const headers = new Headers(request.headers);
+  headers.set("Accept", "text/x-component");
+  headers.set("X-Forwarded-For", request.url);
+
+  const response = await fetch(
+    new Request(url, {
+      body: request.body,
+      headers,
+      method: request.method,
+      signal: request.signal,
+      window: null,
+    })
+  );
 
   if (!response.headers.get("Content-Type")?.match(/\btext\/x-component\b/)) {
     throw new Error(
@@ -67,4 +82,57 @@ export async function RSCFrame({
       {children}
     </StreamReader>
   );
+}
+
+export type AppContext = unknown;
+
+interface ServerContext {
+  appContext?: AppContext;
+  request: Request;
+}
+
+const INTERNAL_getServerContextRef = cache(
+  (): { current?: ServerContext } => ({})
+);
+export function INTERNAL_SeverContextProvider({
+  appContext,
+  children,
+  request,
+}: {
+  appContext?: AppContext;
+  children: React.ReactNode;
+  request: Request;
+}) {
+  const serverContextRef = INTERNAL_getServerContextRef();
+  const serverContext: ServerContext = {
+    appContext,
+    request,
+  };
+  serverContextRef.current = serverContext;
+
+  return children;
+}
+
+export function getURL(): URL {
+  const serverContextRef = INTERNAL_getServerContextRef();
+  if (!serverContextRef.current) {
+    throw new Error("No server context found");
+  }
+  return new URL(serverContextRef.current.request.url);
+}
+
+export function getHeaders(): Headers {
+  const serverContextRef = INTERNAL_getServerContextRef();
+  if (!serverContextRef.current) {
+    throw new Error("No server context found");
+  }
+  return new Headers(serverContextRef.current.request.headers);
+}
+
+export function getAppContext(): AppContext {
+  const serverContextRef = INTERNAL_getServerContextRef();
+  if (!serverContextRef.current) {
+    throw new Error("No server context found");
+  }
+  return serverContextRef.current.appContext;
 }

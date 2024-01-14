@@ -6,6 +6,7 @@ import {
   type Params,
 } from "@remix-run/router";
 
+import { INTERNAL_SeverContextProvider } from "framework";
 import { Outlet, OutletProvider } from "framework/client";
 import { renderToReadableStream } from "framework/react.server";
 
@@ -140,6 +141,13 @@ export function createStaticRequestHandler(routes: AgnosticDataRouteObject[]) {
     } else {
       root = toRender;
     }
+
+    // TODO: Plumb through an appContext for the "adapter" layer to provide context to the app through getAppContext()
+    root = (
+      <INTERNAL_SeverContextProvider request={request}>
+        {root}
+      </INTERNAL_SeverContextProvider>
+    );
 
     return {
       root,

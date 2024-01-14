@@ -1,7 +1,7 @@
 {
   "private": true,
   "scripts": {
-    "build": "pnpm -r build",
+    "build": "pnpm -r --filter framework --filter @example/* build",
     "start": "pnpm --filter @example/* start"
   },
   "pnpm": {

@@ -6,10 +6,14 @@ import RSDS from "react-server-dom-webpack/server";
 export function renderToReadableStream(
   root: React.ReactNode,
   manifest?: unknown,
-  options?: { signal?: AbortSignal }
+  options?: { signal?: AbortSignal; onPostpone?: (...args: unknown[]) => void }
 ) {
-  const { signal } = options ?? {};
-  const { pipe, abort } = RSDS.renderToPipeableStream(root, manifest, options);
+  const { signal, ...sharedOptions } = options ?? {};
+  const { pipe, abort } = RSDS.renderToPipeableStream(
+    root,
+    manifest,
+    sharedOptions
+  );
 
   signal?.addEventListener("abort", abort, { once: true });
 
