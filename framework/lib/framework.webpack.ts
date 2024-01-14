@@ -537,7 +537,7 @@ async function generateServerRoutes(outFile: string, routesDir: string) {
       [
         "id: " + JSON.stringify(route.id) + ",",
         ...(route.index ? ["index: true,"] : []),
-        ...(path ? ["path: " + JSON.stringify(path) + ","] : []),
+        "path: " + JSON.stringify(path) + ",",
         "lazy: () => import(" + JSON.stringify(route.relative) + "),",
         ...(!route.children.length
           ? []

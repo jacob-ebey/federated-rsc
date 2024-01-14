@@ -77,7 +77,8 @@
     },
     "./entry/browser": "./entry/browser.tsx",
     "./entry/server": "./entry/server.tsx",
-    "./entry/ssr": "./entry/ssr.tsx"
+    "./entry/ssr": "./entry/ssr.tsx",
+    "./package.json": "./package.json"
   },
   "scripts": {
     "build": "tsc -p tsconfig.lib.json"
