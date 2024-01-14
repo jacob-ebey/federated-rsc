@@ -1,13 +1,17 @@
 {
-  "private": true,
-  "scripts": {
-    "build": "pnpm -r --filter framework --filter @example/* build",
-    "start": "pnpm --filter @example/* start"
-  },
-  "pnpm": {
-    "overrides": {
-      "react": "0.0.0-experimental-1d5667a12-20240102",
-      "react-dom": "0.0.0-experimental-1d5667a12-20240102"
-    }
-  }
+	"private": true,
+	"scripts": {
+		"build": "pnpm -r --filter framework --filter @fixture/* build",
+		"check": "biome check **/*",
+		"start": "pnpm --filter @fixture/* start"
+	},
+	"pnpm": {
+		"overrides": {
+			"react": "0.0.0-experimental-1d5667a12-20240102",
+			"react-dom": "0.0.0-experimental-1d5667a12-20240102"
+		}
+	},
+	"devDependencies": {
+		"@biomejs/biome": "1.5.1"
+	}
 }
