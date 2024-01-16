@@ -1,10 +1,71 @@
-export function Component() {
-	return <h1>Product Page</h1>;
+import { RouteProps, getURL } from "framework";
+
+import { Separator } from "@/components/ui/separator";
+import { AddToCartForm } from "./form";
+import { ProductHeader, ProductImages } from "./product";
+import { ProductReviews } from "./reviews";
+
+export async function Component({ params: { handle } }: RouteProps<"handle">) {
+	const { searchParams } = getURL();
+	const variables = {
+		handle,
+		selectedOptions: [],
+	};
+
+	const url = new URL("https://mock.shop/api");
+	url.searchParams.set("query", query);
+	url.searchParams.set("variables", JSON.stringify(variables));
+	const request = await fetch(url);
+	const response = await request.json();
+
+	const product = response.data?.product;
+	if (!product) {
+		throw new Error("No product");
+	}
+
+	const productOptionValues = new Map<string, Set<string>>(
+		product.options.map((option: { name: string; values: string[] }) => [
+			option.name,
+			new Set(option.values),
+		]),
+	);
+	const selectedOptions: Record<string, string> = {};
+	for (const [key, value] of searchParams) {
+		if (productOptionValues.get(key)?.has(value)) {
+			selectedOptions[key] = value;
+		}
+	}
+
+	const header = (
+		<ProductHeader
+			title={product.title}
+			description={product.description}
+			priceRange={product.priceRange}
+		/>
+	);
+
+	return (
+		<div className="container grid gap-6 items-start py-6 md:grid-cols-2 lg:gap-12">
+			<div className="grid gap-3 items-start md:grid-cols-5">
+				<div className="md:hidden">{header}</div>
+				<ProductImages />
+			</div>
+			<div className="grid gap-4 items-start md:gap-10">
+				<div className="hidden md:block">{header}</div>
+				<AddToCartForm
+					options={product.options}
+					selectedOptions={selectedOptions}
+				/>
+				<Separator />
+				<ProductReviews />
+			</div>
+		</div>
+	);
 }
 
 const query = `
-  query Product($selectedOptions: [SelectedOptionInput!]!) {
-    product(handle: "men-crewneck") {
+  query Product($handle: String, $selectedOptions: [SelectedOptionInput!]!) {
+    product(handle: $handle) {
       id
       title
       description

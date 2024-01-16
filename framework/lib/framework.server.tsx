@@ -7,7 +7,10 @@ import {
 } from "@remix-run/router";
 
 import { INTERNAL_SeverContextProvider, type RouteProps } from "framework";
-import { INTERNAL_Outlet, INTERNAL_OutletProvider } from "framework/client";
+import {
+	INTERNAL_Outlet,
+	INTERNAL_OutletProvider,
+} from "framework/client.internal";
 import { renderToReadableStream } from "framework/react.server";
 
 declare global {
@@ -32,9 +35,10 @@ export function createRequestHandler(routes: AgnosticDataRouteObject[]) {
 					{},
 					{
 						get(_, prop, __) {
-							const [___, ...exposedRest] = String(prop).split(":");
+							const [rscId, ...exposedRest] = String(prop).split(":");
 							const [____, ...exportedRest] = exposedRest.join(":").split("#");
 							const exported = exportedRest.join("#");
+							const remoteId = rscId.slice(18);
 
 							return {
 								id: prop,

@@ -197,6 +197,7 @@ async function baseServerConfig({
 					"framework",
 					"framework/server",
 					"framework/client",
+					"framework/client.internal",
 					"framework/entry/server",
 				],
 			}),
@@ -282,7 +283,9 @@ async function baseSSRConfig({
 		externals: [
 			nodeExternals({
 				allowlist: [
+					"framework/ssr",
 					"framework/client",
+					"framework/client.internal",
 					"framework/react.client",
 					"framework/entry/ssr",
 					"react-server-dom-webpack/client",
@@ -326,12 +329,12 @@ async function baseSSRConfig({
 				howToLoad: `commonjs ./${containerName}.js`,
 				serverModules,
 				shared: {
-					react: pkgJson.dependencies.react,
-					"react/jsx-runtime": pkgJson.dependencies.react,
-					"react-dom": pkgJson.dependencies["react-dom"],
-					framework: { singleton: true },
-					"framework/client": { singleton: true },
-					"framework/react.client": { singleton: true },
+					"react/": { version: pkgJson.dependencies.react, singleton: true },
+					"react-dom/": {
+						version: pkgJson.dependencies["react-dom"],
+						singleton: true,
+					},
+					"framework/": { version: "*", singleton: true },
 					"react-server-dom-webpack/client": { singleton: true },
 				},
 			}),
@@ -423,12 +426,12 @@ async function baseBrowserConfig({
 				remoteType: "script",
 				serverModules,
 				shared: {
-					react: pkgJson.dependencies.react,
-					"react/jsx-runtime": pkgJson.dependencies.react,
-					"react-dom": pkgJson.dependencies["react-dom"],
-					framework: { singleton: true },
-					"framework/client": { singleton: true },
-					"framework/react.client": { singleton: true },
+					"react/": { version: pkgJson.dependencies.react, singleton: true },
+					"react-dom/": {
+						version: pkgJson.dependencies["react-dom"],
+						singleton: true,
+					},
+					"framework/": { version: "*", singleton: true },
 					"react-server-dom-webpack/client": { singleton: true },
 				},
 			}),

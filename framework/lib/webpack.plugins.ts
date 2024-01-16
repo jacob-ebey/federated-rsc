@@ -171,6 +171,7 @@ export class ClientRSCPlugin {
 						[
 							"if (typeof chunkId === 'string' && chunkId.startsWith('rsc/remote/client/')) {",
 							Template.indent([
+								// TODO: MAKE THIS WORK AND NOT DOUBLE LOAD THINGS BY USING THE FEDERATION RUNTIME APIs
 								`let existing = ${RuntimeGlobals.moduleCache}[chunkId];`,
 								"if (existing)",
 								"if (existing.loaded) return Promise.resolve();",

@@ -39,7 +39,6 @@ module.exports = (config, { build, webpack }) => {
 		case "browser":
 			config.plugins.push(
 				new ModuleFederationPlugin({
-					library: { type: "window" },
 					remoteType: "script",
 					remotes: Object.entries(REMOTES).reduce(
 						(acc, [name, remote]) => {
@@ -48,13 +47,21 @@ module.exports = (config, { build, webpack }) => {
 						},
 						/** @type {Record<string, string>} */ ({}),
 					),
+					shared: {
+						"react/": { version: pkgJson.dependencies.react, singleton: true },
+						"react-dom/": {
+							version: pkgJson.dependencies["react-dom"],
+							singleton: true,
+						},
+						"framework/": { singleton: true },
+						"react-server-dom-webpack/client": { singleton: true },
+					},
 				}),
 			);
 			break;
 		case "ssr":
 			config.plugins.push(
 				new ModuleFederationPlugin({
-					library: { type: "commonjs-static" },
 					remoteType: "commonjs",
 					remotes: Object.entries(REMOTES).reduce(
 						(acc, [name, remote]) => {
@@ -64,12 +71,12 @@ module.exports = (config, { build, webpack }) => {
 						/** @type {Record<string, string>} */ ({}),
 					),
 					shared: {
-						react: pkgJson.dependencies.react,
-						"react/jsx-runtime": pkgJson.dependencies.react,
-						"react-dom": pkgJson.dependencies["react-dom"],
-						framework: { singleton: true },
-						"framework/client": { singleton: true },
-						"framework/react.client": { singleton: true },
+						"react/": { version: pkgJson.dependencies.react, singleton: true },
+						"react-dom/": {
+							version: pkgJson.dependencies["react-dom"],
+							singleton: true,
+						},
+						"framework/": { singleton: true },
 						"react-server-dom-webpack/client": { singleton: true },
 					},
 				}),

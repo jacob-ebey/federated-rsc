@@ -1,6 +1,7 @@
 {
   "recommendations": [
     "biomejs.biome",
-    "csstools.postcss"
+    "csstools.postcss",
+    "heybourn.headwind"
   ]
 }

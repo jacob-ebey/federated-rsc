@@ -5,7 +5,7 @@ import {
 	type PromiseStream,
 	type PromiseStreamItem,
 	INTERNAL_StreamReader,
-} from "framework/client";
+} from "framework/client.internal";
 
 export { Params };
 
