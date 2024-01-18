@@ -1,11 +1,11 @@
 "use client";
 
 import {
-	type PromiseStream,
-	type PromiseStreamItem,
 	INTERNAL_Outlet,
 	INTERNAL_OutletProvider,
 	INTERNAL_StreamReader,
+	type PromiseStream,
+	type PromiseStreamItem,
 } from "framework/client";
 
 const Outlet = INTERNAL_Outlet;

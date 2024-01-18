@@ -1,4 +1,5 @@
-import { getURL, type RouteProps } from "framework";
+import { type RouteProps } from "framework";
+import { getURL } from "framework";
 
 import { FederatedRSCFrame } from "../../remotes";
 

@@ -1,8 +1,8 @@
-import * as React from "react";
 import {
 	type AgnosticDataRouteObject,
 	createStaticHandler,
 } from "@remix-run/router";
+import * as React from "react";
 
 import { INTERNAL_SeverContextProvider, type RouteProps } from "framework";
 import { renderToReadableStream } from "framework/react.server";

@@ -2,9 +2,9 @@ import { type Params } from "@remix-run/router";
 import * as React from "react";
 
 import {
+	INTERNAL_StreamReader,
 	type PromiseStream,
 	type PromiseStreamItem,
-	INTERNAL_StreamReader,
 } from "framework/client.internal";
 
 export { Params };
