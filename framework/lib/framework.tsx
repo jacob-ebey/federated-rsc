@@ -1,5 +1,7 @@
 import { type Params } from "@remix-run/router";
 import * as React from "react";
+// @ts-expect-error - no types
+import RSDS from "react-server-dom-webpack/server";
 
 import {
 	INTERNAL_StreamReader,
@@ -40,7 +42,7 @@ export async function RSCFrame({
 	if (!serverContextRef.current) {
 		throw new Error("No server context found");
 	}
-	const { request } = serverContextRef.current;
+	const { actionResult, request } = serverContextRef.current;
 
 	const headers = new Headers(request.headers);
 	headers.set("Accept", "text/x-component");
@@ -52,11 +54,19 @@ export async function RSCFrame({
 			"",
 	);
 
+	let method = request.method;
+	let body = request.body;
+	if (actionResult) {
+		method = "GET";
+		body = null;
+		headers.delete("RSC-Action");
+	}
+
 	const response = await fetch(
 		new Request(url, {
-			body: request.body,
+			body,
 			headers,
-			method: request.method,
+			method,
 			signal: request.signal,
 			// @ts-expect-error - no types
 			duplex: "half",
@@ -98,14 +108,21 @@ export async function RSCFrame({
 export type AppContext = unknown;
 
 interface ServerContext {
-	appContext?: AppContext;
+	actionResult: ActionResult;
+	appContext: AppContext;
 	request: Request;
 }
+
+export type ActionResult =
+	| null
+	| { id: string; result: unknown }
+	| { id: string; error: unknown };
 
 const INTERNAL_getServerContextRef = React.cache(
 	(): { current?: ServerContext } => ({}),
 );
-export function INTERNAL_SeverContextProvider({
+// @ts-expect-error - idk what this is about
+export async function INTERNAL_SeverContextProvider({
 	appContext,
 	children,
 	request,
@@ -115,13 +132,57 @@ export function INTERNAL_SeverContextProvider({
 	request: Request;
 }) {
 	const serverContextRef = INTERNAL_getServerContextRef();
+	const actionId = request.headers.get("RSC-Action");
+	let actionResult: null | ActionResult = null;
+	if (actionId) {
+		let action: undefined | ((...args: unknown[]) => unknown) = undefined;
+		try {
+			const [moduleId, ...exportNameRest] = actionId.split("#");
+			const exportName = exportNameRest.join("#");
+			await __webpack_require__.e(moduleId);
+			// @ts-expect-error
+			action = __webpack_require__(moduleId)[exportName];
+		} catch (error) {}
+		if (action) {
+			const body = request.headers
+				.get("Content-Type")
+				?.match(/\bmultipart\/form\-data\b/)
+				? await request.formData()
+				: await request.text();
+			const reply = await RSDS.decodeReply(body, {});
+			try {
+				const result = await action(...reply);
+				actionResult = { id: actionId, result };
+			} catch (error) {
+				actionResult = { id: actionId, error };
+			}
+		}
+	}
+
 	const serverContext: ServerContext = {
+		actionResult,
 		appContext,
 		request,
 	};
 	serverContextRef.current = serverContext;
 
 	return children;
+}
+
+export function getActionResult(action: unknown): ActionResult {
+	const serverContextRef = INTERNAL_getServerContextRef();
+	if (!serverContextRef.current) {
+		throw new Error("No server context found");
+	}
+	const _action = action as { $$id?: string };
+	if (typeof action !== "function" || !_action?.$$id) {
+		throw new Error("Expected a `use server` action");
+	}
+	const result = serverContextRef.current.actionResult;
+	if (!result || result.id !== _action.$$id) {
+		return null;
+	}
+	return result;
 }
 
 export function getURL(): URL {

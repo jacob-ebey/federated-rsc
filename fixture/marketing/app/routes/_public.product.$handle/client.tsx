@@ -2,15 +2,22 @@
 
 import { useLocation } from "framework/client";
 import * as React from "react";
+import { useFormStatus } from "react-dom";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export function AddToCartButton() {
 	const location = useLocation();
+	const formStatus = useFormStatus();
+
+	const diabled =
+		formStatus.pending ||
+		(location.state !== "idle" &&
+			location.to.pathname === location.url.pathname);
 
 	return (
-		<Button size="lg" disabled={location.state !== "idle"}>
+		<Button size="lg" disabled={diabled}>
 			Add to cart
 		</Button>
 	);

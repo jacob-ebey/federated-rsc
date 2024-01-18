@@ -1,115 +1,115 @@
 {
-  "name": "framework",
-  "version": "1.0.0",
-  "files": [
-    "bin",
-    "cli",
-    "dist",
-    "entry"
-  ],
-  "bin": {
-    "remix": "./bin/remix.cjs"
-  },
-  "main": "dist/framework.js",
-  "types": "dist/framework.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/framework.d.ts",
-      "react-server": {
-        "default": "./dist/framework.js"
-      },
-      "default": "./server-only.js"
-    },
-    "./browser": {
-      "types": "./dist/framework.browser.d.ts",
-      "default": "./dist/framework.browser.js"
-    },
-    "./client": {
-      "types": "./dist/framework.client.d.ts",
-      "default": "./dist/framework.client.js"
-    },
-    "./client.internal": {
-      "types": "./dist/framework.client.internal.d.ts",
-      "default": "./dist/framework.client.internal.js"
-    },
-    "./server": {
-      "types": "./dist/framework.server.d.ts",
-      "react-server": {
-        "default": "./dist/framework.server.js"
-      },
-      "default": "./server-only.js"
-    },
-    "./runtime": {
-      "types": "./dist/framework.runtime.d.ts",
-      "react-server": {
-        "default": "./dist/framework.runtime.server.js"
-      },
-      "default": "./dist/framework.runtime.client.js"
-    },
-    "./server-runtime": {
-      "types": "./dist/framework.server-runtime.d.ts",
-      "react-server": {
-        "default": "./dist/framework.server-runtime.server.js"
-      },
-      "default": "./dist/framework.server-runtime.client.js"
-    },
-    "./ssr": {
-      "types": "./dist/framework.ssr.d.ts",
-      "default": "./dist/framework.ssr.js"
-    },
-    "./react.client": {
-      "types": "./dist/react.client.browser.d.ts",
-      "browser": "./dist/react.client.browser.js",
-      "default": "./dist/react.client.node.js"
-    },
-    "./react.server": {
-      "types": "./dist/react.server.browser.d.ts",
-      "browser": "./dist/react.server.browser.js",
-      "default": "./dist/react.server.node.js"
-    },
-    "./webpack": {
-      "types": "./dist/framework.webpack.d.ts",
-      "default": "./dist/framework.webpack.js"
-    },
-    "./webpack/plugins": {
-      "types": "./dist/webpack.plugins.d.ts",
-      "default": "./dist/webpack.plugins.js"
-    },
-    "./webpack.federation-runtime-plugin": {
-      "types": "./dist/webpack.federation-runtime-plugin.d.ts",
-      "default": "./dist/webpack.federation-runtime-plugin.js"
-    },
-    "./entry/browser": "./entry/browser.tsx",
-    "./entry/server": "./entry/server.tsx",
-    "./entry/ssr": "./entry/ssr.tsx",
-    "./package.json": "./package.json"
-  },
-  "scripts": {
-    "build": "tsc -p tsconfig.lib.json"
-  },
-  "dependencies": {
-    "@module-federation/enhanced": "0.0.8",
-    "@module-federation/runtime": "0.0.8",
-    "@oxidation-compiler/napi": "^0.2.0",
-    "@remix-run/router": "^1.14.1",
-    "esbuild-loader": "^4.0.2",
-    "fast-glob": "^3.3.2",
-    "react": "0.0.0-experimental-1d5667a12-20240102",
-    "react-dom": "0.0.0-experimental-1d5667a12-20240102",
-    "react-server-dom-webpack": "0.0.0-experimental-1d5667a12-20240102",
-    "unplugin-rsc": "0.0.6",
-    "webpack": "^5.89.0",
-    "webpack-format-messages": "^3.0.1",
-    "webpack-node-externals": "^3.0.0",
-    "webpack-virtual-modules": "^0.6.1",
-    "webpack-visualizer-plugin2": "^1.1.0",
-    "webpackbar": "^6.0.0"
-  },
-  "devDependencies": {
-    "@types/node": "^20.10.6",
-    "@types/react": "^18.2.46",
-    "@types/react-dom": "^18.2.18",
-    "@types/webpack-node-externals": "^3.0.4",
-    "typescript": "^5.3.3"
-  }
+	"name": "framework",
+	"version": "1.0.0",
+	"files": ["bin", "cli", "dist", "entry"],
+	"bin": {
+		"remix": "./bin/remix.cjs"
+	},
+	"main": "dist/framework.js",
+	"types": "dist/framework.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/framework.d.ts",
+			"react-server": {
+				"default": "./dist/framework.js"
+			},
+			"default": "./server-only.js"
+		},
+		"./framework": {
+			"types": "./dist/framework.d.ts",
+			"default": "./dist/framework.js"
+		},
+		"./browser": {
+			"types": "./dist/framework.browser.d.ts",
+			"default": "./dist/framework.browser.js"
+		},
+		"./client": {
+			"types": "./dist/framework.client.d.ts",
+			"default": "./dist/framework.client.js"
+		},
+		"./client.internal": {
+			"types": "./dist/framework.client.internal.d.ts",
+			"default": "./dist/framework.client.internal.js"
+		},
+		"./server": {
+			"types": "./dist/framework.server.d.ts",
+			"react-server": {
+				"default": "./dist/framework.server.js"
+			},
+			"default": "./server-only.js"
+		},
+		"./runtime": {
+			"types": "./dist/framework.runtime.d.ts",
+			"react-server": {
+				"default": "./dist/framework.runtime.server.js"
+			},
+			"default": "./dist/framework.runtime.client.js"
+		},
+		"./server-runtime": {
+			"types": "./dist/framework.server-runtime.d.ts",
+			"react-server": {
+				"default": "./dist/framework.server-runtime.server.js"
+			},
+			"default": "./dist/framework.server-runtime.client.js"
+		},
+		"./ssr": {
+			"types": "./dist/framework.ssr.d.ts",
+			"default": "./dist/framework.ssr.js"
+		},
+		"./react.client": {
+			"types": "./dist/react.client.browser.d.ts",
+			"browser": "./dist/react.client.browser.js",
+			"default": "./dist/react.client.node.js"
+		},
+		"./react.server": {
+			"types": "./dist/react.server.browser.d.ts",
+			"browser": "./dist/react.server.browser.js",
+			"default": "./dist/react.server.node.js"
+		},
+		"./webpack": {
+			"types": "./dist/framework.webpack.d.ts",
+			"default": "./dist/framework.webpack.js"
+		},
+		"./webpack/plugins": {
+			"types": "./dist/webpack.plugins.d.ts",
+			"default": "./dist/webpack.plugins.js"
+		},
+		"./webpack.federation-runtime-plugin": {
+			"types": "./dist/webpack.federation-runtime-plugin.d.ts",
+			"default": "./dist/webpack.federation-runtime-plugin.js"
+		},
+		"./entry/browser": "./entry/browser.tsx",
+		"./entry/empty": "./entry/empty.tsx",
+		"./entry/server": "./entry/server.tsx",
+		"./entry/ssr": "./entry/ssr.tsx",
+		"./package.json": "./package.json"
+	},
+	"scripts": {
+		"build": "tsc -p tsconfig.lib.json"
+	},
+	"dependencies": {
+		"@module-federation/enhanced": "0.0.8",
+		"@module-federation/runtime": "0.0.8",
+		"@oxidation-compiler/napi": "^0.2.0",
+		"@remix-run/router": "^1.14.1",
+		"esbuild-loader": "^4.0.2",
+		"fast-glob": "^3.3.2",
+		"react": "0.0.0-experimental-1d5667a12-20240102",
+		"react-dom": "0.0.0-experimental-1d5667a12-20240102",
+		"react-server-dom-webpack": "0.0.0-experimental-1d5667a12-20240102",
+		"unplugin-rsc": "0.0.6",
+		"webpack": "^5.89.0",
+		"webpack-format-messages": "^3.0.1",
+		"webpack-node-externals": "^3.0.0",
+		"webpack-virtual-modules": "^0.6.1",
+		"webpack-visualizer-plugin2": "^1.1.0",
+		"webpackbar": "^6.0.0"
+	},
+	"devDependencies": {
+		"@types/node": "^20.10.6",
+		"@types/react": "^18.2.46",
+		"@types/react-dom": "^18.2.18",
+		"@types/webpack-node-externals": "^3.0.4",
+		"typescript": "^5.3.3"
+	}
 }

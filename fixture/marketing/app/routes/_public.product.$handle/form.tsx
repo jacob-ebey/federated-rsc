@@ -1,14 +1,21 @@
-import * as React from "react";
-
 import { getURL } from "framework";
 
 import { Input } from "@/components/ui/input";
 
 import { AddToCartButton, Option } from "./client";
 
+export async function addToCart() {
+	"use server";
+	console.log("Adding to cart!");
+	await new Promise((resolve) => setTimeout(resolve, 1000));
+	console.log("Added to cart!");
+}
+
 export function AddToCartForm({
+	message,
 	options,
 }: {
+	message?: React.ReactNode;
 	options: {
 		id: string;
 		name: string;
@@ -19,7 +26,7 @@ export function AddToCartForm({
 	const pathname = url.pathname;
 
 	return (
-		<form method="POST" className="grid gap-4 md:gap-10">
+		<form action={addToCart} className="grid gap-4 md:gap-10">
 			{options.map((option) => {
 				return <Option key={option.id} option={option} pathname={pathname} />;
 			})}
@@ -37,6 +44,8 @@ export function AddToCartForm({
 			</div>
 
 			<AddToCartButton />
+
+			{message}
 		</form>
 	);
 }

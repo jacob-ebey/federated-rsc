@@ -4,7 +4,7 @@ import RSD from "react-server-dom-webpack/client";
 
 declare global {
 	interface Window {
-		callServer: (id: string) => Promise<unknown>;
+		callServer: (id: string, args: unknown[]) => Promise<unknown>;
 	}
 }
 
@@ -12,7 +12,7 @@ export function createFromReadableStream(
 	readableStream: ReadableStream<Uint8Array>,
 ) {
 	return RSD.createFromReadableStream(readableStream, {
-		callServer: window.callServer,
+		callServer: (id: string, args: unknown[]) => window.callServer(id, args),
 	});
 }
 
@@ -23,6 +23,6 @@ export function registerServerReference(
 ) {
 	return RSD.createServerReference(
 		`${mod}#${exp}`,
-		typeof window !== "undefined" ? window.callServer : undefined,
+		(id: string, args: unknown[]) => window.callServer(id, args),
 	);
 }

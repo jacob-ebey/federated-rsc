@@ -94,7 +94,7 @@ export function createStaticRequestHandler(routes: AgnosticDataRouteObject[]) {
 		>;
 
 		let lastRouteId = "!";
-		let toRender: React.ReactElement | string | null = null;
+		let toRender: string | null = null;
 		const routes: Record<string, React.ReactElement> = {};
 
 		for (let i = matches.length - 1; i >= 0; i--) {

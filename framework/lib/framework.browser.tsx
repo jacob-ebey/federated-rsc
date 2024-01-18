@@ -13,6 +13,13 @@ declare global {
 	var __RSC__: {
 		stream: ReadableStream<Uint8Array>;
 	};
+	interface Window {
+		setLocation: (
+			setter: (
+				previousLocation: INTERNAL_LocationState,
+			) => INTERNAL_LocationState,
+		) => void;
+	}
 }
 
 export function hydrate() {
@@ -23,12 +30,11 @@ export function hydrate() {
 	addEventListener("rscready", hydrateInternal, { once: true });
 }
 
-let setLocation: (location: INTERNAL_LocationState) => void;
 let abortController: AbortController | undefined;
 
 async function hydrateInternal() {
 	addEventListener("click", (event) => {
-		if (!setLocation) return;
+		if (!window.setLocation || event.defaultPrevented) return;
 
 		let target = event.target as HTMLAnchorElement | null;
 		if (target?.tagName !== "A") {
@@ -47,12 +53,12 @@ async function hydrateInternal() {
 					},
 					signal: newAbortController.signal,
 				});
-				setLocation({
+				window.setLocation(() => ({
 					root: RSD.createFromFetch(fetchPromise, {
 						callServer: window.callServer,
 					}) as React.Usable<React.ReactElement>,
 					url,
-				});
+				}));
 				// TODO: Abort controller in component to avoid aborting it when it's still mounted.
 				abortController?.abort();
 				abortController = newAbortController;
@@ -62,7 +68,7 @@ async function hydrateInternal() {
 	});
 
 	addEventListener("popstate", (event) => {
-		if (!setLocation) {
+		if (!window.setLocation) {
 			window.location.reload();
 			return;
 		}
@@ -75,19 +81,19 @@ async function hydrateInternal() {
 			},
 			signal: newAbortController.signal,
 		});
-		setLocation({
+		window.setLocation(() => ({
 			root: RSD.createFromFetch(fetchPromise, {
 				callServer: window.callServer,
 			}) as React.Usable<React.ReactElement>,
 			url,
-		});
+		}));
 		abortController?.abort();
 		abortController = newAbortController;
 		event.preventDefault();
 	});
 
 	addEventListener("submit", (event) => {
-		if (!setLocation) return;
+		if (!window.setLocation || event.defaultPrevented) return;
 
 		const target = event.target as HTMLFormElement;
 		const submitter = event.submitter;
@@ -98,11 +104,7 @@ async function hydrateInternal() {
 		if (submitter?.hasAttribute("formaction")) {
 			action = submitter.getAttribute("formaction");
 		}
-		if (!action) {
-			const location = new URL(window.location.href);
-			action = location.pathname;
-		}
-		if (!action.startsWith("/")) {
+		if (!action?.startsWith("/")) {
 			return;
 		}
 
@@ -146,12 +148,12 @@ async function hydrateInternal() {
 			},
 			signal: newAbortController.signal,
 		});
-		setLocation({
+		window.setLocation(() => ({
 			root: RSD.createFromFetch(fetchPromise, {
 				callServer: window.callServer,
 			}) as React.Usable<React.ReactElement>,
 			url,
-		});
+		}));
 		// TODO: Abort controller in component to avoid aborting it when it's still mounted.
 		abortController?.abort();
 		abortController = newAbortController;
@@ -170,7 +172,7 @@ async function hydrateInternal() {
 			<React.StrictMode>
 				<INTERNAL_Location
 					getSetLocation={(_setLocation) => {
-						setLocation = _setLocation;
+						window.setLocation = _setLocation;
 					}}
 					initialRoot={initialRoot}
 					initialURL={initialURL}

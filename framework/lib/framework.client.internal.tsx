@@ -14,9 +14,7 @@ import {
 const Outlet = INTERNAL_Outlet;
 const OutletProvider = INTERNAL_OutletProvider;
 const StreamReader = INTERNAL_StreamReader;
-const Link = (props: React.ComponentPropsWithoutRef<"link">) => (
-	<INTERNAL_Link {...props} />
-);
+const Link = INTERNAL_Link;
 
 export type { PromiseStream, PromiseStreamItem };
 export {

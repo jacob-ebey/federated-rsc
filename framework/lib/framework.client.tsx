@@ -39,7 +39,9 @@ export function INTERNAL_Location({
 	initialURL,
 }: {
 	getSetLocation?: (
-		setLocation: (location: INTERNAL_LocationState) => void,
+		setLocation: (
+			setter: (location: INTERNAL_LocationState) => INTERNAL_LocationState,
+		) => void,
 	) => void;
 	initialRoot: React.Usable<React.ReactElement>;
 	initialURL: URL;
@@ -53,12 +55,13 @@ export function INTERNAL_Location({
 	});
 	React.useEffect(() => {
 		if (getSetLocation) {
-			getSetLocation((location) => {
-				setTo(location.url);
-				startTransition(() => _setLocation(location));
+			getSetLocation((setter) => {
+				const newLocation = setter(location);
+				setTo(newLocation.url);
+				startTransition(() => _setLocation(newLocation));
 			});
 		}
-	}, [getSetLocation]);
+	}, [location, getSetLocation]);
 
 	const locationState = React.useMemo<LocationState>(
 		() =>
@@ -145,13 +148,16 @@ export function INTERNAL_StreamReader({
 		);
 	}
 
-	const element =
+	const element = React.use(
 		React.use<
 			React.ReactElement<
 				INTERNAL_OutletProviderProps,
 				typeof INTERNAL_OutletProvider
 			>
-		>(current);
+			// @ts-expect-error
+		>(current)._payload,
+		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	) as any;
 
 	if (!element?.props?.outlets) throw new Error("No outlets found");
 

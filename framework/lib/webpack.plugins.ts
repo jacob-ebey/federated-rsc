@@ -10,12 +10,84 @@ export class ServerRSCPlugin {
 			clientModules: Set<string>;
 			containerName: string;
 			cwd: string;
+			howToLoad: string;
+			libraryType: string;
+			remoteType: string;
 			serverModules: Set<string>;
+			shared: unknown;
 		},
 	) {}
 
 	apply(compiler: webpack.Compiler) {
-		const { clientModules, containerName, cwd, serverModules } = this.options;
+		const {
+			clientModules,
+			containerName,
+			cwd,
+			howToLoad,
+			libraryType,
+			remoteType,
+			serverModules,
+			shared,
+		} = this.options;
+
+		const allRemotes: Record<string, unknown> = {};
+		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+		const plugins: any[] = [];
+		for (const plugin of compiler.options.plugins) {
+			if (
+				plugin &&
+				(plugin.constructor.name === "ModuleFederationPlugin" ||
+					plugin.constructor.name === "UniversalFederationPlugin")
+			) {
+				// @ts-expect-error
+				Object.assign(allRemotes, plugin._options.remotes || {});
+				plugins.push(plugin);
+			}
+		}
+
+		const serverRSCContainer = new ModuleFederationPlugin({
+			// isServer,
+			name: containerName,
+			exposes: Array.from(serverModules).reduce(
+				(p, c) =>
+					Object.assign(p, {
+						[exposedNameFromResource(cwd, c)]: c,
+					}),
+				{},
+			),
+			remotes: Object.assign(allRemotes, {
+				[containerName]: howToLoad,
+			}),
+			runtimePlugins: [
+				require.resolve("framework/webpack.federation-runtime-plugin"),
+			],
+			shared,
+			remoteType,
+			library: libraryType
+				? {
+						name: ["var", "window"].includes(libraryType)
+							? containerName
+							: undefined,
+						type: libraryType,
+				  }
+				: undefined,
+		});
+		serverRSCContainer.apply(compiler);
+
+		plugins.push(serverRSCContainer);
+
+		for (const plugin of plugins) {
+			Object.assign(plugin._options.remotes, allRemotes);
+		}
+
+		const remotes = Object.assign(
+			{},
+			...plugins.map((p) => p._options.remotes),
+		);
+
+		new compiler.webpack.DefinePlugin({
+			___REMOTES___: JSON.stringify(remotes),
+		}).apply(compiler);
 
 		rscServerPlugin
 			.webpack({
@@ -44,6 +116,97 @@ export class ServerRSCPlugin {
 				},
 			})
 			.apply(compiler);
+
+		class ContainerReferenceDependency extends compiler.webpack.dependencies
+			.ModuleDependency {
+			get type() {
+				return "container-reference";
+			}
+		}
+
+		const rsdResource = require.resolve("framework/framework");
+		compiler.hooks.compilation.tap(
+			"MyPlugin",
+			(compilation, { normalModuleFactory }) => {
+				compilation.hooks.optimizeModuleIds.tap("MyPlugin", (modules) => {
+					for (const mod of modules as webpack.NormalModule[]) {
+						if (mod.userRequest?.startsWith("webpack/container/")) {
+							compilation.chunkGraph.setModuleId(mod, mod.userRequest);
+						}
+					}
+				});
+				compilation.hooks.optimizeChunks.tap("MyPlugin", (chunks) => {
+					for (const chunk of chunks) {
+						if (
+							chunk.name &&
+							compilation.chunkGraph
+								.getChunkModules(chunk)
+								.some((mod) => mod.type === "remote-module")
+						) {
+							chunk.id = chunk.name;
+						}
+					}
+				});
+
+				compilation.dependencyFactories.set(
+					ContainerReferenceDependency,
+					normalModuleFactory,
+				);
+				compilation.dependencyTemplates.set(
+					ContainerReferenceDependency,
+					new compiler.webpack.dependencies.NullDependency.Template(),
+				);
+
+				// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+				const handler = (parser: any) => {
+					// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+					parser.hooks.program.tap("MyPlugin", (ast: any) => {
+						const mod =
+							/** @type {import("webpack").NormalModule} */ parser.state.module;
+
+						if (mod.resource !== rsdResource) return;
+
+						let attached = 0;
+						for (const plugin of plugins) {
+							if (plugin._options.remotes) {
+								for (const key of Object.keys(plugin._options.remotes)) {
+									attached++;
+									const name = `rsc/remote/server/${key}`;
+									const block = new compiler.webpack.AsyncDependenciesBlock(
+										{
+											name,
+										},
+										null,
+										name,
+									);
+									block.addDependency(new ContainerReferenceDependency(key));
+
+									mod.addBlock(block);
+								}
+							}
+						}
+
+						if (process.env.DEBUG === "1") {
+							console.debug(
+								`ℹ ${compiler.options.name} attached ${attached} remotes to react-server-dom-webpack\n`,
+							);
+						}
+					});
+				};
+
+				normalModuleFactory.hooks.parser
+					.for("javascript/auto")
+					.tap("HarmonyModulesPlugin", handler);
+
+				normalModuleFactory.hooks.parser
+					.for("javascript/esm")
+					.tap("HarmonyModulesPlugin", handler);
+
+				normalModuleFactory.hooks.parser
+					.for("javascript/dynamic")
+					.tap("HarmonyModulesPlugin", handler);
+			},
+		);
 	}
 }
 
@@ -166,8 +329,6 @@ export class ClientRSCPlugin {
 			}
 		}
 
-		const RuntimeGlobals = compiler.webpack.RuntimeGlobals;
-
 		compiler.hooks.compilation.tap(
 			"MyPlugin",
 			(compilation, { normalModuleFactory }) => {
@@ -230,7 +391,7 @@ export class ClientRSCPlugin {
 						}
 
 						if (process.env.DEBUG === "1") {
-							console.log(
+							console.debug(
 								`ℹ ${compiler.options.name} attached ${attached} remotes to react-server-dom-webpack\n`,
 							);
 						}

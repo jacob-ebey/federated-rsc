@@ -54,6 +54,24 @@ export async function build() {
 		),
 	]);
 	console.log();
+
+	console.log("🧩 building server actions bundle...");
+	await runWebpack(
+		await getWebpackConfig("server-actions", {
+			clientModules,
+			cwd,
+			mode,
+			serverModules,
+		}),
+	);
+
+	const serverModulesArray = Array.from(serverModules);
+	console.log(`\nℹ server modules in container: ${serverModulesArray.length}`);
+	if (process.env.DEBUG) {
+		for (const serverModule of serverModules) {
+			console.log(`  - file://${path.relative(cwd, serverModule)}`);
+		}
+	}
 }
 
 /**

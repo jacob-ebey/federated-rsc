@@ -44,7 +44,7 @@ type WebpackLoader = {
 };
 
 export async function getWebpackConfig(
-	build: "server" | "ssr" | "browser",
+	build: "server" | "server-actions" | "ssr" | "browser",
 	{
 		clientModules,
 		cwd,
@@ -56,7 +56,11 @@ export async function getWebpackConfig(
 		mode: "development" | "production";
 		serverModules: Set<string>;
 	},
-): Promise<webpack.Configuration & { name: "server" | "ssr" | "browser" }> {
+): Promise<
+	webpack.Configuration & {
+		name: "server" | "server-actions" | "ssr" | "browser";
+	}
+> {
 	const devtool = false;
 	// mode === "development" ? "eval-cheap-source-map" : "source-map";
 
@@ -75,7 +79,9 @@ export async function getWebpackConfig(
 	);
 	const containerName = snakeCase(pkgJson.name);
 
-	let config: webpack.Configuration & { name: "server" | "ssr" | "browser" };
+	let config: webpack.Configuration & {
+		name: "server" | "server-actions" | "ssr" | "browser";
+	};
 	switch (build) {
 		case "server": {
 			const routesDir = path.resolve(cwd, "app/routes");
@@ -91,6 +97,26 @@ export async function getWebpackConfig(
 				routesDir,
 				serverModules,
 			});
+			break;
+		}
+		case "server-actions": {
+			const routesDir = path.resolve(cwd, "app/routes");
+
+			config = await baseServerConfig({
+				clientModules,
+				containerName,
+				cwd,
+				esbuildLoader,
+				mode,
+				devtool,
+				extensions,
+				routesDir,
+				serverModules,
+			});
+			config.entry = { empty: require.resolve("framework/entry/empty") };
+			config.name = "server-actions";
+			config.output = config.output || {};
+
 			break;
 		}
 		case "ssr": {
@@ -175,7 +201,7 @@ async function baseServerConfig({
 	routesDir: string;
 	serverModules: Set<string>;
 }): Promise<webpack.Configuration & { name: "server" }> {
-	const bootstrapPath = path.resolve(cwd, "___bootstrap_serverr.js");
+	const bootstrapPath = path.resolve(cwd, "___bootstrap_server.js");
 	const routesPath = path.resolve(cwd, "___routes_server.js");
 
 	const serverEntryImport = "framework/entry/server";
@@ -230,7 +256,39 @@ async function baseServerConfig({
 				)}).then(m => m.handler(...args));`,
 				[routesPath]: generated,
 			}),
-			new ServerRSCPlugin({ clientModules, serverModules, cwd, containerName }),
+			new ServerRSCPlugin({
+				clientModules,
+				containerName,
+				cwd,
+				howToLoad: `commonjs ./${containerName}.js`,
+				libraryType: "commonjs-static",
+				remoteType: "commonjs",
+				serverModules,
+				shared: {
+					react: {
+						singleton: true,
+						version: "0.0.0-experimental-1d5667a12-20240102",
+					},
+					"react/": {
+						singleton: true,
+						version: "0.0.0-experimental-1d5667a12-20240102",
+					},
+					"react-dom": {
+						singleton: true,
+						version: "0.0.0-experimental-1d5667a12-20240102",
+					},
+					"react-dom/": {
+						singleton: true,
+						version: "0.0.0-experimental-1d5667a12-20240102",
+					},
+					framework: { singleton: true, version: "1.0.0" },
+					"framework/": { singleton: true, version: "1.0.0" },
+					"react-server-dom-webpack/": {
+						singleton: true,
+						version: "0.0.0-experimental-1d5667a12-20240102",
+					},
+				},
+			}),
 			!!process.env.PROFILE &&
 				new WebpackBar({
 					name: "server",

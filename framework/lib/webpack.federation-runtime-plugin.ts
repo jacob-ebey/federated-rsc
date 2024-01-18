@@ -54,7 +54,7 @@ const gs = (globalThis ||
 	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 	new Function("return globalThis")()) as unknown as Record<string, any>;
 
-const clientPrefix = "rsc/remote/client/";
+const prefix = /^rsc\/remote\/(client|server)\//;
 const ogEnsureChunk = __webpack_require__.e;
 const containerLoadCache =
 	gs.containerLoadCache ||
@@ -75,7 +75,7 @@ function rscFederationEnsureChunk(chunkId: string): Promise<unknown> {
 			await new Promise((r) => setTimeout(r, 0));
 
 			const [remoteId, exposedModuleRequest] = idToSet.split(":");
-			const containerName = remoteId.slice(clientPrefix.length);
+			const containerName = remoteId.replace(prefix, "");
 			const exposedModuleCacheId = `${containerName}/${exposedModuleRequest}`;
 
 			const referenceId = `webpack/container/reference/${containerName}`;
@@ -126,7 +126,7 @@ function rscFederationEnsureChunk(chunkId: string): Promise<unknown> {
 __webpack_require__.e = async (chunkId: string | number) => {
 	if (
 		typeof chunkId === "string" &&
-		chunkId.startsWith(clientPrefix) &&
+		prefix.test(chunkId) &&
 		chunkId.includes(":")
 	) {
 		if (cache[chunkId]) return cache[chunkId].promise;

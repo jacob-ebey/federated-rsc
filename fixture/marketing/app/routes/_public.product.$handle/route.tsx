@@ -1,18 +1,20 @@
-import { RouteProps, getURL } from "framework";
+import { getActionResult } from "framework";
+import { type RouteProps } from "framework";
 
 import { Separator } from "@/components/ui/separator";
 
 import { ProductImages } from "./client";
-import { AddToCartForm } from "./form";
+import { AddToCartForm, addToCart } from "./form";
 import { ProductHeader } from "./product";
 import { ProductReviews } from "./reviews";
 
 export async function Component({ params: { handle } }: RouteProps<"handle">) {
+	const addToCartResult = getActionResult(addToCart);
+
 	const variables = {
 		handle,
 		selectedOptions: [],
 	};
-
 	const url = new URL("https://mock.shop/api");
 	url.searchParams.set("query", query);
 	url.searchParams.set("variables", JSON.stringify(variables));
@@ -50,7 +52,20 @@ export async function Component({ params: { handle } }: RouteProps<"handle">) {
 			</div>
 			<div className="grid gap-4 items-start md:gap-10">
 				<div className="hidden md:block">{header}</div>
-				<AddToCartForm options={product.options} />
+				<AddToCartForm
+					options={product.options}
+					message={
+						<div key={Date.now()} className="opacity-0 block animate-fade">
+							{!addToCartResult ? (
+								<>&nbsp;</>
+							) : "error" in addToCartResult ? (
+								"Failed to add to cart"
+							) : (
+								"Added to cart"
+							)}
+						</div>
+					}
+				/>
 				<Separator />
 				<ProductReviews />
 			</div>
