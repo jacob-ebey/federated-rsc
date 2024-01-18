@@ -28,6 +28,10 @@
       "types": "./dist/framework.client.d.ts",
       "default": "./dist/framework.client.js"
     },
+    "./client.internal": {
+      "types": "./dist/framework.client.internal.d.ts",
+      "default": "./dist/framework.client.internal.js"
+    },
     "./server": {
       "types": "./dist/framework.server.d.ts",
       "react-server": {
@@ -93,7 +97,7 @@
     "react": "0.0.0-experimental-1d5667a12-20240102",
     "react-dom": "0.0.0-experimental-1d5667a12-20240102",
     "react-server-dom-webpack": "0.0.0-experimental-1d5667a12-20240102",
-    "unplugin-rsc": "0.0.3",
+    "unplugin-rsc": "0.0.6",
     "webpack": "^5.89.0",
     "webpack-format-messages": "^3.0.1",
     "webpack-node-externals": "^3.0.0",

@@ -1,14 +1,16 @@
 import * as React from "react";
-
 import {
 	type AgnosticDataRouteObject,
-	type Params,
 	createStaticHandler,
 } from "@remix-run/router";
 
 import { INTERNAL_SeverContextProvider, type RouteProps } from "framework";
-import { INTERNAL_Outlet, INTERNAL_OutletProvider } from "framework/client";
 import { renderToReadableStream } from "framework/react.server";
+
+import {
+	INTERNAL_Outlet,
+	INTERNAL_OutletProvider,
+} from "framework/client.internal";
 
 declare global {
 	// biome-ignore lint/style/noVar: <explanation>
@@ -32,14 +34,13 @@ export function createRequestHandler(routes: AgnosticDataRouteObject[]) {
 					{},
 					{
 						get(_, prop, __) {
-							const [___, ...exposedRest] = String(prop).split(":");
-							const [____, ...exportedRest] = exposedRest.join(":").split("#");
-							const exported = exportedRest.join("#");
+							const [id, ...rest] = String(prop).split("#");
+							const name = rest.join("#");
 
 							return {
-								id: prop,
-								name: exported,
-								chunks: [prop],
+								id,
+								name,
+								chunks: [id.split("#")[0]],
 								async: true,
 							};
 						},
@@ -105,7 +106,7 @@ export function createStaticRequestHandler(routes: AgnosticDataRouteObject[]) {
 				const aliasedId = `${___CONTAINER_NAME___}/${id}`;
 
 				routes[aliasedId] = (
-					<Component params={params}>
+					<Component key={aliasedId} params={params}>
 						<INTERNAL_Outlet key={lastRouteId} id={lastRouteId} />
 					</Component>
 				);

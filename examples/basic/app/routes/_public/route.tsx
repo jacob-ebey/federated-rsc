@@ -4,7 +4,10 @@ export function Component({ children }: { children: React.ReactNode }) {
 	const headers = getHeaders();
 	const url = getURL();
 
-	const renderedFor = headers.get("X-Forwarded-For") || url.href;
+	const renderedForHost = headers.get("X-Forwarded-For-Host") || url.host;
+	const renderedForURL = new URL(url);
+	renderedForURL.host = renderedForHost;
+	const renderedFor = renderedForURL.href;
 
 	return (
 		<html lang="en">

@@ -5,7 +5,7 @@ import {
 	type PromiseStream,
 	type PromiseStreamItem,
 	INTERNAL_StreamReader,
-} from "framework/client";
+} from "framework/client.internal";
 
 export { Params };
 
@@ -43,7 +43,13 @@ export async function RSCFrame({
 
 	const headers = new Headers(request.headers);
 	headers.set("Accept", "text/x-component");
-	headers.set("X-Forwarded-For", request.url);
+	headers.delete("host");
+	headers.set(
+		"X-Forwarded-For-Host",
+		request.headers.get("X-Forwarded-For-Host") ??
+			request.headers.get("host") ??
+			"",
+	);
 
 	const response = await fetch(
 		new Request(url, {

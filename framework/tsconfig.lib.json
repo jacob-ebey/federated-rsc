@@ -7,7 +7,7 @@
 		"module": "Node16",
 		"moduleResolution": "Node16",
 		"target": "ES2022",
-		"lib": ["DOM", "ES2022"],
+		"lib": ["DOM", "DOM.Iterable", "ES2022"],
 		"types": ["node", "react/experimental", "react-dom/experimental"],
 		"jsx": "react",
 		"strict": true,

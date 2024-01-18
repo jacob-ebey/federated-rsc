@@ -6,6 +6,7 @@ import RDS from "react-dom/server";
 // @ts-expect-error - no types
 import RSD from "react-server-dom-webpack/client";
 
+import { INTERNAL_Location } from "framework/client";
 import { InlinePayload } from "framework/ssr";
 
 export async function handler(
@@ -15,10 +16,23 @@ export async function handler(
 ) {
 	const url = new URL(request.url);
 	const serverUrl = new URL(url.pathname + url.search, serverOrigin);
+
+	const headers = new Headers(request.headers);
+	headers.set("Accept", "text/x-component");
+	headers.delete("host");
+	headers.set(
+		"X-Forwarded-For-Host",
+		request.headers.get("X-Forwarded-For-Host") ??
+			request.headers.get("host") ??
+			"",
+	);
+
 	const response = await fetch(serverUrl, {
-		headers: {
-			Accept: "text/x-component",
-		},
+		body: request.body,
+		headers,
+		method: request.method,
+		signal: request.signal,
+		window: null,
 	});
 
 	if (request.headers.get("Accept")?.match(/\btext\/x-component\b/)) {
@@ -58,7 +72,7 @@ export async function handler(
 									return {
 										id,
 										name: key,
-										chunks: [id],
+										chunks: [String(id).split("#")[0]],
 									};
 								},
 							},
@@ -81,7 +95,7 @@ export async function handler(
 		let shellSent = false;
 		const { pipe, abort } = RDS.renderToPipeableStream(
 			<>
-				{root}
+				<INTERNAL_Location initialRoot={root} initialURL={url} />
 				<React.Suspense>
 					<InlinePayload readable={payloadB.getReader()} />
 				</React.Suspense>

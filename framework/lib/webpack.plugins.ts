@@ -95,6 +95,7 @@ export class ClientRSCPlugin {
 			},
 		});
 
+		const allRemotes: Record<string, unknown> = {};
 		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 		const plugins: any[] = [];
 		for (const plugin of compiler.options.plugins) {
@@ -103,7 +104,8 @@ export class ClientRSCPlugin {
 				(plugin.constructor.name === "ModuleFederationPlugin" ||
 					plugin.constructor.name === "UniversalFederationPlugin")
 			) {
-				//// @ts-expect-error
+				// @ts-expect-error
+				Object.assign(allRemotes, plugin._options.remotes || {});
 				plugins.push(plugin);
 			}
 		}
@@ -118,7 +120,7 @@ export class ClientRSCPlugin {
 					}),
 				{},
 			),
-			remotes: Object.assign({}, ...plugins.map((p) => p._options.remotes), {
+			remotes: Object.assign(allRemotes, {
 				[containerName]: howToLoad,
 			}),
 			runtimePlugins: [
@@ -138,6 +140,19 @@ export class ClientRSCPlugin {
 		clientRSCContainer.apply(compiler);
 		plugins.push(clientRSCContainer);
 
+		for (const plugin of plugins) {
+			Object.assign(plugin._options.remotes, allRemotes);
+		}
+
+		const remotes = Object.assign(
+			{},
+			...plugins.map((p) => p._options.remotes),
+		);
+
+		new compiler.webpack.DefinePlugin({
+			___REMOTES___: JSON.stringify(remotes),
+		}).apply(compiler);
+
 		// if (isServer) {
 		//   new StreamingTargetPlugin({
 		//     // name: this.containerName,
@@ -152,63 +167,6 @@ export class ClientRSCPlugin {
 		}
 
 		const RuntimeGlobals = compiler.webpack.RuntimeGlobals;
-		const Template = compiler.webpack.Template;
-
-		class ContainerReferenceRuntimeModule extends compiler.webpack
-			.RuntimeModule {
-			constructor() {
-				super("ensure chunk rsc container reference runtime");
-			}
-			generate() {
-				if (!this.compilation) throw new Error("No compilation");
-				const runtimeTemplate = this.compilation.runtimeTemplate;
-				return Template.asString([
-					`var ogEnsureChunk = ${RuntimeGlobals.ensureChunk};`,
-					"var seenContainers = new Set();",
-					"// this function allows you to load federated modules through react server component decoding",
-					`${RuntimeGlobals.ensureChunk} = ${runtimeTemplate.basicFunction(
-						["chunkId"],
-						[
-							"if (typeof chunkId === 'string' && chunkId.startsWith('rsc/remote/client/')) {",
-							Template.indent([
-								`let existing = ${RuntimeGlobals.moduleCache}[chunkId];`,
-								"if (existing)",
-								"if (existing.loaded) return Promise.resolve();",
-								"else existing.promise;",
-								"let splitIndex = chunkId.indexOf(':', 18);",
-								"let remote = chunkId.slice(0, splitIndex);",
-								"let remoteModuleId = remote.slice(18);",
-								"let [exposed] = chunkId.slice(splitIndex + 1).split('#');",
-								"let promises = [ogEnsureChunk(remote)];",
-								`${RuntimeGlobals.moduleCache}[chunkId] = {
-                  id: chunkId,
-                  loaded: false,
-                  exports: {},
-                };`,
-								// `${RuntimeGlobals.ensureChunkHandlers}.remotes(remote, promises);`,
-								`return Promise.all(promises).then(${runtimeTemplate.basicFunction(
-									["r"],
-									[
-										`return ${RuntimeGlobals.require}("webpack/container/reference/" + remoteModuleId);`,
-									],
-								)}).then(${runtimeTemplate.basicFunction(
-									["container"],
-									["return container.get(exposed);"],
-								)}).then(${runtimeTemplate.basicFunction(
-									["factory"],
-									[
-										"var mod = factory();",
-										`Object.assign(${RuntimeGlobals.moduleCache}[chunkId].exports, mod);`,
-									],
-								)});`,
-							]),
-							"}",
-							"return ogEnsureChunk(chunkId);",
-						],
-					)};`,
-				]);
-			}
-		}
 
 		compiler.hooks.compilation.tap(
 			"MyPlugin",
@@ -290,26 +248,6 @@ export class ClientRSCPlugin {
 				normalModuleFactory.hooks.parser
 					.for("javascript/dynamic")
 					.tap("HarmonyModulesPlugin", handler);
-
-				/**
-				 *
-				 * @param {import("webpack").Chunk} chunk
-				 * @param {Set<string>} set
-				 */
-				const requirementsHandler = (
-					chunk: webpack.Chunk,
-					set: Set<string>,
-				) => {
-					set.add(RuntimeGlobals.moduleFactoriesAddOnly);
-					set.add(RuntimeGlobals.hasOwnProperty);
-					compilation.addRuntimeModule(
-						chunk,
-						new ContainerReferenceRuntimeModule(),
-					);
-				};
-				compilation.hooks.runtimeRequirementInTree
-					.for(RuntimeGlobals.ensureChunk)
-					.tap("MyPlugin", requirementsHandler);
 			},
 		);
 	}

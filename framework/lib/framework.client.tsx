@@ -1,8 +1,32 @@
-"use client";
-
 import * as React from "react";
 
 import { createFromReadableStream } from "framework/react.client";
+
+export type LocationState =
+	| {
+			state: "idle";
+			url: URL;
+	  }
+	| {
+			state: "transitioning";
+			to: URL;
+			url: URL;
+	  };
+
+const INTERNAL_locationContext = React.createContext<null | LocationState>(
+	null,
+);
+
+function INTERNAL_LocationContextProvider({
+	value,
+	children,
+}: React.ProviderProps<LocationState>) {
+	return (
+		<INTERNAL_locationContext.Provider value={value}>
+			{children}
+		</INTERNAL_locationContext.Provider>
+	);
+}
 
 export interface INTERNAL_LocationState {
 	root: React.Usable<React.ReactElement>;
@@ -14,7 +38,7 @@ export function INTERNAL_Location({
 	initialRoot,
 	initialURL,
 }: {
-	getSetLocation: (
+	getSetLocation?: (
 		setLocation: (location: INTERNAL_LocationState) => void,
 	) => void;
 	initialRoot: React.Usable<React.ReactElement>;
@@ -22,15 +46,39 @@ export function INTERNAL_Location({
 }) {
 	// TODO: propagate state
 	const [transitioning, startTransition] = React.useTransition();
+	const [to, setTo] = React.useState<null | URL>(null);
 	const [location, _setLocation] = React.useState<INTERNAL_LocationState>({
 		root: initialRoot,
 		url: initialURL,
 	});
 	if (getSetLocation) {
-		getSetLocation((location) => startTransition(() => _setLocation(location)));
+		getSetLocation((location) => {
+			setTo(location.url);
+			startTransition(() => _setLocation(location));
+		});
 	}
 
-	return React.use(location.root) as React.JSX.Element;
+	const locationState = React.useMemo<LocationState>(
+		() =>
+			transitioning && to
+				? {
+						state: "transitioning",
+						to,
+						url: location.url,
+				  }
+				: {
+						state: "idle",
+						url: location.url,
+				  },
+		[location.url, transitioning, to],
+	);
+
+	// return React.use(location.root);
+	return (
+		<INTERNAL_LocationContextProvider value={locationState}>
+			{React.use(location.root) as React.JSX.Element}
+		</INTERNAL_LocationContextProvider>
+	);
 }
 
 const outletContext = React.createContext<null | Record<
@@ -53,8 +101,11 @@ export function INTERNAL_OutletProvider({
 	children,
 	outlets,
 }: INTERNAL_OutletProviderProps) {
+	const parentOutlets = React.useContext(outletContext);
 	return (
-		<outletContext.Provider value={outlets}>{children}</outletContext.Provider>
+		<outletContext.Provider value={{ ...parentOutlets, ...outlets }}>
+			{children}
+		</outletContext.Provider>
 	);
 }
 
@@ -103,13 +154,15 @@ export function INTERNAL_StreamReader({
 	if (!element?.props?.outlets) throw new Error("No outlets found");
 
 	return React.useMemo(() => {
-		return React.cloneElement(element, {
-			...element.props,
-			outlets: {
-				...element.props.outlets,
-				"!": children,
-			},
-		});
+		return (
+			<INTERNAL_OutletProvider
+				{...element.props}
+				outlets={{
+					...element.props.outlets,
+					"!": children,
+				}}
+			/>
+		);
 	}, [element, children]);
 }
 
@@ -126,4 +179,10 @@ function fromPromiseStream<T = unknown>(initialPromise: PromiseStream<T>) {
 			}
 		},
 	});
+}
+
+export function useLocation() {
+	const location = React.useContext(INTERNAL_locationContext);
+	if (!location) throw new Error("No router context found");
+	return location;
 }

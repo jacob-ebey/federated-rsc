@@ -26,5 +26,10 @@
 	},
 	"formatter": {
 		"enabled": true
+	},
+	"css": {
+		"formatter": {
+			"enabled": true
+		}
 	}
 }
