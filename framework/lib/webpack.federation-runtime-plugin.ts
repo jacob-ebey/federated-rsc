@@ -78,18 +78,6 @@ function rscFederationEnsureChunk(chunkId: string): Promise<unknown> {
 			const containerName = remoteId.slice(clientPrefix.length);
 			const exposedModuleCacheId = `${containerName}/${exposedModuleRequest}`;
 
-			// Handle shared client modules
-			if (
-				containerName !== __FEDERATION__.__INSTANCES__[0].name &&
-				!exposedModuleRequest.startsWith("./")
-			) {
-				const baseContainerName = __FEDERATION__.__INSTANCES__[0].name;
-				const baseChunkId = `${clientPrefix}${baseContainerName}:${exposedModuleRequest}`;
-				const mod = await rscFederationEnsureChunk(baseChunkId);
-				cache[idToSet].exports = mod;
-				return mod;
-			}
-
 			const referenceId = `webpack/container/reference/${containerName}`;
 
 			let containerPromise = containerLoadCache.get(referenceId);
