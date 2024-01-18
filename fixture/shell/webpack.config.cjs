@@ -48,14 +48,32 @@ module.exports = (config, { build, webpack }) => {
 						/** @type {Record<string, string>} */ ({}),
 					),
 					shared: {
-						"react/": { version: pkgJson.dependencies.react, singleton: true },
-						"react-dom/": {
-							version: pkgJson.dependencies["react-dom"],
+						react: {
 							singleton: true,
+							version: "0.0.0-experimental-1d5667a12-20240102",
 						},
-						"framework/": { singleton: true },
-						"react-server-dom-webpack/client": { singleton: true },
+						"react/": {
+							singleton: true,
+							version: "0.0.0-experimental-1d5667a12-20240102",
+						},
+						"react-dom": {
+							singleton: true,
+							version: "0.0.0-experimental-1d5667a12-20240102",
+						},
+						"react-dom/": {
+							singleton: true,
+							version: "0.0.0-experimental-1d5667a12-20240102",
+						},
+						framework: { singleton: true, version: "1.0.0" },
+						"framework/": { singleton: true, version: "1.0.0" },
+						"react-server-dom-webpack/": {
+							singleton: true,
+							version: "0.0.0-experimental-1d5667a12-20240102",
+						},
 					},
+					runtimePlugins: [
+						require.resolve("framework/webpack.federation-runtime-plugin"),
+					],
 				}),
 			);
 			break;
@@ -71,14 +89,32 @@ module.exports = (config, { build, webpack }) => {
 						/** @type {Record<string, string>} */ ({}),
 					),
 					shared: {
-						"react/": { version: pkgJson.dependencies.react, singleton: true },
-						"react-dom/": {
-							version: pkgJson.dependencies["react-dom"],
+						react: {
 							singleton: true,
+							version: "0.0.0-experimental-1d5667a12-20240102",
 						},
-						"framework/": { singleton: true },
-						"react-server-dom-webpack/client": { singleton: true },
+						"react/": {
+							singleton: true,
+							version: "0.0.0-experimental-1d5667a12-20240102",
+						},
+						"react-dom": {
+							singleton: true,
+							version: "0.0.0-experimental-1d5667a12-20240102",
+						},
+						"react-dom/": {
+							singleton: true,
+							version: "0.0.0-experimental-1d5667a12-20240102",
+						},
+						framework: { singleton: true, version: "1.0.0" },
+						"framework/": { singleton: true, version: "1.0.0" },
+						"react-server-dom-webpack/": {
+							singleton: true,
+							version: "0.0.0-experimental-1d5667a12-20240102",
+						},
 					},
+					runtimePlugins: [
+						require.resolve("framework/webpack.federation-runtime-plugin"),
+					],
 				}),
 			);
 			break;

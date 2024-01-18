@@ -7,6 +7,7 @@ settings:
 overrides:
   react: 0.0.0-experimental-1d5667a12-20240102
   react-dom: 0.0.0-experimental-1d5667a12-20240102
+  react-server-dom-webpack: 0.0.0-experimental-1d5667a12-20240102
 
 importers:
 

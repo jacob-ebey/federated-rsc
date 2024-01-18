@@ -19,7 +19,7 @@ export function createFromReadableStream(
 								return {
 									id,
 									name: key,
-									chunks: [id],
+									chunks: [String(id).split("#")[0]],
 								};
 							},
 						},

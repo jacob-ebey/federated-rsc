@@ -1,11 +1,12 @@
-import {
-	INTERNAL_Location,
-	type INTERNAL_LocationState,
-} from "framework/client.internal";
 import * as React from "react";
 import { hydrateRoot } from "react-dom/client";
 // @ts-expect-error - no types
 import RSD from "react-server-dom-webpack/client";
+
+import {
+	INTERNAL_Location,
+	type INTERNAL_LocationState,
+} from "framework/client";
 
 declare global {
 	// biome-ignore lint/style/noVar: <explanation>
@@ -15,6 +16,7 @@ declare global {
 }
 
 export function hydrate() {
+	console.log("initializing hydration");
 	if (typeof __RSC__ !== "undefined") {
 		hydrateInternal();
 		return;
@@ -26,6 +28,7 @@ let setLocation: (location: INTERNAL_LocationState) => void;
 let abortController: AbortController | undefined;
 
 async function hydrateInternal() {
+	console.log("hydrating");
 	addEventListener("click", (event) => {
 		if (!setLocation) return;
 

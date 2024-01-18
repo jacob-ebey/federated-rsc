@@ -196,7 +196,6 @@ async function baseServerConfig({
 				allowlist: [
 					"framework",
 					"framework/server",
-					"framework/client",
 					"framework/client.internal",
 					"framework/entry/server",
 				],
@@ -283,9 +282,9 @@ async function baseSSRConfig({
 		externals: [
 			nodeExternals({
 				allowlist: [
-					"framework/ssr",
+					"framework",
 					"framework/client",
-					"framework/client.internal",
+					"framework/ssr",
 					"framework/react.client",
 					"framework/entry/ssr",
 					"react-server-dom-webpack/client",
@@ -329,13 +328,28 @@ async function baseSSRConfig({
 				howToLoad: `commonjs ./${containerName}.js`,
 				serverModules,
 				shared: {
-					"react/": { version: pkgJson.dependencies.react, singleton: true },
-					"react-dom/": {
-						version: pkgJson.dependencies["react-dom"],
+					react: {
 						singleton: true,
+						version: "0.0.0-experimental-1d5667a12-20240102",
 					},
-					"framework/": { version: "*", singleton: true },
-					"react-server-dom-webpack/client": { singleton: true },
+					"react/": {
+						singleton: true,
+						version: "0.0.0-experimental-1d5667a12-20240102",
+					},
+					"react-dom": {
+						singleton: true,
+						version: "0.0.0-experimental-1d5667a12-20240102",
+					},
+					"react-dom/": {
+						singleton: true,
+						version: "0.0.0-experimental-1d5667a12-20240102",
+					},
+					framework: { singleton: true, version: "1.0.0" },
+					"framework/": { singleton: true, version: "1.0.0" },
+					"react-server-dom-webpack/": {
+						singleton: true,
+						version: "0.0.0-experimental-1d5667a12-20240102",
+					},
 				},
 			}),
 			!!process.env.PROFILE &&
@@ -426,13 +440,28 @@ async function baseBrowserConfig({
 				remoteType: "script",
 				serverModules,
 				shared: {
-					"react/": { version: pkgJson.dependencies.react, singleton: true },
-					"react-dom/": {
-						version: pkgJson.dependencies["react-dom"],
+					react: {
 						singleton: true,
+						version: "0.0.0-experimental-1d5667a12-20240102",
 					},
-					"framework/": { version: "*", singleton: true },
-					"react-server-dom-webpack/client": { singleton: true },
+					"react/": {
+						singleton: true,
+						version: "0.0.0-experimental-1d5667a12-20240102",
+					},
+					"react-dom": {
+						singleton: true,
+						version: "0.0.0-experimental-1d5667a12-20240102",
+					},
+					"react-dom/": {
+						singleton: true,
+						version: "0.0.0-experimental-1d5667a12-20240102",
+					},
+					framework: { singleton: true, version: "1.0.0" },
+					"framework/": { singleton: true, version: "1.0.0" },
+					"react-server-dom-webpack/": {
+						singleton: true,
+						version: "0.0.0-experimental-1d5667a12-20240102",
+					},
 				},
 			}),
 			!!process.env.PROFILE &&

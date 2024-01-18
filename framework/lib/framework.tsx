@@ -43,7 +43,13 @@ export async function RSCFrame({
 
 	const headers = new Headers(request.headers);
 	headers.set("Accept", "text/x-component");
-	headers.set("X-Forwarded-For", request.url);
+	headers.delete("host");
+	headers.set(
+		"X-Forwarded-For-Host",
+		request.headers.get("X-Forwarded-For-Host") ??
+			request.headers.get("host") ??
+			"",
+	);
 
 	const response = await fetch(
 		new Request(url, {

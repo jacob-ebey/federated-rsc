@@ -1,17 +1,18 @@
 {
-	"private": true,
-	"scripts": {
-		"build": "pnpm -r --filter framework --filter @fixture/* build",
-		"check": "biome check **/*",
-		"start": "pnpm --filter @fixture/* start"
-	},
-	"pnpm": {
-		"overrides": {
-			"react": "0.0.0-experimental-1d5667a12-20240102",
-			"react-dom": "0.0.0-experimental-1d5667a12-20240102"
-		}
-	},
-	"devDependencies": {
-		"@biomejs/biome": "1.5.1"
-	}
+  "private": true,
+  "scripts": {
+    "build": "pnpm -r --filter framework --filter @fixture/* build",
+    "check": "biome check **/*",
+    "start": "pnpm --filter @fixture/* start"
+  },
+  "pnpm": {
+    "overrides": {
+      "react": "0.0.0-experimental-1d5667a12-20240102",
+      "react-dom": "0.0.0-experimental-1d5667a12-20240102",
+      "react-server-dom-webpack": "0.0.0-experimental-1d5667a12-20240102"
+    }
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.5.1"
+  }
 }

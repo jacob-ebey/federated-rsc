@@ -1,6 +1,6 @@
 "use client";
 
-import { useLocation } from "framework/client";
+// import { useLocation } from "framework/client";
 
 import { Label } from "@/components/ui/label";
 
@@ -17,8 +17,8 @@ export function Option({
 	pathname: string;
 	selectedOption?: string;
 }) {
-	const location = useLocation();
-	console.log(location);
+	// const location = useLocation();
+	// console.log(location);
 
 	// const selectedOptions = new URLSearchParams(location.url.search);
 

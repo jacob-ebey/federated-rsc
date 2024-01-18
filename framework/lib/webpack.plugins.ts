@@ -95,6 +95,7 @@ export class ClientRSCPlugin {
 			},
 		});
 
+		const allRemotes: Record<string, unknown> = {};
 		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 		const plugins: any[] = [];
 		for (const plugin of compiler.options.plugins) {
@@ -103,7 +104,8 @@ export class ClientRSCPlugin {
 				(plugin.constructor.name === "ModuleFederationPlugin" ||
 					plugin.constructor.name === "UniversalFederationPlugin")
 			) {
-				//// @ts-expect-error
+				// @ts-expect-error
+				Object.assign(allRemotes, plugin._options.remotes || {});
 				plugins.push(plugin);
 			}
 		}
@@ -118,7 +120,7 @@ export class ClientRSCPlugin {
 					}),
 				{},
 			),
-			remotes: Object.assign({}, ...plugins.map((p) => p._options.remotes), {
+			remotes: Object.assign(allRemotes, {
 				[containerName]: howToLoad,
 			}),
 			runtimePlugins: [
@@ -137,6 +139,19 @@ export class ClientRSCPlugin {
 		});
 		clientRSCContainer.apply(compiler);
 		plugins.push(clientRSCContainer);
+
+		for (const plugin of plugins) {
+			Object.assign(plugin._options.remotes, allRemotes);
+		}
+
+		const remotes = Object.assign(
+			{},
+			...plugins.map((p) => p._options.remotes),
+		);
+
+		new compiler.webpack.DefinePlugin({
+			___REMOTES___: JSON.stringify(remotes),
+		}).apply(compiler);
 
 		// if (isServer) {
 		//   new StreamingTargetPlugin({
@@ -161,52 +176,124 @@ export class ClientRSCPlugin {
 			}
 			generate() {
 				if (!this.compilation) throw new Error("No compilation");
+				RuntimeGlobals.shareScopeMap;
 				const runtimeTemplate = this.compilation.runtimeTemplate;
 				return Template.asString([
-					`var ogEnsureChunk = ${RuntimeGlobals.ensureChunk};`,
-					"var seenContainers = new Set();",
-					"// this function allows you to load federated modules through react server component decoding",
-					`${RuntimeGlobals.ensureChunk} = ${runtimeTemplate.basicFunction(
-						["chunkId"],
-						[
-							"if (typeof chunkId === 'string' && chunkId.startsWith('rsc/remote/client/')) {",
-							Template.indent([
-								// TODO: MAKE THIS WORK AND NOT DOUBLE LOAD THINGS BY USING THE FEDERATION RUNTIME APIs
-								`let existing = ${RuntimeGlobals.moduleCache}[chunkId];`,
-								"if (existing)",
-								"if (existing.loaded) return Promise.resolve();",
-								"else existing.promise;",
-								"let splitIndex = chunkId.indexOf(':', 18);",
-								"let remote = chunkId.slice(0, splitIndex);",
-								"let remoteModuleId = remote.slice(18);",
-								"let [exposed] = chunkId.slice(splitIndex + 1).split('#');",
-								"let promises = [ogEnsureChunk(remote)];",
-								`${RuntimeGlobals.moduleCache}[chunkId] = {
-                  id: chunkId,
-                  loaded: false,
-                  exports: {},
-                };`,
-								// `${RuntimeGlobals.ensureChunkHandlers}.remotes(remote, promises);`,
-								`return Promise.all(promises).then(${runtimeTemplate.basicFunction(
-									["r"],
-									[
-										`return ${RuntimeGlobals.require}("webpack/container/reference/" + remoteModuleId);`,
-									],
-								)}).then(${runtimeTemplate.basicFunction(
-									["container"],
-									["return container.get(exposed);"],
-								)}).then(${runtimeTemplate.basicFunction(
-									["factory"],
-									[
-										"var mod = factory();",
-										`Object.assign(${RuntimeGlobals.moduleCache}[chunkId].exports, mod);`,
-									],
-								)});`,
-							]),
-							"}",
-							"return ogEnsureChunk(chunkId);",
-						],
-					)};`,
+					// `var ogEnsureChunk = ${RuntimeGlobals.ensureChunk};`,
+					// "var seenContainers = new Set();",
+					// "// this function allows you to load federated modules through react server component decoding",
+					// `${RuntimeGlobals.ensureChunk} = ${runtimeTemplate.basicFunction(
+					// 	["chunkId"],
+					// 	[
+					// 		"if (typeof chunkId === 'string' && chunkId.startsWith('rsc/remote/client/') && chunkId.includes(':')) {",
+					// 		Template.indent([
+					// 			"var [baseId,...exposedModuleRest] = chunkId.split(':');",
+					// 			"var exposedModule = exposedModuleRest.join(':');",
+					// 			"var containerName = baseId.slice('rsc/remote/client/'.length);",
+					// 			`return ogEnsureChunk(baseId).then(${runtimeTemplate.basicFunction(
+					// 				[],
+					// 				[
+					// 					`var container = ${RuntimeGlobals.require}("webpack/container/reference/" + containerName)`,
+					// 					`var federation = ${RuntimeGlobals.require}.federation;`,
+					// 					"if (!globalThis[containerName]) globalThis[containerName] = container;",
+					// 					"if (!federation.instance.moduleCache.has(containerName)) {",
+					// 					Template.indent([
+					// 						"federation.instance.moduleCache.set(containerName, container);",
+					// 					]),
+					// 					"}",
+					// 					`if (!federation.instance.snapshotHandler.manifestCache.has("webpack/container/reference/" + containerName)) {`,
+					// 					Template.indent([
+					// 						`federation.instance.snapshotHandler.manifestCache.set("webpack/container/reference/" + containerName, { metadata: {} });`,
+					// 					]),
+					// 					"}",
+					// 					`if (!federation.instance.options.remotes.find(${runtimeTemplate.basicFunction(
+					// 						["r"],
+					// 						[
+					// 							"return r.name === containerName || r.alias === containerName;",
+					// 						],
+					// 					)})) {`,
+					// 					Template.indent([
+					// 						`federation.instance.options.remotes.push({
+					// 							name: containerName,
+					// 							entry: "webpack/container/reference/" + containerName,
+					// 						});`,
+					// 					]),
+					// 					"}",
+					// 					`if (!federation.initOptions.remotes.find(${runtimeTemplate.basicFunction(
+					// 						["r"],
+					// 						[
+					// 							"return r.name === containerName || r.alias === containerName;",
+					// 						],
+					// 					)})) {`,
+					// 					Template.indent([
+					// 						`federation.initOptions.remotes.push({
+					// 							name: containerName,
+					// 							entry: "webpack/container/reference/" + containerName,
+					// 						});`,
+					// 					]),
+					// 					"}",
+					// 					`return Promise.all(${
+					// 						RuntimeGlobals.require
+					// 					}.federation.instance.initializeSharing()).then(${runtimeTemplate.basicFunction(
+					// 						[],
+					// 						[
+					// 							`console.log({
+					// 								container,
+					// 								federation,
+					// 								snapshotHandler: federation.instance.snapshotHandler
+					// 							});`,
+					// 							`return federation.runtime.loadRemote(containerName + "/" + exposedModule.replace(/^\\.\\//, "")).then(${runtimeTemplate.basicFunction(
+					// 								["mod"],
+					// 								[
+					// 									`console.log({
+					// 										mod,
+					// 									});`,
+					// 								],
+					// 							)});`,
+					// 						],
+					// 					)});`,
+					// 				],
+					// 			)})`,
+					// 		]),
+					// 	// TODO: MAKE THIS WORK AND NOT DOUBLE LOAD THINGS BY USING THE FEDERATION RUNTIME APIs
+					// 	`let existing = ${RuntimeGlobals.moduleCache}[chunkId];`,
+					// 	"if (existing)",
+					// 	"if (existing.loaded) return Promise.resolve();",
+					// 	"else existing.promise;",
+					// 	"let splitIndex = chunkId.indexOf(':', 18);",
+					// 	"let remote = chunkId.slice(0, splitIndex);",
+					// 	"let remoteModuleId = remote.slice(18);",
+					// 	"let [exposed] = chunkId.slice(splitIndex + 1).split('#');",
+					// 	// "let promises = [ogEnsureChunk(remote)];",
+					// 	"let promises = [];",
+					// 	"if ()",
+					// 	"__webpack_require__.f.remotes(remote, promises)",
+					// 	`${RuntimeGlobals.moduleCache}[chunkId] = {
+					//     id: chunkId,
+					//     loaded: false,
+					//     exports: {},
+					//   };`,
+					// 	// `${RuntimeGlobals.ensureChunkHandlers}.remotes(remote, promises);`,
+					// 	`return Promise.all(promises).then(${runtimeTemplate.basicFunction(
+					// 		["r"],
+					// 		[
+					// 			`return ${RuntimeGlobals.require}("webpack/container/reference/" + remoteModuleId);`,
+					// 		],
+					// 	)}).then(${runtimeTemplate.basicFunction(
+					// 		["container"],
+					// 		["return container.get(exposed);"],
+					// 	)}).then(${runtimeTemplate.basicFunction(
+					// 		["factory"],
+					// 		[
+					// 			"var mod = factory();",
+					// 			`Object.assign(${RuntimeGlobals.moduleCache}[chunkId].exports, mod);`,
+					// 		],
+					// 	)});`,
+					// ]),
+					// 	"}",
+					// 	"return ogEnsureChunk(chunkId);",
+					// ],
+					// )};`,
 				]);
 			}
 		}
