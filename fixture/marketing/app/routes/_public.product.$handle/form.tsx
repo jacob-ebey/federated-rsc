@@ -2,10 +2,9 @@ import * as React from "react";
 
 import { getURL } from "framework";
 
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-import { Option } from "./client";
+import { AddToCartButton, Option } from "./client";
 
 export function AddToCartForm({
 	options,
@@ -42,7 +41,7 @@ export function AddToCartForm({
 				/>
 			</div>
 
-			<Button size="lg">Add to cart</Button>
+			<AddToCartButton />
 		</form>
 	);
 }

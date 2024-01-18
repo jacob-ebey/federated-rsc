@@ -4,6 +4,16 @@ import { useLocation } from "framework/client";
 
 import { Button } from "@/components/ui/button";
 
+export function AddToCartButton() {
+	const location = useLocation();
+
+	return (
+		<Button size="lg" disabled={location.state !== "idle"}>
+			Add to cart
+		</Button>
+	);
+}
+
 export function Option({
 	option,
 	pathname,
@@ -16,7 +26,7 @@ export function Option({
 	pathname: string;
 }) {
 	const location = useLocation();
-	console.log(location);
+
 	const selectedOptions = new URLSearchParams(
 		location.state === "transitioning" &&
 			location.url.pathname === location.to.pathname
