@@ -3,11 +3,12 @@ import * as React from "react";
 
 import {
 	INTERNAL_StreamReader,
+	Link,
 	type PromiseStream,
 	type PromiseStreamItem,
 } from "framework/client.internal";
 
-export { Params };
+export { Link, Params };
 
 export interface RouteProps<Param extends string = never> {
 	params: Params<Param>;
@@ -57,6 +58,8 @@ export async function RSCFrame({
 			headers,
 			method: request.method,
 			signal: request.signal,
+			// @ts-expect-error - no types
+			duplex: "half",
 			window: null,
 		}),
 	);

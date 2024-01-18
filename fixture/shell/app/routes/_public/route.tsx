@@ -1,5 +1,6 @@
-import { getHeaders, getURL } from "framework";
+import { Link, getHeaders, getURL } from "framework";
 
+import { GlobalStatusIndicator } from "./client";
 import { Header } from "./header";
 import styleFile from "./style.css";
 
@@ -17,9 +18,10 @@ export function Component({ children }: { children: React.ReactNode }) {
 				<meta charSet="utf-8" />
 				<meta name="viewport" content="width=device-width, initial-scale=1" />
 				<title>YAY!</title>
-				<link rel="stylesheet" href={styleHref} />
+				<Link rel="stylesheet" href={styleHref} />
 			</head>
 			<body className="bg-background text-foreground">
+				<GlobalStatusIndicator />
 				<Header />
 				{children}
 				<footer>

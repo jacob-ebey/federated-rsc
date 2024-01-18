@@ -1,4 +1,4 @@
-import { getURL } from "framework";
+import { Link, getURL } from "framework";
 
 import { FederatedRSCFrame } from "../../remotes";
 
@@ -11,7 +11,7 @@ export function Component({ children }: { children?: React.ReactNode }) {
 
 	const toRender = (
 		<>
-			<link rel="stylesheet" href={styleHref} />
+			<Link rel="stylesheet" href={styleHref} />
 			{children}
 		</>
 	);

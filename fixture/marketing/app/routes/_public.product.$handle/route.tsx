@@ -1,8 +1,10 @@
 import { RouteProps, getURL } from "framework";
 
 import { Separator } from "@/components/ui/separator";
+
+import { ProductImages } from "./client";
 import { AddToCartForm } from "./form";
-import { ProductHeader, ProductImages } from "./product";
+import { ProductHeader } from "./product";
 import { ProductReviews } from "./reviews";
 
 export async function Component({ params: { handle } }: RouteProps<"handle">) {
@@ -34,7 +36,17 @@ export async function Component({ params: { handle } }: RouteProps<"handle">) {
 		<div className="container grid gap-6 items-start py-6 md:grid-cols-2 lg:gap-12">
 			<div className="grid gap-3 items-start md:grid-cols-5">
 				<div className="md:hidden">{header}</div>
-				<ProductImages />
+				<ProductImages
+					images={product.images.edges.map(
+						(edge: {
+							node: {
+								id: string;
+								url: string;
+								altText: string;
+							};
+						}) => edge.node,
+					)}
+				/>
 			</div>
 			<div className="grid gap-4 items-start md:gap-10">
 				<div className="hidden md:block">{header}</div>

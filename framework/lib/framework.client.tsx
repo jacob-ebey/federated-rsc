@@ -51,12 +51,14 @@ export function INTERNAL_Location({
 		root: initialRoot,
 		url: initialURL,
 	});
-	if (getSetLocation) {
-		getSetLocation((location) => {
-			setTo(location.url);
-			startTransition(() => _setLocation(location));
-		});
-	}
+	React.useEffect(() => {
+		if (getSetLocation) {
+			getSetLocation((location) => {
+				setTo(location.url);
+				startTransition(() => _setLocation(location));
+			});
+		}
+	}, [getSetLocation]);
 
 	const locationState = React.useMemo<LocationState>(
 		() =>
@@ -185,4 +187,31 @@ export function useLocation() {
 	const location = React.useContext(INTERNAL_locationContext);
 	if (!location) throw new Error("No router context found");
 	return location;
+}
+
+// TODO: Implement some ref counter or something to remove them from the DOM.
+const loadLink = React.cache(
+	(rel?: string, href?: string) =>
+		new Promise<HTMLLinkElement | null>((resolve, reject) => {
+			if (rel !== "stylesheet" || !href) return resolve(null);
+
+			const link = document.createElement("link");
+			link.onload = () => {
+				resolve(link);
+			};
+			link.onerror = (_, __, ___, ____, error) => {
+				link?.remove();
+				reject(error);
+			};
+			link.setAttribute("rel", rel);
+			link.setAttribute("href", href);
+			document.body.appendChild(link);
+		}),
+);
+
+export function Link(props: React.ComponentPropsWithoutRef<"link">) {
+	if (typeof document !== "undefined") {
+		React.use(loadLink(props.rel, props.href));
+	}
+	return <link {...props} />;
 }

@@ -135,16 +135,15 @@ async function hydrateInternal() {
 
 		const newAbortController = new AbortController();
 		let body: BodyInit | undefined;
-		let headers = new Headers();
 		if (!searchParams) {
-			const req = new Request(url.pathname + url.search, { method, body });
-			headers = req.headers;
+			body = formData;
 		}
-		headers.append("Accept", "text/x-component");
 		const fetchPromise = fetch(url.pathname + url.search, {
 			method,
 			body,
-			headers,
+			headers: {
+				Accept: "text/x-component",
+			},
 			signal: newAbortController.signal,
 		});
 		setLocation({

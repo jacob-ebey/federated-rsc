@@ -32,6 +32,8 @@ export async function handler(
 		headers,
 		method: request.method,
 		signal: request.signal,
+		// @ts-expect-error - no types
+		duplex: "half",
 		window: null,
 	});
 

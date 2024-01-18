@@ -19,14 +19,9 @@ export function AddToCartForm({
 	const pathname = url.pathname;
 
 	return (
-		<form className="grid gap-4 md:gap-10">
+		<form method="POST" className="grid gap-4 md:gap-10">
 			{options.map((option) => {
-				return (
-					<React.Fragment key={option.id}>
-						<p className="text-lg">{option.name}</p>
-						<Option option={option} pathname={pathname} />
-					</React.Fragment>
-				);
+				return <Option key={option.id} option={option} pathname={pathname} />;
 			})}
 
 			<div className="grid gap-2">

@@ -79,7 +79,7 @@ export function createStaticRequestHandler(routes: AgnosticDataRouteObject[]) {
 	});
 
 	return async (request: Request) => {
-		const context = await handler.query(request);
+		const context = await handler.query(new Request(request.url));
 		if (context instanceof Response) {
 			// TODO: re-write redirects
 			return context;
