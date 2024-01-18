@@ -281,14 +281,7 @@ async function baseSSRConfig({
 		target: "node18",
 		externals: [
 			nodeExternals({
-				allowlist: [
-					"framework",
-					"framework/client",
-					"framework/ssr",
-					"framework/react.client",
-					"framework/entry/ssr",
-					"react-server-dom-webpack/client",
-				],
+				allowlist: ["framework", /^framework\//, /^react-server-dom-webpack/],
 			}),
 		],
 		resolve: {

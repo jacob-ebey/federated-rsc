@@ -4,20 +4,17 @@ import { getURL } from "framework";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
 import { Option } from "./client";
 
 export function AddToCartForm({
 	options,
-	selectedOptions,
 }: {
 	options: {
 		id: string;
 		name: string;
 		values: string[];
 	}[];
-	selectedOptions: Record<string, string>;
 }) {
 	const url = getURL();
 	const pathname = url.pathname;
@@ -27,22 +24,14 @@ export function AddToCartForm({
 			{options.map((option) => {
 				return (
 					<React.Fragment key={option.id}>
-						<Label className="text-base" htmlFor="color">
-							{option.name}
-						</Label>
-						<Option
-							option={option}
-							pathname={pathname}
-							selectedOption={selectedOptions[option.name]}
-						/>
+						<p className="text-lg">{option.name}</p>
+						<Option option={option} pathname={pathname} />
 					</React.Fragment>
 				);
 			})}
 
 			<div className="grid gap-2">
-				<Label className="text-base" htmlFor="quantity">
-					Quantity
-				</Label>
+				<p className="text-lg">Quantity</p>
 				<Input
 					id="quantity"
 					name="quantity"

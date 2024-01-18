@@ -2,8 +2,6 @@ import * as React from "react";
 
 import { createFromReadableStream } from "framework/react.client";
 
-console.log("framework/client");
-
 export type LocationState =
 	| {
 			state: "idle";
@@ -19,7 +17,7 @@ const INTERNAL_locationContext = React.createContext<null | LocationState>(
 	null,
 );
 
-export function INTERNAL_LocationContextProvider({
+function INTERNAL_LocationContextProvider({
 	value,
 	children,
 }: React.ProviderProps<LocationState>) {
@@ -29,8 +27,6 @@ export function INTERNAL_LocationContextProvider({
 		</INTERNAL_locationContext.Provider>
 	);
 }
-
-console.log({ INTERNAL_LocationContextProvider });
 
 export interface INTERNAL_LocationState {
 	root: React.Usable<React.ReactElement>;
@@ -42,7 +38,7 @@ export function INTERNAL_Location({
 	initialRoot,
 	initialURL,
 }: {
-	getSetLocation: (
+	getSetLocation?: (
 		setLocation: (location: INTERNAL_LocationState) => void,
 	) => void;
 	initialRoot: React.Usable<React.ReactElement>;
@@ -56,7 +52,10 @@ export function INTERNAL_Location({
 		url: initialURL,
 	});
 	if (getSetLocation) {
-		getSetLocation((location) => startTransition(() => _setLocation(location)));
+		getSetLocation((location) => {
+			setTo(location.url);
+			startTransition(() => _setLocation(location));
+		});
 	}
 
 	const locationState = React.useMemo<LocationState>(
@@ -74,12 +73,12 @@ export function INTERNAL_Location({
 		[location.url, transitioning, to],
 	);
 
-	return React.use(location.root);
-	// return (
-	// 	<INTERNAL_LocationContextProvider value={locationState}>
-	// 		{React.use(location.root) as React.JSX.Element}
-	// 	</INTERNAL_LocationContextProvider>
-	// );
+	// return React.use(location.root);
+	return (
+		<INTERNAL_LocationContextProvider value={locationState}>
+			{React.use(location.root) as React.JSX.Element}
+		</INTERNAL_LocationContextProvider>
+	);
 }
 
 const outletContext = React.createContext<null | Record<
@@ -102,8 +101,11 @@ export function INTERNAL_OutletProvider({
 	children,
 	outlets,
 }: INTERNAL_OutletProviderProps) {
+	const parentOutlets = React.useContext(outletContext);
 	return (
-		<outletContext.Provider value={outlets}>{children}</outletContext.Provider>
+		<outletContext.Provider value={{ ...parentOutlets, ...outlets }}>
+			{children}
+		</outletContext.Provider>
 	);
 }
 
@@ -152,13 +154,15 @@ export function INTERNAL_StreamReader({
 	if (!element?.props?.outlets) throw new Error("No outlets found");
 
 	return React.useMemo(() => {
-		return React.cloneElement(element, {
-			...element.props,
-			outlets: {
-				...element.props.outlets,
-				"!": children,
-			},
-		});
+		return (
+			<INTERNAL_OutletProvider
+				{...element.props}
+				outlets={{
+					...element.props.outlets,
+					"!": children,
+				}}
+			/>
+		);
 	}, [element, children]);
 }
 

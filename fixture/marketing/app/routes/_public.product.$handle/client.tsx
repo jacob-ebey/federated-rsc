@@ -1,13 +1,12 @@
 "use client";
 
-// import { useLocation } from "framework/client";
+import { useLocation } from "framework/client";
 
-import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
 export function Option({
 	option,
 	pathname,
-	selectedOption,
 }: {
 	option: {
 		id: string;
@@ -15,24 +14,34 @@ export function Option({
 		values: string[];
 	};
 	pathname: string;
-	selectedOption?: string;
 }) {
-	// const location = useLocation();
-	// console.log(location);
+	const location = useLocation();
+	console.log(location);
+	const selectedOptions = new URLSearchParams(
+		location.state === "transitioning" &&
+			location.url.pathname === location.to.pathname
+			? location.to.search
+			: location.url.search,
+	);
 
-	// const selectedOptions = new URLSearchParams(location.url.search);
+	const selectedValue = selectedOptions.get(option.name);
 
 	return (
 		<>
-			{option.values.map((value) => (
-				<Label
-					className="border cursor-pointer rounded-md p-2 flex items-center gap-2 [&:has(:checked)]:bg-muted dark:[&:has(:checked)]:bg-gray-800"
-					htmlFor={`optionvalue-${option.name}-${value}`}
-					key={value}
-				>
-					<a href={`${pathname}?`}>{value}</a>
-				</Label>
-			))}
+			{option.values.map((value) => {
+				const searchParams = new URLSearchParams(selectedOptions);
+				searchParams.set(option.name, value);
+				return (
+					<Button
+						asChild
+						key={value}
+						size="sm"
+						variant={value === selectedValue ? "default" : "outline"}
+					>
+						<a href={`${pathname}?${searchParams.toString()}`}>{value}</a>
+					</Button>
+				);
+			})}
 		</>
 	);
 }

@@ -16,7 +16,6 @@ declare global {
 }
 
 export function hydrate() {
-	console.log("initializing hydration");
 	if (typeof __RSC__ !== "undefined") {
 		hydrateInternal();
 		return;
@@ -28,12 +27,15 @@ let setLocation: (location: INTERNAL_LocationState) => void;
 let abortController: AbortController | undefined;
 
 async function hydrateInternal() {
-	console.log("hydrating");
 	addEventListener("click", (event) => {
 		if (!setLocation) return;
 
-		const target = event.target as HTMLElement;
-		if (target.tagName === "A") {
+		let target = event.target as HTMLAnchorElement | null;
+		if (target?.tagName !== "A") {
+			target = target?.closest("a") ?? null;
+		}
+
+		if (target?.tagName === "A") {
 			const href = target.getAttribute("href");
 			if (href?.startsWith("/") && target.getAttribute("target") !== "_self") {
 				window.history.pushState({}, "", href);

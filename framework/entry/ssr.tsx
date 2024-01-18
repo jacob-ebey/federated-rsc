@@ -6,6 +6,7 @@ import RDS from "react-dom/server";
 // @ts-expect-error - no types
 import RSD from "react-server-dom-webpack/client";
 
+import { INTERNAL_Location } from "framework/client";
 import { InlinePayload } from "framework/ssr";
 
 export async function handler(
@@ -94,7 +95,7 @@ export async function handler(
 		let shellSent = false;
 		const { pipe, abort } = RDS.renderToPipeableStream(
 			<>
-				{root}
+				<INTERNAL_Location initialRoot={root} initialURL={url} />
 				<React.Suspense>
 					<InlinePayload readable={payloadB.getReader()} />
 				</React.Suspense>

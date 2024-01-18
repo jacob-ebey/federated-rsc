@@ -6,7 +6,6 @@ import { ProductHeader, ProductImages } from "./product";
 import { ProductReviews } from "./reviews";
 
 export async function Component({ params: { handle } }: RouteProps<"handle">) {
-	const { searchParams } = getURL();
 	const variables = {
 		handle,
 		selectedOptions: [],
@@ -21,19 +20,6 @@ export async function Component({ params: { handle } }: RouteProps<"handle">) {
 	const product = response.data?.product;
 	if (!product) {
 		throw new Error("No product");
-	}
-
-	const productOptionValues = new Map<string, Set<string>>(
-		product.options.map((option: { name: string; values: string[] }) => [
-			option.name,
-			new Set(option.values),
-		]),
-	);
-	const selectedOptions: Record<string, string> = {};
-	for (const [key, value] of searchParams) {
-		if (productOptionValues.get(key)?.has(value)) {
-			selectedOptions[key] = value;
-		}
 	}
 
 	const header = (
@@ -52,10 +38,7 @@ export async function Component({ params: { handle } }: RouteProps<"handle">) {
 			</div>
 			<div className="grid gap-4 items-start md:gap-10">
 				<div className="hidden md:block">{header}</div>
-				<AddToCartForm
-					options={product.options}
-					selectedOptions={selectedOptions}
-				/>
+				<AddToCartForm options={product.options} />
 				<Separator />
 				<ProductReviews />
 			</div>
