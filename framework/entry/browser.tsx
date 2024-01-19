@@ -5,23 +5,41 @@ import { hydrate } from "framework/browser";
 
 window.callServer = async function callServer(id, args) {
 	const body = await RSDC.encodeReply(args);
+	const headerName =
+		typeof args[0] === "object" &&
+		args.length === 1 &&
+		args[0] instanceof FormData
+			? "Form-Action"
+			: "RSC-Action";
+
 	const fetchPromise = fetch(window.location.href, {
 		body: body,
 		headers: {
 			Accept: "text/x-component",
-			"RSC-Action": id,
+			[headerName]: id,
 		},
 		method: "POST",
 	});
 
-	await fetchPromise;
+	let response = RSDC.createFromFetch(fetchPromise, {
+		callServer: (id: string, args: unknown[]) => window.callServer(id, args),
+	});
 
-	window.setLocation(({ url }) => ({
-		root: RSDC.createFromFetch(fetchPromise, {
-			callServer: (id: string, args: unknown[]) => window.callServer(id, args),
-		}),
-		url,
-	}));
+	if (headerName === "Form-Action") {
+		window.setLocation?.(({ url }) => ({
+			root: response,
+			url,
+		}));
+		return undefined;
+	}
+
+	response = await response;
+
+	if (response.error) {
+		throw response.error;
+	}
+
+	return response.result;
 };
 
 hydrate();

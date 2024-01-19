@@ -1,24 +1,32 @@
-import { getActionResult } from "framework";
+import { getActionResult, getURL } from "framework";
 import { type RouteProps } from "framework";
 
 import { Separator } from "@/components/ui/separator";
 
+import { addToCart } from "./actions";
 import { ProductImages } from "./client";
-import { AddToCartForm, addToCart } from "./form";
+import { AddToCartForm } from "./form";
 import { ProductHeader } from "./product";
 import { ProductReviews } from "./reviews";
 
 export async function Component({ params: { handle } }: RouteProps<"handle">) {
 	const addToCartResult = getActionResult(addToCart);
+	const url = getURL();
+
+	const selectedOptions: { name: string; value: string }[] = [];
+	for (const [name, value] of url.searchParams) {
+		if (name[0].toLocaleLowerCase() === name[0]) continue;
+		selectedOptions.push({ name, value });
+	}
 
 	const variables = {
 		handle,
-		selectedOptions: [],
+		selectedOptions,
 	};
-	const url = new URL("https://mock.shop/api");
-	url.searchParams.set("query", query);
-	url.searchParams.set("variables", JSON.stringify(variables));
-	const request = await fetch(url);
+	const apiURL = new URL("https://mock.shop/api");
+	apiURL.searchParams.set("query", query);
+	apiURL.searchParams.set("variables", JSON.stringify(variables));
+	const request = await fetch(apiURL);
 	const response = await request.json();
 
 	const product = response.data?.product;
@@ -65,6 +73,7 @@ export async function Component({ params: { handle } }: RouteProps<"handle">) {
 							)}
 						</div>
 					}
+					selectedVariantId={product.variantBySelectedOptions?.id}
 				/>
 				<Separator />
 				<ProductReviews />

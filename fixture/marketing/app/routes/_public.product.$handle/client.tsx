@@ -7,11 +7,14 @@ import { useFormStatus } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-export function AddToCartButton() {
+export function AddToCartButton({
+	disabled: _disabled,
+}: { disabled?: boolean }) {
 	const location = useLocation();
 	const formStatus = useFormStatus();
 
 	const diabled =
+		_disabled ||
 		formStatus.pending ||
 		(location.state !== "idle" &&
 			location.to.pathname === location.url.pathname);

@@ -13,6 +13,7 @@ export async function handler(
 	request: Request,
 	serverOrigin: string,
 	bootstrapScripts: string[],
+	remotes?: Record<string, string>,
 ) {
 	const url = new URL(request.url);
 	const serverUrl = new URL(url.pathname + url.search, serverOrigin);
@@ -26,6 +27,22 @@ export async function handler(
 			request.headers.get("host") ??
 			"",
 	);
+
+	const actionId = request.headers.get("RSC-Action");
+	if (actionId) {
+		const remote = actionId.split(":")[0].slice("rsc/remote/server/".length);
+		if (remotes?.[remote]) {
+			return fetch(new URL(url.pathname + url.search, remotes[remote]), {
+				body: request.body,
+				headers,
+				method: request.method,
+				signal: request.signal,
+				// @ts-expect-error - no types
+				duplex: "half",
+				window: null,
+			});
+		}
+	}
 
 	const response = await fetch(serverUrl, {
 		body: request.body,

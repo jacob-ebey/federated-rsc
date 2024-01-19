@@ -1,10 +1,16 @@
 import {
-	type AgnosticDataRouteObject,
 	createStaticHandler,
+	type AgnosticDataRouteObject,
 } from "@remix-run/router";
 import * as React from "react";
+// @ts-expect-error - no types
+import RSDS from "react-server-dom-webpack/server";
 
-import { INTERNAL_SeverContextProvider, type RouteProps } from "framework";
+import {
+	INTERNAL_SeverContextProvider,
+	type ActionResult,
+	type RouteProps,
+} from "framework";
 import { renderToReadableStream } from "framework/react.server";
 
 import {
@@ -79,6 +85,39 @@ export function createStaticRequestHandler(routes: AgnosticDataRouteObject[]) {
 	});
 
 	return async (request: Request) => {
+		const actionId = request.headers.get("RSC-Action");
+		if (actionId) {
+			const [moduleId, ...exportNameRest] = actionId.split("#");
+			const exportName = exportNameRest.join("#");
+			await __webpack_require__.e(moduleId);
+			// @ts-expect-error
+			const action = __webpack_require__(moduleId)[exportName];
+			const body = request.headers
+				.get("Content-Type")
+				?.match(/\bmultipart\/form\-data\b/)
+				? await request.formData()
+				: await request.text();
+			const reply = await RSDS.decodeReply(body, {});
+
+			let actionResult: ActionResult;
+			try {
+				const result = await action(...reply);
+				actionResult = { id: actionId, result };
+			} catch (error) {
+				actionResult = { id: actionId, error };
+			}
+
+			return {
+				root: actionResult,
+				status: "error" in actionResult ? 500 : 200,
+				headers: new Headers({
+					"Content-Type": "text/x-component; charset=utf-8",
+					"Transfer-Encoding": "chunked",
+					Vary: "Accept",
+				}),
+			};
+		}
+
 		const context = await handler.query(new Request(request.url));
 		if (context instanceof Response) {
 			// TODO: re-write redirects

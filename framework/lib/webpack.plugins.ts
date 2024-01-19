@@ -238,25 +238,27 @@ export class ClientRSCPlugin {
 			shared,
 		} = this.options;
 
-		rscClientPlugin.webpack({
-			include: /\.[mc]?[tj]sx?$/,
-			exclude: "this_should_never_match_anything",
-			transformModuleId: (id, type) => {
-				return `rsc/remote/${type.replace(
-					/^use /,
-					"",
-				)}/${containerName}${exposedNameFromResource(cwd, id)}`;
-			},
-			useServerRuntime: {
-				function: "registerServerReference",
-				module: "framework/runtime",
-			},
-			onModuleFound(id, type) {
-				if (type === "use server") {
-					serverModules.add(id);
-				}
-			},
-		});
+		rscClientPlugin
+			.webpack({
+				include: /\.[mc]?[tj]sx?$/,
+				exclude: "this_should_never_match_anything",
+				transformModuleId: (id, type) => {
+					return `rsc/remote/${type.replace(
+						/^use /,
+						"",
+					)}/${containerName}:${exposedNameFromResource(cwd, id)}`;
+				},
+				useServerRuntime: {
+					function: "registerServerReference",
+					module: "framework/runtime",
+				},
+				onModuleFound(id, type) {
+					if (type === "use server") {
+						serverModules.add(id);
+					}
+				},
+			})
+			.apply(compiler);
 
 		const allRemotes: Record<string, unknown> = {};
 		// biome-ignore lint/suspicious/noExplicitAny: <explanation>

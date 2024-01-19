@@ -2,18 +2,13 @@ import { getURL } from "framework";
 
 import { Input } from "@/components/ui/input";
 
+import { addToCart } from "./actions";
 import { AddToCartButton, Option } from "./client";
-
-export async function addToCart() {
-	"use server";
-	console.log("Adding to cart!");
-	await new Promise((resolve) => setTimeout(resolve, 1000));
-	console.log("Added to cart!");
-}
 
 export function AddToCartForm({
 	message,
 	options,
+	selectedVariantId,
 }: {
 	message?: React.ReactNode;
 	options: {
@@ -21,14 +16,22 @@ export function AddToCartForm({
 		name: string;
 		values: string[];
 	}[];
+	selectedVariantId?: string;
 }) {
 	const url = getURL();
-	const pathname = url.pathname;
 
 	return (
-		<form action={addToCart} className="grid gap-4 md:gap-10">
+		<form
+			action={async () => {
+				const result = await addToCart();
+				console.log({ result });
+			}}
+			className="grid gap-4 md:gap-10"
+		>
 			{options.map((option) => {
-				return <Option key={option.id} option={option} pathname={pathname} />;
+				return (
+					<Option key={option.id} option={option} pathname={url.pathname} />
+				);
 			})}
 
 			<div className="grid gap-2">
@@ -43,7 +46,7 @@ export function AddToCartForm({
 				/>
 			</div>
 
-			<AddToCartButton />
+			<AddToCartButton disabled={!selectedVariantId} />
 
 			{message}
 		</form>

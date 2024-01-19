@@ -59,7 +59,7 @@ export async function RSCFrame({
 	if (actionResult) {
 		method = "GET";
 		body = null;
-		headers.delete("RSC-Action");
+		headers.delete("Form-Action");
 	}
 
 	const response = await fetch(
@@ -131,8 +131,7 @@ export async function INTERNAL_SeverContextProvider({
 	children: React.ReactNode;
 	request: Request;
 }) {
-	const serverContextRef = INTERNAL_getServerContextRef();
-	const actionId = request.headers.get("RSC-Action");
+	const actionId = request.headers.get("Form-Action");
 	let actionResult: null | ActionResult = null;
 	if (actionId) {
 		let action: undefined | ((...args: unknown[]) => unknown) = undefined;
@@ -159,6 +158,9 @@ export async function INTERNAL_SeverContextProvider({
 		}
 	}
 
+	console.log({ actionResult });
+
+	const serverContextRef = INTERNAL_getServerContextRef();
 	const serverContext: ServerContext = {
 		actionResult,
 		appContext,
