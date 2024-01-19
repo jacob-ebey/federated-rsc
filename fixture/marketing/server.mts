@@ -16,6 +16,11 @@ app.use(
 	"/dist/server/*.css",
 	cors({ origin: "*", allowMethods: ["HEAD", "GET"] }),
 	compress(),
+	// artificial delay to simulate network latency
+	async (c, next) => {
+		await new Promise((r) => setTimeout(r, 100));
+		next();
+	},
 	serveStatic(),
 );
 app.use(

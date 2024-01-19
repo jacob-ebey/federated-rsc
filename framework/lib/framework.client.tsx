@@ -198,26 +198,35 @@ export function useLocation() {
 // TODO: Implement some ref counter or something to remove them from the DOM.
 const loadLink = React.cache(
 	(rel?: string, href?: string) =>
-		new Promise<HTMLLinkElement | null>((resolve, reject) => {
-			if (rel !== "stylesheet" || !href) return resolve(null);
+		new Promise<void>((resolve, reject) => {
+			if (rel !== "stylesheet" || !href) return resolve();
 
 			const link = document.createElement("link");
 			link.onload = () => {
-				resolve(link);
+				resolve();
 			};
 			link.onerror = (_, __, ___, ____, error) => {
-				link?.remove();
 				reject(error);
 			};
 			link.setAttribute("rel", rel);
 			link.setAttribute("href", href);
-			document.body.appendChild(link);
+			document.head.appendChild(link);
 		}),
 );
 
 export function Link(props: React.ComponentPropsWithoutRef<"link">) {
-	if (typeof document !== "undefined") {
-		React.use(loadLink(props.rel, props.href));
+	const [_loadPromise, setLoadPromise] = React.useState<Promise<void> | null>(
+		null,
+	);
+	let loadPromise = _loadPromise;
+	if (typeof document !== "undefined" && !loadPromise) {
+		loadPromise = loadLink(props.rel, props.href);
+		setLoadPromise(loadPromise);
 	}
+
+	if (loadPromise) {
+		React.use(loadPromise);
+	}
+
 	return <link {...props} />;
 }
