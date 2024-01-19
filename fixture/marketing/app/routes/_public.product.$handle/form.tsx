@@ -21,13 +21,7 @@ export function AddToCartForm({
 	const url = getURL();
 
 	return (
-		<form
-			action={async () => {
-				const result = await addToCart();
-				console.log({ result });
-			}}
-			className="grid gap-4 md:gap-10"
-		>
+		<form action={addToCart} className="grid gap-4 md:gap-10">
 			{options.map((option) => {
 				return (
 					<Option key={option.id} option={option} pathname={url.pathname} />
