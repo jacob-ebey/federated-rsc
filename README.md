@@ -1,5 +1,7 @@
 # Federated RSC Reference Architecture
 
+THIS IS SUPERSEDED BY https://github.com/jacob-ebey/fuckin-around
+
 This repository contains the reference architecture for a federated RSC organization architecture. The architecture is based on a few principles:
 
 - HTTP is the API for the "server" layer.
